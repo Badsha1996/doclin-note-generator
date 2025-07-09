@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  frontend:
+    build: ./apps/frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./apps/frontend:/app
+    working_dir: /app
+    command: npm run dev
+
+  backend:
+    build: ./apps/backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./apps/backend:/app
+    working_dir: /app
+    command: uvicorn main:app --reload --host 0.0.0.0 --port 8000
