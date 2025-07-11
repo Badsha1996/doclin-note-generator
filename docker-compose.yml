@@ -1,19 +1,17 @@
-version: '3.8'
+
 services:
-  frontend:
-    build: ./apps/frontend
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
     ports:
       - "5173:5173"
-    volumes:
-      - ./apps/frontend:/app
-    working_dir: /app
-    command: npm run dev
-
-  backend:
-    build: ./apps/backend
-    ports:
       - "8000:8000"
     volumes:
-      - ./apps/backend:/app
+      - .:/app
+      - /app/node_modules
+      - /app/apps/frontend/node_modules
     working_dir: /app
-    command: uvicorn main:app --reload --host 0.0.0.0 --port 8000
+    command: pnpm turbo run dev --parallel --cache-dir=.turbo
+    environment:
+      - CHOKIDAR_USEPOLLING=true
