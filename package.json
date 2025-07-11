@@ -3,11 +3,15 @@
   "version": "1.0.0",
   "packageManager": "pnpm@10.7.0",
   "scripts": {
-    "dev": "turbo run dev",
+    "dev": "turbo run dev --parallel",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "start": "docker-compose up --build",
-    "fresh-start": "docker-compose build --no-cache && docker-compose up"
+    "fresh-start": "docker-compose build --no-cache && docker-compose up",
+    "down": "docker-compose down",
+    "restart": "docker-compose down && docker-compose up --build",
+    "logs": "docker-compose logs -f",
+    "clean": "rm -rf node_modules && rm -rf .turbo && rm -rf dist && rm -rf build"
   },
   "repository": {
     "type": "git",
