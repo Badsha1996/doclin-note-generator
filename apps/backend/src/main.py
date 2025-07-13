@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from .auth.infrastructure import database_setup
+from .auth.infrastructure import database
 app = FastAPI()
 
 @app.get("/")
