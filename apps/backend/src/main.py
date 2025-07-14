@@ -1,7 +1,7 @@
 from fastapi import FastAPI,Depends
 from sqlalchemy.orm import Session
 from .database.database import Base, engine, SessionLocal
-from .infrastructure.models import UserModel
+from .infrastructure.auth.models import UserModel
 
 # main APP initiation 🎌
 app = FastAPI(
