@@ -1,6 +1,6 @@
 from fastapi import FastAPI,Depends
 from sqlalchemy.orm import Session
-from .interfaces.routes.auth_routes import router
+from .interfaces.routes.auth_routes import auth_router
 from .database.database import Base, engine, SessionLocal
 from .infrastructure.user_models import UserModel
 
@@ -15,7 +15,10 @@ app = FastAPI(
 Base.metadata.create_all(bind=engine)
 
 # Parent route for prefix added
-app.include_router(router, prefix="/api")
+
+# localhots/api/....
+# auth routes
+app.include_router(auth_router, prefix="/api")
 
 
 @app.get("/")

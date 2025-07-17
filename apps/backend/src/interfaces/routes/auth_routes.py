@@ -1,11 +1,12 @@
 from fastapi import APIRouter, HTTPException
 
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+auth_router = APIRouter(prefix="/auth", tags=["auth"])
 
-@router.post("/register")
+@auth_router.post("/register")
 async def register_user():
-    try:
-        yield "Regitser user"
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    return {"register":"done"}
+    # try:
+    #     yield "Regitser user"
+    # except Exception as e:
+    #     raise HTTPException(status_code=400, detail=str(e))
