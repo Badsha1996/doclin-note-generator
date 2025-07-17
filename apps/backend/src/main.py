@@ -1,7 +1,8 @@
 from fastapi import FastAPI,Depends
 from sqlalchemy.orm import Session
+from .interfaces.routes.auth_routes import router
 from .database.database import Base, engine, SessionLocal
-from .infrastructure.auth.models import UserModel
+from .infrastructure.user_models import UserModel
 
 # main APP initiation 🎌
 app = FastAPI(
@@ -14,6 +15,7 @@ app = FastAPI(
 Base.metadata.create_all(bind=engine)
 
 # Parent route for prefix added
+app.include_router(router, prefix="/api")
 
 
 @app.get("/")
