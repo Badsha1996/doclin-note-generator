@@ -6,7 +6,7 @@
     "dev": "turbo run dev --parallel",
     "build": "turbo run build",
     "lint": "turbo run lint",
-    "start": "docker-compose up --build",
+    "start": "docker-compose up",
     "fresh-start": "docker-compose build --no-cache && docker-compose up",
     "down": "docker-compose down",
     "restart": "docker-compose down && docker-compose up --build",
