@@ -15,15 +15,14 @@ app = FastAPI(
 Base.metadata.create_all(bind=engine)
 
 # Parent route for prefix added
-
-# localhots/api/....
 # auth routes
 app.include_router(auth_router, prefix="/api")
 
 
+# ROOT ROUTE
 @app.get("/")
 async def root():
-    return {"message": "Authentication API is running"}
+    return {"message": "Doclin Note generator Backend running 👍"}
 
 @app.get("/health")
 async def health_check():
