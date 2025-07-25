@@ -4,10 +4,10 @@ well in simple term only create entity when you are making a TYPE which will
 be used to interact with DB such as CRUD operations 
 It should be database type agnostic 
 '''
-
 import datetime
 from enum import Enum
-from pydantic import BaseModel
+from typing import Optional
+from pydantic import BaseModel, EmailStr
 
 
 class UserRole(str,Enum):
@@ -17,7 +17,7 @@ class UserRole(str,Enum):
 class User(BaseModel):
     id: str
     username: str
-    email:str 
+    email:EmailStr 
     role: UserRole
     is_active: bool
     is_verified: bool
@@ -30,9 +30,18 @@ class User(BaseModel):
 
 class UserCreate(BaseModel):
     username: str
-    email: str
+    email: EmailStr
     password : str
     role: UserRole = UserRole.USER
 
+
+class UserUpdate(BaseModel):
+    email: Optional[EmailStr] = None
+    username: Optional[str] = None
+    is_active: Optional[bool] = None
+    is_verified: Optional[bool] = None
+    role: Optional[UserRole] = None
+
+# we need oAuth class
 
 

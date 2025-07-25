@@ -3,6 +3,10 @@ from sqlalchemy.orm import Session
 from .interfaces.routes.auth_routes import auth_router
 from .database.database import Base, engine, SessionLocal
 from .infrastructure.user_models import UserModel
+from dotenv import load_dotenv
+
+# loading of environment file 
+load_dotenv()
 
 # main APP initiation 🎌
 app = FastAPI(
