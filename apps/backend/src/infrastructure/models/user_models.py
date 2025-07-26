@@ -4,12 +4,11 @@ from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 import uuid
 import enum
-from ..database.database import Base
+from ...database.database import Base
 
-class UserRole(enum.Enum):
+class UserRole(str, enum.Enum):
     user = "user"
     admin = "admin"
-
 
 class UserModel(Base):
     __tablename__ = 'users'

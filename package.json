@@ -7,9 +7,7 @@
     "build": "turbo run build",
     "lint": "turbo run lint",
     "start": "docker-compose up",
-    "fresh-start": "docker-compose build --no-cache && docker-compose up",
-    "down": "docker-compose down",
-    "restart": "docker-compose down && docker-compose up --build",
+    "restart": "docker-compose down && docker-compose build --no-cache && docker-compose up",
     "logs": "docker-compose logs -f",
     "clean": "rm -rf node_modules && rm -rf .turbo && rm -rf dist && rm -rf build"
   },
