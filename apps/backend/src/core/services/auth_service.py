@@ -13,7 +13,7 @@ from ..entities.user_entities import UserRole, UserCreate, User
 from ...utils.exceptions import ConflictException, AuthExceptionError,NotFoundExceptionError,ValidationExceptionError
 
 class AuthService:
-    def __init__(self, user_repo = UserRepo, oauth_repo = None, security = SecurityManager):
+    def __init__(self, user_repo = UserRepo,security = SecurityManager, oauth_repo = None):
         self.user_repo = user_repo
         self.oauth_repo = oauth_repo
         self.security = security
@@ -35,7 +35,7 @@ class AuthService:
             raise ValidationExceptionError({"password":["Password must be at least 6 characters long"]})
         
         # hashing the possword 
-        hashed_password = ""
+        hashed_password = self.security.hash_password(password=password)
 
         user_data = UserCreate(
             username=username,
@@ -43,9 +43,7 @@ class AuthService:
             email=email,
             role=user_role
         )
-        return await self.user_repo.create_user(user_data=user_data)
-        
-            
+        return await self.user_repo.create_user(user_data=user_data)        
     
     async def login_user()->Tuple[str, str, User]:
         ...
