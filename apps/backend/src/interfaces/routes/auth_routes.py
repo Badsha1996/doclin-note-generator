@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from ..schemas.auth_schemas import RegisterSchema, APIResponseSchema
+from ..schemas.auth_schemas import RegisterSchema, APIResponseSchema, LoginSchema
 from ...utils.security import SecurityManager
 from ...infrastructure.providers.auth_provider import get_security_manager
 from sqlalchemy.orm import Session
@@ -32,5 +32,18 @@ async def register_user(
             data={"user": user},
             message="User registered successfully"
         )
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@auth_router.post("/login")
+async def login_user(
+    user_data : LoginSchema,
+    db : Session = Depends(get_DB),
+    security_manager: SecurityManager = Depends(get_security_manager)
+):
+    try:
+        user_repo = SQLUserRepo(db)
+        auth_service = AuthService(user_repo=user_repo,
+                                   security=security_manager)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
