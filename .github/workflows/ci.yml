@@ -27,7 +27,7 @@ jobs:
           run_install: false
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install
 
       - name: Run Prettier (format check)
         run: pnpm run prettier
@@ -41,5 +41,5 @@ jobs:
       - name: Clean previous builds
         run: pnpm clean || true
 
-      # - name: Build all apps
-      #   run: pnpm build
+      - name: Build all apps
+        run: pnpm build
