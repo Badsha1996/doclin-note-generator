@@ -36,7 +36,7 @@ jobs:
         run: pnpm lint || true # this is temp
 
       - name: Run tests (if any)
-        run: pnpm turbo run test --filter=...
+        run: pnpm turbo run test
 
       - name: Clean previous builds
         run: pnpm clean || true
