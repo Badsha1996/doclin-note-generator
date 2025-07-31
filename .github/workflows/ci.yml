@@ -1,4 +1,4 @@
-name: Doclin Note Genarator CI
+name: Doclin Note Generator CI
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   ci:
-    name: Doclin Note Genarator CI/CD
+    name: Doclin Note Generator CI/CD
     runs-on: ubuntu-latest
 
     steps:
@@ -18,13 +18,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: pnpm
+          node-version: 20 # You can change this to 22 if your project requires it
+          cache: 'pnpm'
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
-          version: 10
+          version: 8 # Use a stable version unless you explicitly require v10
+          run_install: false
 
       - name: Install dependencies
         run: pnpm install
