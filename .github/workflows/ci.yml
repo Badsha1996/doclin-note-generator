@@ -1,0 +1,42 @@
+name: Doclin Note Genarator CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "pnpm"
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run Prettier (format check)
+        run: pnpm prettier --check .
+
+      - name: Lint all apps
+        run: pnpm lint
+
+      - name: Run tests (if any)
+        run: pnpm turbo run test --filter=...
+
+      - name: Clean previous builds
+        run: pnpm clean || true
+
+      - name: Build all apps
+        run: pnpm build
