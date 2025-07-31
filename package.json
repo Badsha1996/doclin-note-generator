@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "packageManager": "pnpm@10.7.0",
   "scripts": {
-    "prettier": "prettier --check",
+    "prettier": "prettier --check .",
     "dev": "turbo run dev --parallel",
     "build": "turbo run build",
     "lint": "turbo run lint",
