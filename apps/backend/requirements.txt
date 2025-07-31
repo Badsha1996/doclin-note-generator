@@ -7,8 +7,10 @@ alembic
 psycopg2-binary
 python-jose[cryptography]
 passlib[bcrypt]
+bcrypt==4.0.1  # 🔧 This is needed as newer version has some issue __about__ which is now seprate from passlib
 python-multipart
 authlib
 httpx
 redis
 python-decouple
+pydantic[email]

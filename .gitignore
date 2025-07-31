@@ -25,3 +25,42 @@ env/
 
 # Docker volumes
 pgdata/
+# Node modules
+node_modules/
+.pnpm/
+
+# Turbo build cache
+.turbo/
+
+# Local build outputs (if any)
+dist/
+build/
+.next/
+out/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# dotenv (only if used and contains secrets)
+.env
+.env.local
+.env.*.local
+
+# Docker
+docker-compose.override.yml
+*.local.yml
+*.env
+
+# OS/system files
+.DS_Store
+Thumbs.db
+
+# Editor-specific
+.vscode/
+.idea/
+
+# Optional: lock files (only if not committing them intentionally)
+# pnpm-lock.yaml

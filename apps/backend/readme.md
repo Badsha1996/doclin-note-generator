@@ -1,3 +1,1 @@
-Add virtual environment for dev using
-to make a virtual environment use `python -m venv .venv` command
-`.\.venv\Scripts\activate` in your terminal
+ADD `.env` files to your root take example from `.example.env` file
