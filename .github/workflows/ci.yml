@@ -31,7 +31,8 @@ jobs:
         run: pnpm install
 
       - name: Run Prettier (format check)
-        run: pnpm prettier --check .
+        run: pnpm run prettier
+
 
       - name: Lint all apps
         run: pnpm lint
