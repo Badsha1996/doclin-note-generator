@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from .interfaces.routes.auth_routes import auth_router
 from .database.database import Base, engine, SessionLocal
 from .infrastructure.models.user_models import UserModel
+from .utils.middleware import setup_middleware
 
 # main APP initiation 🎌
 app = FastAPI(
@@ -10,6 +11,9 @@ app = FastAPI(
     description="Doclin note generator is an app which will make your notes and question making easy with advanced AI.",
     version="1.1.1"
 )
+
+# Setup middleware important for CORS error
+setup_middleware(app)
 
 # CREATE the actual table 🔢
 Base.metadata.create_all(bind=engine)
