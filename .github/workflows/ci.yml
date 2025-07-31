@@ -32,8 +32,8 @@ jobs:
       - name: Run Prettier (format check)
         run: pnpm run prettier
 
-      - name: Lint all apps
-        run: pnpm lint || true # this is temp
+      # - name: Lint all apps
+      #   run: pnpm lint || true # this is temp
 
       - name: Run tests (if any)
         run: pnpm turbo run test
