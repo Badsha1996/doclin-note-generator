@@ -9,7 +9,7 @@ export const Route = createRootRoute({
 function RootComponent() {
   return (
     <React.Fragment>
-      <Navbar/>
+      <Navbar />
       <Outlet />
     </React.Fragment>
   );

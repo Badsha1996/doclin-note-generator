@@ -14,7 +14,7 @@ services:
     command: pnpm turbo run dev --parallel --cache-dir=.turbo
     environment:
       - CHOKIDAR_USEPOLLING=true
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/mydatabase 
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/mydatabase
       - PYTHONPATH=/app/apps/backend/src
 
   postgres:
