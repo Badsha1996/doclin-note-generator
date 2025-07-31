@@ -45,5 +45,18 @@ async def login_user(
         user_repo = SQLUserRepo(db)
         auth_service = AuthService(user_repo=user_repo,
                                    security=security_manager)
+        
+        user = await auth_service.login_user(
+            email=user_data.email,
+            username=user_data.username,
+            password=user_data.password,
+        )
+
+        return APIResponseSchema(
+            success=True,
+            data={"user": user},
+            message="User logged in succesfully"
+        )
+        
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

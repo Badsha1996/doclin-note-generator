@@ -30,6 +30,11 @@ class User(BaseModel):
     class Config:
         from_attributes = True
 
+# This is very important 
+# As this will expose password to actual class 
+class InternalUser(User):
+    hash_password: str
+
 class UserCreate(BaseModel):
     username: str
     # email:EmailStr 
