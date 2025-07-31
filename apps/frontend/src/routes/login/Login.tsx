@@ -9,30 +9,43 @@ export default function Login() {
   const [email, setEmail] = React.useState("");
 
   return (
-    <div
-      className="w-screen h-screen relative overflow-hidden"
-      style={{ backgroundColor: "#240046" }}
-    >
-      {/* 🔵 Inline Animated SVG Bubbles Background */}
-      <div className="absolute inset-0 overflow-hidden z-0">
-        {Array.from({ length: 30 }).map((_, i) => (
-          <div
-            key={i}
-            className="absolute rounded-full border border-white/20 animate-bubble"
-            style={{
-              width: `${Math.random() * 40 + 20}px`, // 20–60px
-              height: `${Math.random() * 40 + 20}px`,
-              left: `${Math.random() * 100}%`,
-              bottom: `-${Math.random() * 100}px`,
-              animationDelay: `${Math.random() * 10}s`,
-              animationDuration: `${10 + Math.random() * 10}s`,
-              borderColor: "#E0AAFF50", // semi-transparent lavender
-              boxShadow: "0 0 6px rgba(224,170,255,0.4)",
-            }}
-          />
-        ))}
-      </div>
+      <div className="relative w-screen h-screen overflow-hidden bg-gradient-to-br from-[#3a0067] via-[#240046] to-[#18002B]">
+  {/* Bubble Layer */}
+  <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+    {Array.from({ length: 40 }).map((_, i) => (
+<div
+  key={i}
+  className="absolute rounded-full animate-bubble"
+  style={{
+    width: Math.random() * 50 + 20 + "px",
+    height: Math.random() * 50 + 20 + "px",
+    left: Math.random() * 100 + "%",
+    bottom: -Math.random() * 100 + "px",
+    animationDelay: Math.random() * 10 + "s",
+    animationDuration: 10 + Math.random() * 10 + "s",
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    border: "1px solid rgba(255, 255, 255, 0.12)",
+    boxShadow: `
+      0 0 10px rgba(224, 170, 255, 0.5),
+      0 0 20px rgba(224, 170, 255, 0.3),
+      0 0 30px rgba(255, 255, 255, 0.15)
+    `,
+    backdropFilter: "blur(4px)",
+    borderRadius: "9999px",
+  }}
+/>
+    ))}
 
+  {/* Ultra subtle glass overlay (optional) */}
+  <div
+    className="absolute inset-0 z-5 pointer-events-none"
+    style={{
+      backdropFilter: "blur(60px)",
+      WebkitBackdropFilter: "blur(60px)",
+      mixBlendMode: "overlay",
+      opacity: 0.25,
+    }}
+  />
       {/* 🟣 Glassmorphism Login Card */}
 
       <Card
@@ -41,7 +54,7 @@ export default function Login() {
     absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
    bg-white/2 backdrop-blur-[90px]
     shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_10px_40px_rgba(0,0,0,0.4)]
-    rounded-[20px] p-8 text-white z-10
+    rounded-[20px] p-8 text-white z-999 
     transition-all duration-300 border-none"
       >
         <CardHeader>
@@ -56,9 +69,12 @@ export default function Login() {
           </Button>
           {!showEmailInput ? (
             <Button
-              variant="outline"
+              variant="vibe"
               className="w-full text-black"
-              onClick={() => setShowEmailInput(true)}
+             onClick={() => {
+  console.log("Button clicked"); // <-- Add this
+  setShowEmailInput(true);
+}}
             >
               Continue with Email
             </Button>
@@ -78,7 +94,7 @@ export default function Login() {
           )}
         </CardContent>
       </Card>
-
+</div>
 
     </div>
   );
