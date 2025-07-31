@@ -42,4 +42,4 @@ jobs:
         run: pnpm clean || true
 
       - name: Build all apps
-        run: pnpm turbo run build
+        run: pnpm build
