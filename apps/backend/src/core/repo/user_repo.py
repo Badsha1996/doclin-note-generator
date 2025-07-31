@@ -9,7 +9,7 @@ the ACTUAL implemenetion is in infrastructure/repo
 '''
 from abc import ABC, abstractmethod
 from typing import List, Optional
-from ..entities.user_entities import User, UserCreate, UserUpdate
+from ..entities.user_entities import User, UserCreate, UserUpdate, InternalUser
 
 class UserRepo(ABC):
     @abstractmethod
@@ -21,11 +21,11 @@ class UserRepo(ABC):
         ...
     
     @abstractmethod
-    async def get_user_by_email(self, email: str) -> Optional[User]:
+    async def get_user_by_email(self, email: str) -> Optional[InternalUser]:
         ...
     
     @abstractmethod
-    async def get_user_by_username(self, username: str) -> Optional[User]:
+    async def get_user_by_username(self, username: str) -> Optional[InternalUser]:
         ...
 
     @abstractmethod
