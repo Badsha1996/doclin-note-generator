@@ -1,11 +1,3 @@
-'''
-Service is also agnostic so we will not have actual DATABASE call but we can pretend to call it by calling 
-agnostic repo class methods in CORE floder
-this is actual core logic of the methods / controller 
-
-IMPORTANT!
-* This is an abstract service where you will pass SQL or Mongo REPO to this class to get actual implementaion
-'''
 from typing import Optional, Tuple
 from ..repo.user_repo import UserRepo
 from ...utils.security import SecurityManager
@@ -65,21 +57,18 @@ class AuthService:
         
         return User.model_validate(existing_user) 
     
-    async def login_user(self, email : str, username: str, password: str)->any:
+    async def login_user(self, email : str, username: str, password: str)->Tuple[str, str, User]:
         # check if the user exist by email or username 
         user = await self.authenticate_user(email=email, password=password, username=username)
         if not user:
             raise AuthExceptionError("Invalid credentials")
         
         access_token = self.security.create_access_token(
-            data={"sub": str(user.id), "email": user.email, "role": user.role, "username": user.username}
+            data={"user_id": str(user.id), "email": user.email, "role": user.role, "username": user.username}
         )
         
         refresh_token = self.security.create_refresh_token(
-            data={"sub": str(user.id), "email": user.email, "role": user.role, "username": user.username}
+            data={"user_id": str(user.id), "email": user.email, "role": user.role, "username": user.username}
         )
         
-        return {"access_token": access_token, 
-                "refresh_token": refresh_token, 
-                "user_data": user
-                }
+        return access_token, refresh_token, user

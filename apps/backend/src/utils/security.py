@@ -1,10 +1,20 @@
 import logging
+import secrets
+import string
 from typing import Any, Dict, Optional
 from passlib.context import CryptContext
 from datetime import datetime, timedelta, timezone
 from jose import JWTError, jwt
+from pydantic import BaseModel
+from .exceptions import AuthExceptionError
 
 logger = logging.getLogger(__name__)
+
+class TokenData(BaseModel):
+    user_id: str
+    email: str
+    role: str
+    exp: int
 
 class SecurityManager:
     def __init__(self, secret_key: str, algorithm: str):
@@ -42,17 +52,17 @@ class SecurityManager:
         to_encode.update({"exp": expire, "type": "refresh"})
         return jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm)
     
-    # def verify_token(self, token: str) -> TokenData:
-    #     try:
-    #         payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
-    #         return TokenData(
-    #             user_id=payload.get("sub"),
-    #             email=payload.get("email"),
-    #             role=payload.get("role"),
-    #             exp=payload.get("exp")
-    #         )
-    #     except JWTError:
-    #         raise AuthException("Invalid or expired token")
+    def verify_token(self, token: str) -> TokenData:
+        try:
+            payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
+            return TokenData(
+                user_id=payload.get("user_id"),
+                email=payload.get("email"),
+                role=payload.get("role"),
+                exp=payload.get("exp")
+            )
+        except JWTError:
+            raise AuthExceptionError("Invalid or expired token")
     
-    # def generate_verification_code(self, length: int = 6) -> str:
-    #     return ''.join(secrets.choice(string.digits) for _ in range(length))
+    def generate_verification_code(self, length: int = 6) -> str:
+        return ''.join(secrets.choice(string.digits) for _ in range(length))

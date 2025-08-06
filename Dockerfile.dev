@@ -1,31 +1,39 @@
-FROM python:3.12-slim-bookworm
+# Swap 3.12 to 3.13, 3.14, etc. as needed by individual team members
+FROM python:3.12-bookworm
 
-# Update and install only required packages to minimize vulnerabilities
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y --no-install-recommends \
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Reliable mirrors + dependencies
+RUN echo "deb http://deb.debian.org/debian bookworm main" > /etc/apt/sources.list && \
+    echo "deb http://security.debian.org/debian-security bookworm-security main" >> /etc/apt/sources.list && \
+    echo "deb http://deb.debian.org/debian bookworm-updates main" >> /etc/apt/sources.list && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends --fix-missing \
       curl gnupg build-essential libssl-dev libffi-dev python3-dev ca-certificates && \
     curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
     apt-get install -y --no-install-recommends nodejs && \
     npm install -g pnpm turbo && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Re-run security updates to ensure all vulnerabilities are patched
-RUN apt-get update && apt-get dist-upgrade -y && apt-get clean && rm -rf /var/lib/apt/lists/*
-
+# Upgrade Python packaging tools
 RUN pip install --upgrade pip setuptools wheel
 
+# Project directory
 WORKDIR /app
 
-# Copy full repo BEFORE install to ensure workspace is detected
+# Copy everything in
 COPY . .
 
-# Install Node deps for the monorepo
+# Node dependencies
 RUN pnpm install
 
-# Install Python deps
+# Python dependencies
 RUN pip install --no-cache-dir -r apps/backend/requirements.txt
 
+# Expose frontend and backend ports
 EXPOSE 5173 8000
 
+# Monorepo dev script
 CMD ["pnpm", "turbo", "run", "dev", "--parallel", "--cache-dir=.turbo"]

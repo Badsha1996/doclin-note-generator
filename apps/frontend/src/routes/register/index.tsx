@@ -5,5 +5,5 @@ export const Route = createFileRoute("/register/")({
 });
 
 function Register() {
-  return <div>Register</div>;
+  return <div>Register wokrdggg hello</div>;
 }

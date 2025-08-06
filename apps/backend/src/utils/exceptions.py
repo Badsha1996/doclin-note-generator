@@ -19,3 +19,7 @@ class NotFoundExceptionError(HTTPException):
 class ConflictException(HTTPException):
     def __init__(self, detail: str = "Resource already exists"):
         super().__init__(status_code=status.HTTP_409_CONFLICT, detail=detail)
+    
+class InternelServerException(HTTPException):
+    def __init__(self, detail : str = "Internal server Error"):
+        super().__init__(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail = detail)
