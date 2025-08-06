@@ -29,6 +29,9 @@ class SQLUserRepo(UserRepo):
     
     async def get_user_by_username(self, username: str) -> Optional[InternalUser]:
         return self.db.query(UserModel).filter(UserModel.username == username).first()
+    
+    async def get_user_by_id(self, user_id: str) -> Optional[InternalUser]:
+        return self.db.query(UserModel).filter(UserModel.id == user_id).first()
 
     async def update_user(self, user_id: str, user_data: UserUpdate) -> Optional[User]:
         ...

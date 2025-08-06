@@ -1,3 +1,4 @@
+from datetime import timedelta
 from fastapi import UploadFile, File
 from ..utils.exceptions import InternelServerException
 from fastapi.responses import JSONResponse
@@ -42,8 +43,14 @@ async def upload_file(file : UploadFile = File(...)):
             content_type=content_type or "application/octet-stream"
         )
 
+        file_url = minio_client.presigned_get_object(
+            BUCKET_NAME,
+            file.filename,
+            expires=timedelta(days=7)
+        )
+
         os.remove(temp_file_path)  # Clean up temp file
 
-        return file
+        return file_url
     except S3Error as e:
         raise InternelServerException(detail=str(e))
