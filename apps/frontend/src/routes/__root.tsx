@@ -11,7 +11,7 @@ function RootComponent() {
   const pathname = router.state.location.pathname;
   return (
     <React.Fragment>
-      {pathname !== "/login" && <Navbar />}
+      {!(pathname === "/login" || pathname === "/register") && <Navbar />}
       <Outlet />
     </React.Fragment>
   );

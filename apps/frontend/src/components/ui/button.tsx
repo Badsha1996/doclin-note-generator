@@ -20,8 +20,7 @@ const buttonVariants = cva(
         // ghost:
         //   "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         // link: "text-primary underline-offset-4 hover:underline",
-        vibe: 
-          "bg-secondary text-secondary-foreground hover:bg-muted shadow-md",
+        vibe: "bg-secondary text-secondary-foreground hover:bg-muted shadow-md",
         focusGlow:
           "bg-muted text-secondary-foreground hover:bg-chart-2 shadow-[0_0_10px_var(--chart-2)]",
         glass:
@@ -30,12 +29,9 @@ const buttonVariants = cva(
           "bg-transparent text-muted border border-muted hover:bg-muted/10",
         frosted:
           "bg-accent/50 text-accent-foreground backdrop-blur-md ring-1 ring-ring hover:bg-accent/70",
-        ghost: 
-          "bg-transparent text-popover-foreground hover:bg-white/10",
-        lavender: 
-          "bg-chart-2 text-foreground hover:bg-chart-1",
-        destructive: 
-          "bg-destructive text-white hover:bg-destructive/90",
+        ghost: "bg-transparent text-popover-foreground hover:bg-white/10",
+        lavender: "bg-chart-2 text-foreground hover:bg-chart-1",
+        destructive: "bg-destructive text-white hover:bg-destructive/90",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",

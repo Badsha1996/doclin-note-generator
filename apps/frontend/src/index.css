@@ -64,7 +64,9 @@
   --muted: oklch(0.701 0.202 308.27); /* #9D4EDD */
   --muted-foreground: oklch(0.408 0.141 307.17); /* #10002B */
 
-  --destructive: oklch(0.577 0.245 27.325); /* keep as-is or update if desired */
+  --destructive: oklch(
+    0.577 0.245 27.325
+  ); /* keep as-is or update if desired */
   --border: oklch(0.85 0.05 306); /* soft purple border */
   --input: oklch(0.85 0.05 306);
   --ring: oklch(0.728 0.192 305); /* active ring */
