@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Outlet, createRootRoute } from "@tanstack/react-router";
+import { Outlet, createRootRoute, useRouter } from "@tanstack/react-router";
 import Navbar from "@/components/common/Navbar";
 
 export const Route = createRootRoute({
@@ -7,9 +7,11 @@ export const Route = createRootRoute({
 });
 
 function RootComponent() {
+  const router = useRouter();
+  const pathname = router.state.location.pathname;
   return (
     <React.Fragment>
-      <Navbar />
+      {!(pathname === "/login" || pathname === "/register") && <Navbar />}
       <Outlet />
     </React.Fragment>
   );
