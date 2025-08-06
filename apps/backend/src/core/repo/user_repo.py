@@ -20,6 +20,10 @@ class UserRepo(ABC):
         ...
 
     @abstractmethod
+    async def get_user_by_id(self, user_id: str) -> Optional[InternalUser]:
+        ...
+
+    @abstractmethod
     async def update_user(self, user_id: str, user_data: UserUpdate) -> Optional[User]:
         ...
     
