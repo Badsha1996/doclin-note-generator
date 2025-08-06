@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import doclinImg from "@/assets/doclin.svg";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import doc from "@/assets/doc.png";
+import BubbleBackground from "@/components/common/BubbleBackground";
 
 export const Route = createFileRoute("/login/")({
   component: Login,
@@ -17,42 +17,7 @@ function Login() {
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-gradient-to-br from-[#3a0067] via-[#240046] to-[#18002B]">
       {/* === Bubble Background (non-interactive) === */}
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        {Array.from({ length: 40 }).map((_, i) => (
-          <div
-            key={i}
-            className="absolute rounded-full animate-bubble"
-            style={{
-              width: Math.random() * 50 + 20 + "px",
-              height: Math.random() * 50 + 20 + "px",
-              left: Math.random() * 100 + "%",
-              bottom: -Math.random() * 100 + "px",
-              animationDelay: Math.random() * 10 + "s",
-              animationDuration: 10 + Math.random() * 10 + "s",
-              backgroundColor: "rgba(255, 255, 255, 0.05)",
-              border: "1px solid rgba(255, 255, 255, 0.12)",
-              boxShadow: `
-                0 0 10px rgba(224, 170, 255, 0.5),
-                0 0 20px rgba(224, 170, 255, 0.3),
-                0 0 30px rgba(255, 255, 255, 0.15)
-              `,
-              backdropFilter: "blur(4px)",
-              borderRadius: "9999px",
-            }}
-          />
-        ))}
-
-        {/* Ultra subtle glass overlay */}
-        <div
-          className="absolute inset-0 z-5 pointer-events-none"
-          style={{
-            backdropFilter: "blur(60px)",
-            WebkitBackdropFilter: "blur(60px)",
-            mixBlendMode: "overlay",
-            opacity: 0.25,
-          }}
-        />
-      </div>
+      <BubbleBackground />
 
       {/* === Interactive Login Card (on top, with pointer events enabled) === */}
       <Card
@@ -66,7 +31,7 @@ function Login() {
         "
       >
         <CardHeader>
-          <img src={doc}  className="w-8 h-8 mx-auto" />
+          <img src={doc} className="w-8 h-8 mx-auto" />
           <CardTitle className="text-2xl font-bold text-center">
             Welcome to Doclin
           </CardTitle>
@@ -80,7 +45,6 @@ function Login() {
               variant="vibe"
               className="w-full text-black"
               onClick={() => {
-                console.log("Button clicked"); // This should now fire
                 setShowEmailInput(true);
               }}
             >
