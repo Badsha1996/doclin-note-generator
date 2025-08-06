@@ -1,17 +1,33 @@
+# Web Framework and Server
 fastapi
 uvicorn[standard]
+
+# Data Validation and Settings Management
 pydantic
 pydantic-settings
+pydantic[email]
+
+# Database ORM and Migration
 sqlalchemy
 alembic
-psycopg2-binary
+psycopg2-binary  # PostgreSQL driver
+
+# Authentication and Security
 python-jose[cryptography]
 passlib[bcrypt]
-bcrypt==4.0.1  # 🔧 This is needed as newer version has some issue __about__ which is now seprate from passlib
-python-multipart
-authlib
-httpx
-redis
-python-decouple
-pydantic[email]
+bcrypt==4.0.1  # 🔧 Pinning due to issues with newer versions (__about__ module separation)
 itsdangerous
+python-multipart  # For handling form data
+authlib  # OAuth & JWT handling
+
+# HTTP Client
+httpx
+
+# Caching / Queuing
+redis
+
+# Environment Variable Management
+python-decouple
+
+# DEV ONLY - COMMENT THIS WHEN PUSHING TO PRODUCTION
+minio

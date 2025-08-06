@@ -1,6 +1,7 @@
 from fastapi import FastAPI,Depends
 from sqlalchemy.orm import Session
 from .interfaces.routes.auth_routes import auth_router
+from .interfaces.routes.upload_routes import upload_router
 from .database.database import Base, engine, SessionLocal
 from .infrastructure.models.user_models import UserModel
 from .utils.middleware import setup_middleware
@@ -19,8 +20,9 @@ setup_middleware(app)
 Base.metadata.create_all(bind=engine)
 
 # Parent route for prefix added
-# auth routes
+# all routes
 app.include_router(auth_router, prefix="/api")
+app.include_router(upload_router, prefix="/api")
 
 
 # ROOT ROUTE

@@ -1,9 +1,3 @@
-'''
-why we need ENTITIES ?
-well in simple term only create entity when you are making a TYPE which will
-be used to interact with DB such as CRUD operations 
-It should be database type agnostic 
-'''
 from datetime import datetime
 from enum import Enum
 from typing import Optional
@@ -29,6 +23,11 @@ class User(BaseModel):
     # This is important as this will allow us to use SQLalchemy objects 
     class Config:
         from_attributes = True
+
+# This is very important 
+# As this will expose password to actual class 
+class InternalUser(User):
+    hash_password: str
 
 class UserCreate(BaseModel):
     username: str

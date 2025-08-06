@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from ..schemas.auth_schemas import RegisterSchema, APIResponseSchema, LoginSchema
+from ..schemas.auth_schemas import RegisterSchema, LoginSchema
+from ..schemas.base_schemas import APIResponseSchema
 from ...utils.security import SecurityManager
 from ...infrastructure.providers.auth_provider import get_security_manager
 from sqlalchemy.orm import Session
 from ...database.database import get_DB
 from ...infrastructure.repo.user_repo import SQLUserRepo
 from ...core.services.auth_service import AuthService
-
 
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -45,5 +45,18 @@ async def login_user(
         user_repo = SQLUserRepo(db)
         auth_service = AuthService(user_repo=user_repo,
                                    security=security_manager)
+        
+        access_token, refresh_token, user = await auth_service.login_user(
+            email=user_data.email,
+            username=user_data.username,
+            password=user_data.password,
+        )
+
+        return APIResponseSchema(
+            success=True,
+            data = {"user":user,"access_token":access_token, "refresh_token":refresh_token},
+            message="User logged in succesfully"
+        )
+        
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

@@ -19,4 +19,12 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    host: true, // Needed for Docker
+    port: 5173, // Match exposed port
+    watch: {
+      usePolling: true,
+      interval: 100,
+    },
+  },
 });
