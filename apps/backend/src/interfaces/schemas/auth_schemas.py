@@ -26,7 +26,3 @@ class LoginSchema(BaseModel):
             raise ValueError("Either email or username must be provided.")
         return data
 
-class APIResponseSchema(BaseModel):
-    success : bool
-    data: Optional[dict] = None
-    message: str

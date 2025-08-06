@@ -7,6 +7,11 @@ class Settings(BaseSettings):
     ALGORITHM : str
     BACKEND_CORS_ORIGINS: list = ["http://localhost:3000", "http://localhost:5173"]
 
+    S3_ENDPOINT : str
+    S3_ACCESS_KEY : str
+    S3_SECRET_KEY : str
+    S3_BUCKET : str
+
     model_config = SettingsConfigDict(env_file=".env")
 
 settings = Settings()
