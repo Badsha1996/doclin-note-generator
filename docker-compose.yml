@@ -24,7 +24,6 @@ services:
       - postgres
       - minio
 
-
   postgres:
     image: postgres:15
     restart: always
@@ -41,8 +40,8 @@ services:
     image: minio/minio
     command: server /data --console-address ":9001"
     ports:
-      - "9000:9000"   # S3 API
-      - "9001:9001"   # MinIO Web UI
+      - "9000:9000" # S3 API
+      - "9001:9001" # MinIO Web UI
     environment:
       MINIO_ROOT_USER: minio
       MINIO_ROOT_PASSWORD: minio123
