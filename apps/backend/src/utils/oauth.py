@@ -41,12 +41,14 @@ class OAuthManager:
                 raise AuthExceptionError(userinfo_response.status_code)
             
             user_data = userinfo_response.json()
-            if provider == OAuthProvider.GOOGLE:
+            if provider in OAuthProvider:
                 return OAuthUser(
                     email=user_data['email'],
                     username=user_data['name'],
                     provider=provider,
                     provider_id=user_data['id']
                 )
+            
+
             raise AuthExceptionError(f"Unsupported OAuth provider: {provider}")
 
