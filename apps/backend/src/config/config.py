@@ -6,6 +6,12 @@ class Settings(BaseSettings):
     SECRET_KEY : str
     ALGORITHM : str
     BACKEND_CORS_ORIGINS: list = ["http://localhost:3000", "http://localhost:5173"]
+    FRONTEND_URL:str
+    GOOGLE_CLIENT_ID:str
+    GOOGLE_CLIENT_SECRET:str
+    REDIRECT_URI:str
+    META_ID:str
+    META_SECRET:str
 
     S3_ENDPOINT : str
     S3_ACCESS_KEY : str

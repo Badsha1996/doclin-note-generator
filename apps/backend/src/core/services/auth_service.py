@@ -1,11 +1,11 @@
 from typing import Optional, Tuple
-from ..repo.user_repo import UserRepo
+from ..repo.user_repo import OAuthRepo, UserRepo
 from ...utils.security import SecurityManager
-from ..entities.user_entities import UserRole, UserCreate, User
+from ..entities.user_entities import OAuthUser, UserRole, UserCreate, User
 from ...utils.exceptions import ConflictException, AuthExceptionError,NotFoundExceptionError,ValidationExceptionError
 
 class AuthService:
-    def __init__(self, user_repo = UserRepo,security = SecurityManager, oauth_repo = None):
+    def __init__(self, user_repo = UserRepo,security = SecurityManager, oauth_repo = OAuthRepo):
         self.user_repo = user_repo
         self.oauth_repo = oauth_repo
         self.security = security
@@ -71,4 +71,18 @@ class AuthService:
             data={"user_id": str(user.id), "email": user.email, "role": user.role, "username": user.username}
         )
         
+        return access_token, refresh_token, user
+    
+    async def oauth_login(self,oauth_user:OAuthUser)->Tuple[str, str, User]:
+        user = await self.oauth_repo.create_or_update_oauth_user(oauth_user)
+        if not user:
+            raise AuthExceptionError("Invalid credentials")
+        
+        access_token = self.security.create_access_token(
+            data={"user_id": str(user.id), "email": user.email, "role": user.role, "username": user.username}
+        )
+        
+        refresh_token = self.security.create_refresh_token(
+            data={"user_id": str(user.id), "email": user.email, "role": user.role, "username": user.username}
+        )
         return access_token, refresh_token, user
