@@ -73,14 +73,6 @@ async def oauthLogin(
     oauth_manager: OAuthManager = Depends(get_oauth_manager)
 ):
     try:
-        # client = getattr(oauth, state)
-        # token = await client.authorize_access_token(request)
-        # if state == "google":
-        #     user_info = await client.get("userinfo", token=token)
-        # elif state == "meta":
-        #     user_info = await client.get("me?fields=id,name,email", token=token)
-        # else:
-        #     raise HTTPException(status_code=400, detail="User info endpoint not configured")
         user_repo = SQLUserRepo(db)
         oauth_repo = SQLOAuthRepo(db)
         auth_service = AuthService(user_repo, security_manager,oauth_repo)
@@ -98,8 +90,4 @@ async def oauthLogin(
         )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))   
-    # return {
-    #     "code": code,
-    #     "state": state,
-    #     "user":user_info
-    #     }   
+  

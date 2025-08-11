@@ -9,16 +9,16 @@ class OAuthManager:
             OAuthProvider.GOOGLE: {
                 'client_id': settings.GOOGLE_CLIENT_ID,
                 'client_secret': settings.GOOGLE_CLIENT_SECRET,
-                'authorize_url': 'https://accounts.google.com/o/oauth2/auth',
-                'token_url': 'https://oauth2.googleapis.com/token',
-                'userinfo_url': 'https://www.googleapis.com/oauth2/v2/userinfo'
+                'authorize_url': settings.GOOLE_REDIRECT,
+                'token_url': settings.GOOGLE_TOKEN_URL,
+                'userinfo_url': settings.GOOGLE_USER_URL
             },
             OAuthProvider.META: {
                 'client_id': settings.META_ID,
                 'client_secret': settings.META_SECRET,
-                'authorize_url': 'https://www.facebook.com/v18.0/dialog/oauth',  # latest Graph API version
-                'token_url': 'https://graph.facebook.com/v18.0/oauth/access_token',
-                'userinfo_url': 'https://graph.facebook.com/me?fields=id,name,email'
+                'authorize_url': settings.META_REDIRECT,
+                'token_url': settings.META_TOKEN_URL,
+                'userinfo_url': settings.META_USER_URL
             }
         }
     async def get_oauth_user(self, provider: OAuthProvider, code: str, redirect_uri: str) -> OAuthUser:

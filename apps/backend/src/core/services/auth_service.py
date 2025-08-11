@@ -2,7 +2,7 @@ from typing import Optional, Tuple
 from ..repo.user_repo import OAuthRepo, UserRepo
 from ...utils.security import SecurityManager
 from ..entities.user_entities import OAuthUser, UserRole, UserCreate, User
-from ...utils.exceptions import ConflictException, AuthExceptionError,NotFoundExceptionError,ValidationExceptionError
+from ...utils.exceptions import ConflictException, AuthExceptionError,ValidationExceptionError
 
 class AuthService:
     def __init__(self, user_repo = UserRepo,security = SecurityManager, oauth_repo = OAuthRepo):
