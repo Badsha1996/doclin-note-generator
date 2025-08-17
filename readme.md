@@ -1,6 +1,13 @@
-# DOCLIN NOTE GENERATOR
+# frontend teck stack
 
-doclin note generator is an AI powered note making, Question and answer generator and study guider for both teachers and student for simplifying the study so students and teachers can focus on study rather than wasting time 
+- REACT JS  - FREE AND OPEN SOURCE JS LIBRABRY FOR BUILDING WEB AND USER INTERFACES
 
-## frontend tech stack
-rct js,tlwnf,shdcn,tanstack,motion,zod,react icons
+- MOTION - AN AI TOOL TO MANAGE EMPLOYEES OR AI GENERATED EMPLOYEES
+
+- ZOD - A TYPESCRIPT VALIDATION LIBRARY
+
+- TANSTACK- HEADLESS SOFTWARE HAVING TYPE SAFE UTILITIES FOR DATA ROUTING, WEB APPLICATIONS WITH MANY OTHER CAPABILITIES
+
+- RADIX UI - A LOW-LEVEL UI COMPONENT FOCUSES ON ACCESSABILITY,CUSTOMIZATION AND DEVELOPER EXPERIENCE
+
+- REACT ICONS - INCLUDES POPULAR ICONS FOR REACT PROJECTS AND UTILIZES ES6 IMPORTS
