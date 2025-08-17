@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from .interfaces.routes.auth_routes import auth_router
 from .interfaces.routes.upload_routes import upload_router
 from .interfaces.routes.llm_routes import llm_router
+from .interfaces.routes.otp_routes import otp_router
 from .database.database import Base, engine, SessionLocal
 from .infrastructure.models.user_models import UserModel
 from .utils.middleware import setup_middleware
@@ -25,6 +26,7 @@ Base.metadata.create_all(bind=engine)
 app.include_router(auth_router, prefix="/api")
 app.include_router(upload_router, prefix="/api")
 app.include_router(llm_router, prefix="/api")
+app.include_router(otp_router,prefix="/api")
 
 
 # ROOT ROUTE
