@@ -26,3 +26,5 @@ class LoginSchema(BaseModel):
             raise ValueError("Either email or username must be provided.")
         return data
 
+class VerifySchema(BaseModel):
+    id:str

@@ -11,7 +11,6 @@ class EmailService:
         self.password=settings.GOOGLE_APP_PASSWORD
     async def send_email(self,receiver:str,type: Literal["verify", "forget"],data: Dict[str, Any]):
         try:
-            print(self.password)  
             html_content=get_verify_email_template(username=data["username"],otp=data["otp"])if type=="verify" else "<div>Not implemented</div>"
 
             message = MIMEText(html_content, "html")

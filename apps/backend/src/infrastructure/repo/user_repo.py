@@ -34,7 +34,20 @@ class SQLUserRepo(UserRepo):
         return self.db.query(UserModel).filter(UserModel.id == user_id).first()
 
     async def update_user(self, user_id: str, user_data: UserUpdate) -> Optional[User]:
-        ...
+        user = self.db.query(UserModel).filter(UserModel.id == user_id).first()
+        if not user:
+            return None 
+
+        for field, value in user_data.model_dump(exclude_unset=True).items():
+            setattr(user, field, value)
+
+        
+        self.db.add(user)
+        self.db.commit()
+        self.db.refresh(user)
+
+        return User.model_validate(user)
+
     
     async def delete_user(self, user_id: str) -> bool:
         ...

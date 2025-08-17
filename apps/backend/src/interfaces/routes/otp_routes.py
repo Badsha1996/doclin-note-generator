@@ -50,7 +50,7 @@ async def verify_otp(
         verified=await otp_service.verify_otp(email=user_credentials.email,otp=user_credentials.otp)
         if verified:
             return APIResponseSchema(success=True,
-                data = {"oemail":user_credentials.email},
+                data = {"email":user_credentials.email},
                 message="OTP verified succesfully")
         else: raise AuthExceptionError(detail="Invalid OTP")
     except Exception as e:
