@@ -1,7 +1,26 @@
 import { z } from "zod";
 
+export interface ApiConfig<
+  TResponse,
+  TPayload = undefined
+> {
+  endpoint: string;
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+  headers?: Record<string, string>;
+  queryParams?: Record<string, string | number | boolean>;
+  payload?: TPayload;
+  responseSchema?: z.ZodSchema<TResponse>; 
+  payloadSchema?: z.ZodSchema<TPayload>;
+}
+
+export interface ApiError {
+  message: string;
+  status?: number;
+  details?: unknown;
+}
+
 // Register Endpoint API Type
-const userSchema = z.object({
+export const userSchema = z.object({
   id: z.uuid(),
   username: z.string(),
   email: z.email(),
@@ -12,7 +31,7 @@ const userSchema = z.object({
   updated_at: z.coerce.date(),
 });
 
-const apiResponseSchema = z.object({
+export const apiResponseSchema = z.object({
   success: z.literal(true),
   data: z.object({
     user: userSchema,
@@ -20,4 +39,4 @@ const apiResponseSchema = z.object({
   message: z.string(),
 });
 
-type ApiResponse = z.infer<typeof apiResponseSchema>;
+export type ApiResponse = z.infer<typeof apiResponseSchema>;
