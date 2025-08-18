@@ -9,6 +9,10 @@ class UserRole(str,Enum):
     USER = "user"
     ADMIN = "admin"
 
+class OAuthProvider(str,Enum):
+    GOOGLE='google'
+    META='meta'
+    
 class User(BaseModel):
     id: UUID
     username: str
@@ -46,5 +50,11 @@ class UserUpdate(BaseModel):
     role: Optional[UserRole] = None
 
 # we need oAuth class
+
+class OAuthUser(BaseModel):
+    email:str
+    username: str
+    provider_id:str
+    provider:OAuthProvider
 
 

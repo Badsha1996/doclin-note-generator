@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import doc from "@/assets/doc.png";
 import BubbleBackground from "@/components/common/BubbleBackground";
-
+import { FcGoogle } from "react-icons/fc";
+import { BsMeta } from "react-icons/bs";
 export const Route = createFileRoute("/login/")({
   component: Login,
 });
@@ -13,7 +14,29 @@ export const Route = createFileRoute("/login/")({
 function Login() {
   const [showEmailInput, setShowEmailInput] = useState(false);
   const [email, setEmail] = useState("");
+  const handleOAuth = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const provider = e.currentTarget.name as "google" | "meta";
+    const url =
+      provider === "meta"
+        ? `https://www.facebook.com/v20.0/dialog/oauth?` +
+          new URLSearchParams({
+            client_id: import.meta.env.VITE_META_ID,
+            redirect_uri: import.meta.env.VITE_REDIRECT_URI,
+            response_type: "code",
+            scope: "email,public_profile", // FB scopes
+            state: "meta",
+          })
+        : `https://accounts.google.com/o/oauth2/v2/auth?` +
+          new URLSearchParams({
+            client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+            redirect_uri: import.meta.env.VITE_REDIRECT_URI,
+            response_type: "code",
+            scope: "openid email profile",
+            state: "google",
+          });
 
+    window.location.href = url;
+  };
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-gradient-to-br from-[#3a0067] via-[#240046] to-[#18002B]">
       {/* === Bubble Background (non-interactive) === */}
@@ -37,8 +60,23 @@ function Login() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Button type="submit" className="w-full">
-            Continue with Google
+          <Button
+            name="google"
+            className="w-full flex items-center gap-3  bg-blue-600 hover:bg-blue-700"
+            onClick={handleOAuth}
+          >
+            <FcGoogle />
+            <span>Sign in with Google</span>
+          </Button>
+
+          {/* Meta Continue */}
+          <Button
+            name="meta"
+            className="w-full flex items-center gap-3 bg-blue-600 hover:bg-blue-700 text-white"
+            onClick={handleOAuth}
+          >
+            <BsMeta color="#0081FB" />
+            <span>Continue with Meta</span>
           </Button>
           {!showEmailInput ? (
             <Button
