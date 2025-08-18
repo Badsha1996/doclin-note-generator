@@ -11,7 +11,9 @@
     "start": "docker-compose up",
     "restart": "docker-compose down && docker-compose build --no-cache && docker-compose up",
     "logs": "docker-compose logs -f",
-    "clean": "rm -rf node_modules && rm -rf .turbo && rm -rf dist && rm -rf build"
+    "clean": "rm -rf node_modules && rm -rf .turbo && rm -rf dist && rm -rf build",
+    "model": "docker-compose down && docker-compose up -d ollama && docker exec $(docker-compose ps -q ollama) ollama pull llama3:8b",
+    "after-model":""
   },
   "repository": {
     "type": "git",
