@@ -26,6 +26,13 @@ class Settings(BaseSettings):
     S3_SECRET_KEY : str
     S3_BUCKET : str
 
+    LLM_PROVIDER : str  
+    OLLAMA_URL : str
+    OLLAMA_MODEL : str
+
+    GEMINI_API_KEY : str
+    VECTOR_MODEL : str
+
 
     model_config = SettingsConfigDict(env_file=".env")
 
