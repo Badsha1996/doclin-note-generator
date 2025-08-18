@@ -57,41 +57,6 @@ class SQLSyllabusRepo(SyllabusRepo):
 
         return True
     
-    # async def create_json(self, subject: str) -> Optional[Syllabus]:
-    #     syllabus = (
-    #         self.db.query(SyllabusModel)
-    #         .options(joinedload(SyllabusModel.units).joinedload(UnitModel.topics))
-    #         .filter(SyllabusModel.subject == subject)
-    #         .first()
-    #     )
-
-    #     if not syllabus:
-    #         return None
-
-    #     return Syllabus(
-    #         subject=syllabus.subject,
-    #         version_date=syllabus.version_date,
-    #         units=[
-    #             {
-    #                 "unit_id": unit.unit_id,
-    #                 "title": unit.title,
-    #                 "topics": [
-    #                     {
-    #                         "topic_id": topic.topic_id,
-    #                         "title": topic.title,
-    #                         "subtopics": topic.subtopics or [],
-    #                         "sources": topic.sources or [],
-    #                         "learning_objectives": topic.learning_objectives or [],
-    #                         "key_terms": topic.key_terms or []
-    #                     }
-    #                     for topic in unit.topics
-    #                 ]
-    #             }
-    #             for unit in syllabus.units
-    #         ]
-    #     )
-
-
     async def create_json(self, subject: str) -> Optional[Syllabus]:
         syllabus = (
             self.db.query(SyllabusModel)
