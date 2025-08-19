@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import doc from "@/assets/doc.png";
 import BubbleBackground from "@/components/common/BubbleBackground";
 import { FcGoogle } from "react-icons/fc";
 import { BsMeta } from "react-icons/bs";
@@ -38,41 +37,25 @@ function Login() {
     window.location.href = url;
   };
   return (
-    <div className="relative w-screen h-screen overflow-hidden bg-gradient-to-br from-[#3a0067] via-[#240046] to-[#18002B]">
-      {/* === Bubble Background (non-interactive) === */}
+    <div className="relative w-screen h-screen overflow-hidden">
       <BubbleBackground />
 
-      {/* === Interactive Login Card (on top, with pointer events enabled) === */}
-      <Card
-        className="
-          w-96 max-w-[90%]
-          absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-          bg-white/2 backdrop-blur-[90px]
-          shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_10px_40px_rgba(0,0,0,0.4)]
-          rounded-[20px] p-8 text-white
-          transition-all duration-300 border-none z-10
-        "
-      >
-        <CardHeader>
-          <img src={doc} className="w-8 h-8 mx-auto" />
-          <CardTitle className="text-2xl font-bold text-center">
-            Welcome to Doclin
-          </CardTitle>
-        </CardHeader>
+      <Card className="w-full max-w-md rounded-2xl bg-white/10 backdrop-blur-lg p-5 sm:p-6 border-none">
+        <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-white text-center">
+          LOGIN
+        </h2>
         <CardContent className="space-y-4">
           <Button
             name="google"
-            className="w-full flex items-center gap-3  bg-blue-600 hover:bg-blue-700"
+            className="w-full flex items-center gap-3"
             onClick={handleOAuth}
           >
             <FcGoogle />
             <span>Sign in with Google</span>
           </Button>
-
-          {/* Meta Continue */}
           <Button
             name="meta"
-            className="w-full flex items-center gap-3 bg-blue-600 hover:bg-blue-700 text-white"
+            className="w-full flex items-center gap-3 text-white"
             onClick={handleOAuth}
           >
             <BsMeta color="#0081FB" />
