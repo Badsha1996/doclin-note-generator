@@ -1,17 +1,21 @@
 # DOCLIN NOTE GENERATOR
 
-doclin note generator is an AI powered note making, Question and answer generator and study guider for both teachers and student for simplifying the study so students and teachers can focus on study rather than wasting time 
+Doclin Note Generator is an AI powered note making, Question and answer generator and study guider for both teachers and student for simplifying the study so students and teachers can focus on study rather than wasting time
 
-## frontend teck stack
+## Frontend Tech Stack
 
-- REACT JS  - FREE AND OPEN SOURCE JS LIBRABRY FOR BUILDING WEB AND USER INTERFACES
+- React Js - Free and open source JS library for building web and user interfaces
 
-- MOTION - AN AI TOOL TO MANAGE EMPLOYEES OR AI GENERATED EMPLOYEES
+- Framer Motion- A modern library used to create animations in JS and React
 
-- ZOD - A TYPESCRIPT VALIDATION LIBRARY
+- Zod - A typescript validation library 
 
-- TANSTACK- HEADLESS SOFTWARE HAVING TYPE SAFE UTILITIES FOR DATA ROUTING, WEB APPLICATIONS WITH MANY OTHER CAPABILITIES
+- Tanstack- Headless i.e. independent set of tools like tanstack table, tanstack virtual and tanstack router which has nested layouts, loaders and far better control than React
 
-- RADIX UI - A LOW-LEVEL UI COMPONENT FOCUSES ON ACCESSABILITY,CUSTOMIZATION AND DEVELOPER EXPERIENCE
+- Radix UI - A low-level UI component focuses on accessibility,customization and developer experience 
 
-- REACT ICONS - INCLUDES POPULAR ICONS FOR REACT PROJECTS AND UTILIZES ES6 IMPORTS
+- React Icons - Includes popular icons for React projects and utilizes ES6 imports 
+
+- Next-themes - Provides straightforward and seamless theme switching ability for React JS 
+
+- Sonner - Designed to provide visually appealing and customizable toast component i.e. a brief non-disruptive temporary message
