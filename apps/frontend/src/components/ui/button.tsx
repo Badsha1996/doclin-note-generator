@@ -11,8 +11,7 @@ const buttonVariants = cva(
       variant: {
         default:
           "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
-        vibe:
-          "bg-secondary text-secondary-foreground hover:bg-muted shadow-md",
+        vibe: "bg-secondary text-secondary-foreground hover:bg-muted shadow-md",
         focusGlow:
           "bg-muted text-secondary-foreground hover:bg-chart-2 shadow-[0_0_10px_var(--chart-2)]",
         glass:
@@ -21,6 +20,8 @@ const buttonVariants = cva(
           "bg-transparent text-muted border border-muted hover:bg-muted/10",
         frosted:
           "bg-accent/50 text-accent-foreground backdrop-blur-md ring-1 ring-ring hover:bg-accent/70",
+        standOut:
+          "bg-gradient-to-r [background-image:linear-gradient(to_right,var(--standout-from),var(--standout-to))] text-white hover:[background-image:linear-gradient(to_right,var(--standout-from),var(--standout-to)),linear-gradient(var(--muted),var(--muted))] hover:bg-blend-overlay",
         ghost: "bg-transparent text-popover-foreground hover:bg-white/10",
         lavender: "bg-chart-2 text-foreground hover:bg-chart-1",
         destructive: "bg-destructive text-white hover:bg-destructive/90",
@@ -36,7 +37,7 @@ const buttonVariants = cva(
       variant: "default",
       size: "default",
     },
-  },
+  }
 );
 
 function Button({

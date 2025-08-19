@@ -4,7 +4,7 @@ from fastapi import UploadFile
 from uuid import UUID
 
 class UploadService:
-    def __init__(self, file_repo : FileRepo):
+    def __init__(self, file_repo = FileRepo):
         self.file_repo = file_repo
     
     async def uplaod_file(self, file_url: str, file_name : str,file_type: str, file_size : int, user_id : UUID) -> File:

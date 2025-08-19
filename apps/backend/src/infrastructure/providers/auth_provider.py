@@ -9,5 +9,7 @@ def get_security_manager() -> SecurityManager:
         secret_key=settings.SECRET_KEY,
         algorithm=settings.ALGORITHM
     )
+
+@lru_cache()
 def get_oauth_manager()->OAuthManager:
     return OAuthManager()
