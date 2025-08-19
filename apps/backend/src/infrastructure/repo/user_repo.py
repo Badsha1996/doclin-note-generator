@@ -83,7 +83,7 @@ class SQLOAuthRepo(OAuthRepo):
             provider_id=oauth_user.provider_id
         )
         self.db.add(oauth_entry)
-        self.db.commit()
+        self.db.commit()    
         self.db.refresh(user)
 
         return User.model_validate(user)
