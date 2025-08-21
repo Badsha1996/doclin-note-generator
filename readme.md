@@ -1,6 +1,6 @@
 # DOCLIN NOTE GENERATOR
 
-Doclin Note Generator is an AI powered note making, Question and answer generator and study guider for both teachers and student for simplifying the study so students and teachers can focus on study rather than wasting time
+Doclin Note Generator is an AI powered note making, question and answer generator and study guider for both teachers and student for simplifying the study so students and teachers can focus on study rather than wasting time
 
 ## Frontend Tech Stack
 
@@ -20,8 +20,8 @@ Doclin Note Generator is an AI powered note making, Question and answer generato
 
 - Sonner - Designed to provide visually appealing and customizable toast component i.e. a brief non-disruptive temporary message
 
--Shadcn -  A collection of reusable React components used to build web application or to create own component library 
+- Shadcn -  A collection of reusable React components used to build web application or to create own component library 
 
--TailwindCSS - A revolutionary framework that helps to customise HTML element without leaving the current html file
+- TailwindCSS - A revolutionary framework that helps to customise HTML element without leaving the current html file
 
--CLSX - A faster and smaller replacement for classname module that are based on certain conditions
+- CLSX - A faster and smaller replacement for classname module that are based on certain conditions
