@@ -24,6 +24,7 @@ const buttonVariants = cva(
           "bg-gradient-to-r [background-image:linear-gradient(to_right,var(--standout-from),var(--standout-to))] text-white hover:[background-image:linear-gradient(to_right,var(--standout-from),var(--standout-to)),linear-gradient(var(--muted),var(--muted))] hover:bg-blend-overlay",
         ghost: "bg-transparent text-popover-foreground hover:bg-white/10",
         lavender: "bg-chart-2 text-foreground hover:bg-chart-1",
+        snowFlake: "bg-[var(--base-bg)] text-[var(--accent)]",
         destructive: "bg-destructive text-white hover:bg-destructive/90",
       },
       size: {
