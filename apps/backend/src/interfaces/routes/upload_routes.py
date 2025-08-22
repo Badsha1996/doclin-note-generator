@@ -6,7 +6,7 @@ from ...core.services.upload_service import UploadService
 from ...core.entities.user_entities import User
 from ..dependencies.dependencies import get_current_user
 from ...infrastructure.repo.file_repo import SQLFileRepo
-from ..schemas.base_schemas import APIResponseSchema
+from ..schemas.response_schemas import APIResponseSchema
 
 upload_router = APIRouter(prefix="/upload", tags=["upload"])
 

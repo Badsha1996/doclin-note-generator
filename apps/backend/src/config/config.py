@@ -1,24 +1,12 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+
 class Settings(BaseSettings):
     # ALL the environment TYPE defination 🚒
     DATABASE_URL: str
     SECRET_KEY : str
     ALGORITHM : str
     BACKEND_CORS_ORIGINS: list = ["http://localhost:3000", "http://localhost:5173"]
-
-    GOOGLE_CLIENT_ID:str
-    GOOGLE_CLIENT_SECRET:str
-    GOOLE_REDIRECT:str
-    GOOGLE_TOKEN_URL:str
-    GOOGLE_USER_URL:str
-
-
-    META_ID:str
-    META_SECRET:str
-    META_REDIRECT:str
-    META_TOKEN_URL:str
-    META_USER_URL:str
 
     GOOGLE_CLIENT_ID:str
     GOOGLE_CLIENT_SECRET:str
@@ -48,6 +36,14 @@ class Settings(BaseSettings):
     GEMINI_API_KEY : str
     VECTOR_MODEL : str
 
+    LLM_PROVIDER : str  
+    OLLAMA_URL : str
+    OLLAMA_MODEL : str
+
+    VECTOR_MODEL : str
+
+    LLM_MODELS : list[str]
+    LLM_API_KEY : str 
 
     model_config = SettingsConfigDict(env_file=".env")
 

@@ -1,7 +1,9 @@
+from authlib.integrations.httpx_client import AsyncOAuth2Client
+
 from .exceptions import AuthExceptionError
 from ..config.config import settings
-from authlib.integrations.httpx_client import AsyncOAuth2Client
 from ..core.entities.user_entities import OAuthProvider, OAuthUser
+
 
 class OAuthManager:
     def __init__(self):

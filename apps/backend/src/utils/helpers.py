@@ -9,7 +9,7 @@ import requests
 LLM_PROVIDER = settings.LLM_PROVIDER.lower()
 
 if LLM_PROVIDER == "gemini":
-    client = genai.Client(api_key=settings.GEMINI_API_KEY)
+    client = genai.Client(api_key=settings.LLM_API_KEY)
 elif LLM_PROVIDER == "ollama":
     OLLAMA_URL = settings.OLLAMA_URL.rstrip("/")
     OLLAMA_MODEL = settings.OLLAMA_MODEL
