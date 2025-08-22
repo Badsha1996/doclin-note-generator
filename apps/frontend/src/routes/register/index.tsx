@@ -1,13 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import doclinIcon from "@/assets/doclinIcon.png";
 import { FormSchema, type registerTypes } from "@/types/type";
-import { apiResponseSchema } from "@/types/api";
-import type { ApiError } from "@/types/api";
-import type { ApiResponse } from "@/types/api";
-import { z } from "zod";
+import type { ApiError, RegisterResponse } from "@/types/api";
+import { registerResponseSchema } from "@/types/api";
 import { useForm } from "react-hook-form";
 import {
   Form,
@@ -34,6 +32,8 @@ export const Route = createFileRoute("/register/")({
   component: Register,
 });
 
+type ApiResponse = RegisterResponse;
+
 export function Register() {
   const form = useForm<registerTypes>({
     resolver: zodResolver(FormSchema),
@@ -45,20 +45,21 @@ export function Register() {
     },
   });
 
+  const navigate = useNavigate();
   const mutation = useApiMutation<
     ApiResponse,
     Omit<registerTypes, "confirmpassword">
   >(
     {
-      endpoint: "/api/auth/register",
+      endpoint: "/auth/register",
       method: "POST",
       payloadSchema: FormSchema.omit({ confirmpassword: true }),
-      responseSchema: apiResponseSchema,
+      responseSchema: registerResponseSchema,
     },
     {
       onSuccess: (data) => {
         toast.success(data.message || "Registration successful!");
-        // navigate({ to: "/login" });
+        navigate({ to: "/login" });
       },
       onError: (error: ApiError) => {
         toast.error(error.message || "Registration failed. Please try again.");
