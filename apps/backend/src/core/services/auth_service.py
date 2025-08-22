@@ -1,8 +1,8 @@
 from typing import Optional, Tuple
 from ..repo.user_repo import OAuthRepo, UserRepo
 from ...utils.security import SecurityManager
-from ..entities.user_entities import OAuthUser, UserRole, UserCreate, User
-from ...utils.exceptions import ConflictException, AuthExceptionError,ValidationExceptionError
+from ..entities.user_entities import OAuthUser, UserRole, UserCreate, User, UserUpdate
+from ...utils.exceptions import ConflictException, AuthExceptionError, NotFoundExceptionError,ValidationExceptionError
 
 class AuthService:
     def __init__(self, user_repo = UserRepo,security = SecurityManager, oauth_repo = OAuthRepo):
@@ -86,3 +86,14 @@ class AuthService:
             data={"user_id": str(user.id), "email": user.email, "role": user.role, "username": user.username}
         )
         return access_token, refresh_token, user
+    
+
+    async def verify_user(self,id:str)->bool:
+
+        updated_user=UserUpdate(is_verified=True)
+
+        user = await self.user_repo.update_user(id,updated_user)
+        
+        if user is None:
+            raise NotFoundExceptionError("User not found")
+        return True

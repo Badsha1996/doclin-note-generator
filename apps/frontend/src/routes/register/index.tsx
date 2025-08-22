@@ -1,10 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import doc from "@/assets/doc.png";
+import doclinIcon from "@/assets/doclinIcon.png";
 import { FormSchema, type registerTypes } from "@/types/type";
-import { z } from "zod";
+import type { ApiError, RegisterResponse } from "@/types/api";
+import { registerResponseSchema } from "@/types/api";
 import { useForm } from "react-hook-form";
 import {
   Form,
@@ -13,15 +14,25 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import BubbleBackground from "@/components/common/BubbleBackground";
+import { motion } from "framer-motion";
+import {
+  fadeInLeft,
+  fadeInUp,
+  scaleIn,
+  transition,
+  transitionSlow,
+} from "@/lib/motion";
+import { useApiMutation } from "@/hook/useApi";
 
 export const Route = createFileRoute("/register/")({
   component: Register,
 });
+
+type ApiResponse = RegisterResponse;
 
 export function Register() {
   const form = useForm<registerTypes>({
@@ -34,107 +45,209 @@ export function Register() {
     },
   });
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
-    toast.success("Registration successful!");
+  const navigate = useNavigate();
+  const mutation = useApiMutation<
+    ApiResponse,
+    Omit<registerTypes, "confirmpassword">
+  >(
+    {
+      endpoint: "/auth/register",
+      method: "POST",
+      payloadSchema: FormSchema.omit({ confirmpassword: true }),
+      responseSchema: registerResponseSchema,
+    },
+    {
+      onSuccess: (data) => {
+        toast.success(data.message || "Registration successful!");
+        navigate({ to: "/login" });
+      },
+      onError: (error: ApiError) => {
+        toast.error(error.message || "Registration failed. Please try again.");
+      },
+    }
+  );
+
+  function onSubmit(data: registerTypes) {
+    const { confirmpassword, ...payload } = data;
+    mutation.mutate(payload);
   }
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden bg-gradient-to-br from-[#3a0067] via-[#240046] to-[#18002B]">
-      {/* === Bubble Background (non-interactive) === */}
-
+    <div className="relative w-screen h-screen overflow-hidden">
       <BubbleBackground />
+      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-[#2a003f] via-[#19002a] to-[#100018] p-4 sm:p-6 lg:p-8">
+        <motion.div
+          variants={fadeInUp}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          transition={transitionSlow}
+          className="flex w-full max-w-4xl min-h-[500px] rounded-2xl shadow-lg overflow-hidden bg-white/5 backdrop-blur-md border border-white/10"
+          style={{ height: "auto" }}
+        >
+          <div className="hidden lg:flex flex-col w-1/2 bg-transparent text-white p-8 lg:p-12">
+            <motion.img
+              src={doclinIcon}
+              alt="Doclin Icon"
+              initial={{ opacity: 0, y: -30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={transitionSlow}
+              className="w-16 h-16 lg:w-20 lg:h-20 object-contain"
+            />
+            <div className="flex flex-col justify-center flex-1">
+              <motion.h1
+                variants={fadeInLeft}
+                transition={transitionSlow}
+                className="text-3xl sm:text-4xl lg:text-5xl font-bold text-left leading-tight"
+              >
+                Welcome!
+              </motion.h1>
+              <div className="w-10 h-[2px] bg-white/70 my-4"></div>
+              <motion.p
+                variants={fadeInLeft}
+                transition={transition}
+                className="mb-8 text-sm sm:text-base text-white/80 text-left max-w-xs"
+              >
+                Doclin app for notes and question generation
+              </motion.p>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Button
+                  variant="standOut"
+                  className="px-6 py-2 w-full max-w-xs rounded-md font-semibold"
+                >
+                  Learn More
+                </Button>
+              </motion.div>
+            </div>
+          </div>
+          <motion.div
+            variants={scaleIn}
+            initial="initial"
+            animate="animate"
+            whileHover="whileHover"
+            transition={transition}
+            className="flex w-full lg:w-1/2 justify-center items-center p-6 sm:p-8"
+          >
+            <Card className="w-full max-w-md rounded-2xl bg-white/10 backdrop-blur-lg p-5 sm:p-6 border-none">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-white text-center">
+                Register
+              </h2>
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-4"
+                >
+                  <FormField
+                    control={form.control}
+                    name="username"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-white">Username</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Your username"
+                            variant="custom"
+                            {...field}
+                            className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-white">Email</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder="your@email.com"
+                            variant="custom"
+                            {...field}
+                            className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-white">Password</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="password"
+                            variant="custom"
+                            placeholder="••••••••"
+                            {...field}
+                            className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="confirmpassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-white">
+                          Confirm Password
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="password"
+                            variant="custom"
+                            placeholder="••••••••"
+                            {...field}
+                            className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-      {/* === Interactive Login Card (on top, with pointer events enabled) === */}
-      <Card
-        className="
-           w-96 max-w-[90%]
-           absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-           bg-white/2 backdrop-blur-[90px]
-           shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_10px_40px_rgba(0,0,0,0.4)]
-           rounded-[20px] p-6 text-white
-           transition-all duration-300 border-none z-10
-         "
-      >
-        <CardHeader>
-          <img src={doc} className="w-8 h-8 mx-auto" />
-          <CardTitle className="text-2xl font-bold text-center">
-            Welcome to Doclin
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="username"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Username</FormLabel>
-                    <FormControl>
-                      <Input placeholder="UserName" {...field} />
-                    </FormControl>
-                    <FormDescription>
-                      This is your public display name.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input type="email" placeholder="Email" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="flex justify-center mt-2"
+                  >
+                    <Button
+                      type="submit"
+                      variant="standOut"
+                      className="w-full max-w-xs py-2 rounded-md font-semibold"
+                      disabled={mutation.isPending}
+                    >
+                      {mutation.isPending ? "Registering..." : "Register"}
+                    </Button>
+                  </motion.div>
 
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="Password"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="confirmpassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Confirm Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="Confirm Password"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button variant="neonOutline" type="submit">
-                Submit
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+                  <p className="text-sm text-gray-300 mt-4 text-center">
+                    Already have an account?{" "}
+                    <Link
+                      to="/login"
+                      className="text-primary hover:underline font-medium"
+                    >
+                      Login
+                    </Link>
+                  </p>
+                </form>
+              </Form>
+            </Card>
+          </motion.div>
+        </motion.div>
+      </div>
     </div>
   );
 }

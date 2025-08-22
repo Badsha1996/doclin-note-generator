@@ -94,4 +94,21 @@ async def oauthLogin(
         )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))   
-  
+
+
+@auth_router.post("/verify")
+async def verify_user(
+    user_data:VerifySchema,
+    db : Session = Depends(get_DB),
+    security_manager: SecurityManager = Depends(get_security_manager)
+):
+    try:
+        user_repo=SQLUserRepo(db)
+        auth_service=AuthService(user_repo=user_repo,security=security_manager)
+        verified=await auth_service.verify_user(user_data.id)
+        if verified:
+            return APIResponseSchema(success=True,
+                data = {"id":user_data.id},
+                message="User verified succesfully")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))

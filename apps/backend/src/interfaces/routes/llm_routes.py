@@ -11,6 +11,7 @@ from ...core.entities.exam_paper_entities import ExamPaper
 import requests
 import pdfplumber
 import io
+import re
 
 from sqlalchemy.orm import Session
 from ...database.database import get_DB

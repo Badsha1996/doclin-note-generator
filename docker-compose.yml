@@ -24,7 +24,7 @@ services:
       - S3_BUCKET=doclin-storage
       - LLM_PROVIDER=ollama
       - OLLAMA_URL=http://ollama:11434
-      - OLLAMA_MODEL=llama-3-7B-Q4_K_M
+      - OLLAMA_MODEL=llama3:8b
       - VECTOR_MODEL=all-mpnet-base-v2   
       - NODE_ENV=development
       - PYTHONUNBUFFERED=1
@@ -130,7 +130,6 @@ services:
       retries: 5
     networks:
       - app-network
-
 
   # Uncomment for GPU support
   # deploy:

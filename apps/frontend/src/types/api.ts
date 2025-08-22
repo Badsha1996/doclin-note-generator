@@ -1,7 +1,28 @@
 import { z } from "zod";
 
-// Register Endpoint API Type
-const userSchema = z.object({
+export interface ApiConfig<
+  TResponse,
+  TPayload = undefined
+> {
+  endpoint: string;
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+  headers?: Record<string, string>;
+  queryParams?: Record<string, string | number | boolean>;
+  payload?: TPayload;
+  responseSchema?: z.ZodSchema<TResponse>; 
+  payloadSchema?: z.ZodSchema<TPayload>;
+}
+
+export interface ApiError {
+  message: string;
+  status?: number;
+  details?: unknown;
+}
+
+
+
+// Base User Schema
+export const userSchema = z.object({
   id: z.uuid(),
   username: z.string(),
   email: z.email(),
@@ -12,12 +33,37 @@ const userSchema = z.object({
   updated_at: z.coerce.date(),
 });
 
-const apiResponseSchema = z.object({
-  success: z.literal(true),
-  data: z.object({
-    user: userSchema,
-  }),
-  message: z.string(),
+//  Generic API response wrapper
+export const apiResponseSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
+  z.object({
+    success: z.boolean(), // or z.literal(true) if always true
+    data: dataSchema,
+    message: z.string(),
+  });
+
+// Endpoint-specific "data" schemas
+
+// Register Endpoint API Type
+export const registerDataSchema = z.object({
+  user: userSchema,
 });
 
-type ApiResponse = z.infer<typeof apiResponseSchema>;
+// Composed Endpoint Schemas
+export const registerResponseSchema = apiResponseSchema(registerDataSchema);
+
+//Inferred Types
+export type RegisterResponse = z.infer<typeof registerResponseSchema>;
+
+
+
+// Login Endpoint API Type
+export const loginDataSchema = z.object({
+  user: userSchema,
+  access_token: z.string(),
+  refresh_token: z.string(),
+});
+
+
+export const loginResponseSchema = apiResponseSchema(loginDataSchema);
+
+export type LoginResponse = z.infer<typeof loginResponseSchema>;

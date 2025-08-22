@@ -12,7 +12,7 @@
     "restart": "docker-compose down && docker-compose build --no-cache && docker-compose up",
     "logs": "docker-compose logs -f",
     "clean": "rm -rf node_modules && rm -rf .turbo && rm -rf dist && rm -rf build",
-    "model": "docker exec $(docker-compose ps -q ollama) ollama pull llama-3-7B-Q4_K_M"
+    "model": "docker exec $(docker-compose ps -q ollama) ollama pull llama3:8b"
   },
   "repository": {
     "type": "git",
