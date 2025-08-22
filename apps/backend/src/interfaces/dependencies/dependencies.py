@@ -1,6 +1,7 @@
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi import Depends, HTTPException,status
 from sqlalchemy.orm import Session
+
 from ...database.database import get_DB
 from ...core.entities.user_entities import User
 from ...utils.security import SecurityManager

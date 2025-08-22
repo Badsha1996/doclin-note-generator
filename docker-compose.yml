@@ -24,7 +24,7 @@ services:
       - S3_BUCKET=doclin-storage
       - LLM_PROVIDER=ollama
       - OLLAMA_URL=http://ollama:11434
-      - OLLAMA_MODEL=llama3:8b
+      - OLLAMA_MODEL=llama-3-7B-Q4_K_M
       - VECTOR_MODEL=all-mpnet-base-v2   
       - NODE_ENV=development
       - PYTHONUNBUFFERED=1
@@ -111,6 +111,18 @@ services:
     restart: unless-stopped
     environment:
       - OLLAMA_ORIGINS=http://localhost:5173,http://localhost:8000
+      - OLLAMA_MODEL=llama3:8b
+      - OLLAMA_NUM_PREDICT=1024
+      - OLLAMA_CTX=4096
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+        limits:
+          memory: 10g
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
       interval: 30s
@@ -118,6 +130,7 @@ services:
       retries: 5
     networks:
       - app-network
+
 
   # Uncomment for GPU support
   # deploy:

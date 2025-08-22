@@ -1,9 +1,11 @@
 from typing import Optional, List
 from sqlalchemy.orm import Session
+from sqlalchemy import and_
+
+from ..models.user_models import OAuthModel, UserModel, UserRole
 from ...core.repo.user_repo import OAuthRepo, UserRepo
 from ...core.entities.user_entities import OAuthUser, User, UserCreate, UserUpdate, InternalUser
-from ..models.user_models import OAuthModel, UserModel, UserRole
-from sqlalchemy import and_
+
 class SQLUserRepo(UserRepo):
     def __init__(self, db: Session):
         self.db = db
