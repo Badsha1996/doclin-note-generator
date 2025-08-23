@@ -25,16 +25,9 @@ class Settings(BaseSettings):
     S3_ACCESS_KEY : str
     S3_SECRET_KEY : str
     S3_BUCKET : str
+    
     EMAIL:str
     GOOGLE_APP_PASSWORD:str
-
-
-    LLM_PROVIDER : str  
-    OLLAMA_URL : str
-    OLLAMA_MODEL : str
-
-    GEMINI_API_KEY : str
-    VECTOR_MODEL : str
 
     LLM_PROVIDER : str  
     OLLAMA_URL : str

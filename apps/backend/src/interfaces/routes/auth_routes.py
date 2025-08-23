@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from ..schemas.auth_schemas import RegisterSchema, LoginSchema
+from ..schemas.auth_schemas import RegisterSchema, LoginSchema, VerifySchema
 from ..schemas.response_schemas import APIResponseSchema
 from ...utils.security import SecurityManager
 from ...infrastructure.providers.auth_provider import get_oauth_manager, get_security_manager
