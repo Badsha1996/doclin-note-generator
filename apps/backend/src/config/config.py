@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     S3_ACCESS_KEY : str
     S3_SECRET_KEY : str
     S3_BUCKET : str
-    
+
     EMAIL:str
     GOOGLE_APP_PASSWORD:str
 
