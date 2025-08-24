@@ -7,6 +7,7 @@ from .interfaces.routes.auth_routes import auth_router
 from .interfaces.routes.upload_routes import upload_router
 from .interfaces.routes.llm_routes import llm_router
 from .interfaces.routes.exam_paper_routes import exam_paper_router
+from .interfaces.routes.doc_routes import doc_router
 
 
 
@@ -29,7 +30,7 @@ app.include_router(auth_router, prefix="/api")
 app.include_router(upload_router, prefix="/api")
 app.include_router(llm_router, prefix="/api")
 app.include_router(exam_paper_router, prefix="/api")
-
+app.include_router(doc_router, prefix="/api")
 
 # ROOT ROUTE
 @app.get("/")
