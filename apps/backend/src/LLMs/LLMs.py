@@ -48,8 +48,24 @@ class LLMProviderManager:
         raw_output = re.sub(r"^```(json)?", "", raw_output, flags=re.IGNORECASE).strip()
         raw_output = re.sub(r"```$", "", raw_output).strip()
         return raw_output
+    
+    def normalize_exam_json(self, data: dict) -> dict:
+        for section in data.get("sections", []):
+            for q in section.get("questions", []):
+                for sp in q.get("subparts", []):
+                    if "text" in sp and "question_text" not in sp:
+                        sp["question_text"] = sp.pop("text")
+        return data
 
-    def safe_json_parse(self, raw_output: str):
+
+    def safe_json_parse(self, raw_output):
+        # Handle LangChain AIMessage objects
+        if hasattr(raw_output, "content"):
+            raw_output = raw_output.content
+
+        if not isinstance(raw_output, str):
+            raise HTTPException(status_code=500, detail=f"Expected string output, got {type(raw_output)}")
+
         cleaned = self._clean_json_output(raw_output)
 
         try:
@@ -96,10 +112,7 @@ class LLMProviderManager:
         if self.provider == "ollama":
             return self.get_ollama()
         elif self.provider == "gemini":
-            try:
-                return self.get_gemini()
-            except Exception:
-                return self.get_ollama()
+            return self.get_gemini()
         elif self.provider == "auto":
             try:
                 return self.get_gemini()
@@ -107,4 +120,26 @@ class LLMProviderManager:
                 return self.get_ollama()
         else:
             raise HTTPException(status_code=500, detail="Invalid LLM provider")
+        
+    async def safe_generate(self, llm, **kwargs):
+        """
+        Try to call LLM. If quota exceeded or other provider error, 
+        auto-rotate Gemini model or fallback to Ollama.
+        """
+        try:
+            return await llm.ainvoke(kwargs["prompt"])
+        except Exception as e:
+            err = str(e)
+            # Gemini quota / 429 error
+            if "429" in err or "quota" in err.lower():
+                self.rotate_model()
+                if self.provider in ["gemini", "auto"]:
+                    new_llm = self.get_gemini()
+                    return await new_llm.ainvoke(kwargs["prompt"])
+                else:
+                    return await self.get_ollama().ainvoke(kwargs["prompt"])
+            # fallback to Ollama on any other Gemini errors
+            if self.provider in ["gemini", "auto"]:
+                return await self.get_ollama().ainvoke(kwargs["prompt"])
+            raise
 

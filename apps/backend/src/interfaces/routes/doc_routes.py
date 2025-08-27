@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 import requests
 
+from ..dependencies.dependencies import get_current_user
 from ..schemas.llm_schemas import FileSchema
 from ..schemas.response_schemas import APIResponseSchema
-from ..dependencies.dependencies import get_current_user
+
 from ...core.services.doc_service import DocService
 
 doc_router = APIRouter(prefix="/doc", tags=["doc"])
