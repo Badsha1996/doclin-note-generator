@@ -129,7 +129,7 @@ function NavigationMenuLink({
     <NavigationMenuPrimitive.Link
       data-slot="navigation-menu-link"
       className={cn(
-        "bg-[var(--base-bg)] rounded-full text-[var(--base-fg)] p-auto flex flex-col gap-1 px-4 py-2 text-sm transition-all outline-none",
+        "bg-[var(--base-bg)] rounded-full text-white p-auto flex flex-col gap-1 px-4 py-2 text-sm transition-all outline-none",
         className
       )}
       {...props}
