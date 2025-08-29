@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from starlette.middleware.sessions import SessionMiddleware
+
 from ..config.config import settings
 
 def setup_middleware(app: FastAPI):

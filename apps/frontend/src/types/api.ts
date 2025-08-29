@@ -19,7 +19,9 @@ export interface ApiError {
   details?: unknown;
 }
 
-// Register Endpoint API Type
+
+
+// Base User Schema
 export const userSchema = z.object({
   id: z.uuid(),
   username: z.string(),
@@ -31,12 +33,37 @@ export const userSchema = z.object({
   updated_at: z.coerce.date(),
 });
 
-export const apiResponseSchema = z.object({
-  success: z.literal(true),
-  data: z.object({
-    user: userSchema,
-  }),
-  message: z.string(),
+//  Generic API response wrapper
+export const apiResponseSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
+  z.object({
+    success: z.boolean(), // or z.literal(true) if always true
+    data: dataSchema,
+    message: z.string(),
+  });
+
+// Endpoint-specific "data" schemas
+
+// Register Endpoint API Type
+export const registerDataSchema = z.object({
+  user: userSchema,
 });
 
-export type ApiResponse = z.infer<typeof apiResponseSchema>;
+// Composed Endpoint Schemas
+export const registerResponseSchema = apiResponseSchema(registerDataSchema);
+
+//Inferred Types
+export type RegisterResponse = z.infer<typeof registerResponseSchema>;
+
+
+
+// Login Endpoint API Type
+export const loginDataSchema = z.object({
+  user: userSchema,
+  access_token: z.string(),
+  refresh_token: z.string(),
+});
+
+
+export const loginResponseSchema = apiResponseSchema(loginDataSchema);
+
+export type LoginResponse = z.infer<typeof loginResponseSchema>;

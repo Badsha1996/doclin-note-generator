@@ -1,7 +1,7 @@
+from uuid import UUID
+
 from ..entities.file_entities import File, FileUpload
 from ..repo.file_repo import FileRepo
-from fastapi import UploadFile
-from uuid import UUID
 
 class UploadService:
     def __init__(self, file_repo = FileRepo):
