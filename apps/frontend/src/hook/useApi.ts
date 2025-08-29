@@ -1,5 +1,7 @@
 import type { ApiConfig, ApiError } from "../types/api";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "");
+
 const buildUrl = (endpoint: string, queryParams?: Record<string, string | number | boolean>) => {
   if (!queryParams) return endpoint;
   const params = new URLSearchParams();
@@ -20,8 +22,12 @@ export const fetchApi = async <TResponse, TPayload = undefined>(
   if (payload && payloadSchema) {
     payloadSchema.parse(payload);
   }
-
-  const url = buildUrl(endpoint, queryParams);
+  if (!API_BASE_URL) {
+    throw new Error("API_BASE_URL is not defined. Check your .env and Vite config.");
+  }
+  const normalizedEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+  const url = buildUrl(`${API_BASE_URL}${normalizedEndpoint}`, queryParams);
+  console.log("url", url);
   const token = localStorage.getItem("token");
 
   const defaultHeaders = {
@@ -54,7 +60,6 @@ export const fetchApi = async <TResponse, TPayload = undefined>(
   if (responseSchema) {
     return responseSchema.parse(data);
   }
-
   return data;
 };
 // hooks/useApi.ts

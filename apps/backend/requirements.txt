@@ -39,6 +39,9 @@ langchain
 pgvector==0.4.1
 sentence-transformers==5.1.0
 psycopg2
+langchain_google_genai==2.1.9
+langchain-ollama==0.3.6
+json-repair==0.50.0
 
 # DEV ONLY - COMMENT THIS WHEN PUSHING TO PRODUCTION
 minio==7.2.16

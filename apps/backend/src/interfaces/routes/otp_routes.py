@@ -1,14 +1,15 @@
+from fastapi import APIRouter, Depends,HTTPException
+from sqlalchemy.orm import Session
+
 from ...utils.exceptions import AuthExceptionError
 from ...interfaces.schemas.base_schemas import APIResponseSchema
 from ...core.services.email_service import EmailService
 from ...core.services.otp_service import OTPService
 from ...infrastructure.repo.otp_repo import SQLOTPRepo
 from ...interfaces.schemas.otp_schemas import OTPGenerateSchema,OTPVerifySchema
-from fastapi import APIRouter, Depends,HTTPException
 from ...database.database import get_DB
 from ...utils.security import SecurityManager
 from ...infrastructure.providers.auth_provider import get_security_manager
-from sqlalchemy.orm import Session
 
 
 otp_router=APIRouter(prefix="/otp", tags=["otp"])

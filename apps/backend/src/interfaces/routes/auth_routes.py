@@ -1,15 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException
-from ..schemas.auth_schemas import RegisterSchema, LoginSchema,VerifySchema
-from ..schemas.base_schemas import APIResponseSchema
+from sqlalchemy.orm import Session
+
+from ..schemas.auth_schemas import RegisterSchema, LoginSchema, VerifySchema
+from ..schemas.response_schemas import APIResponseSchema
 from ...utils.security import SecurityManager
 from ...infrastructure.providers.auth_provider import get_oauth_manager, get_security_manager
-from ...infrastructure.providers.auth_provider import get_oauth_manager, get_security_manager
-from sqlalchemy.orm import Session
 from ...database.database import get_DB
 from ...infrastructure.repo.user_repo import SQLOAuthRepo, SQLUserRepo
 from ...core.services.auth_service import AuthService
 from ...utils.oauth import OAuthManager
-from ...config.config import settings
+
 
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -20,6 +20,7 @@ async def register_user(
     security_manager: SecurityManager = Depends(get_security_manager)
 ):
     try:
+        '''REGSITER POINT'''
         user_repo = SQLUserRepo(db)
         auth_service = AuthService(user_repo=user_repo,
                                    security=security_manager)
@@ -45,6 +46,7 @@ async def login_user(
     security_manager: SecurityManager = Depends(get_security_manager)
 ):
     try:
+        ''' LOG IN POINT'''
         user_repo = SQLUserRepo(db)
         auth_service = AuthService(user_repo=user_repo,
                                    security=security_manager)
@@ -73,6 +75,7 @@ async def oauthLogin(
     security_manager: SecurityManager = Depends(get_security_manager),
     oauth_manager: OAuthManager = Depends(get_oauth_manager)
 ):
+    ''' OAUTH END POINT'''
     try:
         user_repo = SQLUserRepo(db)
         oauth_repo = SQLOAuthRepo(db)
