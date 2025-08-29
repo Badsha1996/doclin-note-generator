@@ -37,10 +37,6 @@ export default function BackgroundLayout({ children }: BackgroundLayoutProps) {
   const orbX = useTransform(smoothMouseX, [0, window.innerWidth], [-60, 60]);
   const orbY = useTransform(smoothMouseY, [0, window.innerHeight], [-60, 60]);
 
-  // Transform for academic icons (medium movement with rotation)
-  const iconX = useTransform(smoothMouseX, [0, window.innerWidth], [-40, 40]);
-  const iconY = useTransform(smoothMouseY, [0, window.innerHeight], [-40, 40]);
-
   const particles = React.useMemo(
     () =>
       Array.from({ length: 50 }, (_, i) => ({
@@ -63,7 +59,7 @@ export default function BackgroundLayout({ children }: BackgroundLayoutProps) {
   return (
     <div
       onMouseMove={handleMouseMove}
-      className="fixed inset-0 perspective-1000"
+      className="relative min-h-full overflow-hidden"
       style={{ perspective: "1000px" }}
     >
       {/* Main animated gradient background with 3D rotation */}

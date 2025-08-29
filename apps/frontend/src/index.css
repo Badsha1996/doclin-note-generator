@@ -140,7 +140,7 @@
   --sidebar-ring: #818cf8;
 }
 body, html {
-  height: 100%; /* important to cover full page */
+  height: 100%; 
   margin: 0;
   background: linear-gradient(to right, #0f172a, #581c87, #1e293b);
 }
