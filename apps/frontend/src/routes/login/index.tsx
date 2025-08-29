@@ -13,11 +13,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useApiMutation } from "@/hook/useApi";
 import { toast } from "sonner";
-import BubbleBackground from "@/components/common/BubbleBackground";
+
 import { FcGoogle } from "react-icons/fc";
 import { BsMeta } from "react-icons/bs";
 import { motion } from "framer-motion";
-import doclinIcon from "@/assets/doclinIcon.png";
+
 import { fadeInUp, scaleIn, transition } from "@/lib/motion";
 
 export const Route = createFileRoute("/login/")({
@@ -83,129 +83,120 @@ function Login() {
   };
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden">
-      <BubbleBackground />
-      <div className="flex items-center justify-center h-screen p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-[#2a003f] via-[#19002a] to-[#100018]">
-        <motion.div
-          variants={scaleIn}
-          initial="initial"
-          animate="animate"
-          transition={transition}
-          className="flex justify-center items-center w-full"
-        >
-          <Card className="w-full max-w-md rounded-2xl bg-white/10 backdrop-blur-lg p-5 sm:p-6 border-none">
-            <motion.img
-              src={doclinIcon}
-              alt="Doclin Logo"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={transition}
-              className="w-16 h-16 mx-auto mb-4 object-contain"
-            />
-            <motion.h2
-              variants={fadeInUp}
-              initial="initial"
-              animate="animate"
-              transition={transition}
-              className="text-2xl sm:text-3xl font-bold mb-6 text-white text-center"
-            >
-              Login
-            </motion.h2>
+    <div className="relative w-full h-screen flex justify-center items-center overflow-hidden">
+      <motion.div
+        variants={scaleIn}
+        initial="initial"
+        animate="animate"
+        transition={transition}
+        className="flex justify-center items-center w-full"
+      >
+        <Card className="w-full max-w-md rounded-2xl bg-white/10 backdrop-blur-lg p-5 sm:p-6 border-none">
+          <motion.img
+            src="/images/doclinIcon.png"
+            alt="Doclin Logo"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={transition}
+            className="w-16 h-16 mx-auto mb-4 object-contain"
+          />
+          <motion.h2
+            variants={fadeInUp}
+            initial="initial"
+            animate="animate"
+            transition={transition}
+            className="text-2xl sm:text-3xl font-bold mb-6 text-white text-center"
+          >
+            Login
+          </motion.h2>
 
-            <CardContent className="space-y-4">
-              {/* OAuth Buttons */}
+          <CardContent className="space-y-4">
+            {/* OAuth Buttons */}
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button
+                name="google"
+                className="w-full flex items-center gap-3"
+                variant={"standOut"}
+                onClick={handleOAuth}
+              >
+                <FcGoogle size={20} />
+                <span>Sign in with Google</span>
+              </Button>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button
+                name="meta"
+                className="w-full flex items-center gap-3 text-white"
+                variant={"lavender"}
+                onClick={handleOAuth}
+              >
+                <BsMeta size={20} color="#0081FB" />
+                <span>Continue with Meta</span>
+              </Button>
+            </motion.div>
+            {!showEmailInput ? (
               <motion.div
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
                 <Button
-                  name="google"
-                  className="w-full flex items-center gap-3"
-                  variant={"standOut"}
-                  onClick={handleOAuth}
+                  variant="vibe"
+                  className="w-full text-black bg-white/90 hover:bg-white"
+                  onClick={() => setShowEmailInput(true)}
                 >
-                  <FcGoogle size={20} />
-                  <span>Sign in with Google</span>
+                  Continue with Email
                 </Button>
               </motion.div>
+            ) : (
               <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                className="space-y-3"
+                variants={fadeInUp}
+                initial="initial"
+                animate="animate"
+                transition={transition}
               >
-                <Button
-                  name="meta"
-                  className="w-full flex items-center gap-3 text-white"
-                  variant={"lavender"}
-                  onClick={handleOAuth}
-                >
-                  <BsMeta size={20} color="#0081FB" />
-                  <span>Continue with Meta</span>
-                </Button>
-              </motion.div>
-              {!showEmailInput ? (
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <Button
-                    variant="vibe"
-                    className="w-full text-black bg-white/90 hover:bg-white"
-                    onClick={() => setShowEmailInput(true)}
-                  >
-                    Continue with Email
-                  </Button>
-                </motion.div>
-              ) : (
-                <motion.div
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
                   className="space-y-3"
-                  variants={fadeInUp}
-                  initial="initial"
-                  animate="animate"
-                  transition={transition}
                 >
-                  <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-3"
+                  <Input
+                    type="text"
+                    variant="custom"
+                    placeholder="Email or Username"
+                    {...form.register("email")}
+                    className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
+                  />
+                  <Input
+                    type="password"
+                    variant="custom"
+                    placeholder="Enter your password"
+                    {...form.register("password")}
+                    className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
+                  />
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    variant="standOut"
+                    disabled={mutation.isPending}
                   >
-                    <Input
-                      type="text"
-                      variant="custom"
-                      placeholder="Email or Username"
-                      {...form.register("email")}
-                      className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
-                    />
-                    <Input
-                      type="password"
-                      variant="custom"
-                      placeholder="Enter your password"
-                      {...form.register("password")}
-                      className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
-                    />
-                    <Button
-                      type="submit"
-                      className="w-full"
-                      variant="standOut"
-                      disabled={mutation.isPending}
-                    >
-                      {mutation.isPending ? "Logging in..." : "Continue"}
-                    </Button>
-                  </form>
-                </motion.div>
-              )}
+                    {mutation.isPending ? "Logging in..." : "Continue"}
+                  </Button>
+                </form>
+              </motion.div>
+            )}
 
-              <p className="text-sm text-gray-300 mt-6 text-center">
-                Don’t have an account?{" "}
-                <Link
-                  to="/register"
-                  className="text-primary hover:underline font-medium"
-                >
-                  Register
-                </Link>
-              </p>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </div>
+            <p className="text-sm text-gray-300 mt-6 text-center">
+              Don’t have an account?{" "}
+              <Link
+                to="/register"
+                className="text-primary hover:underline font-medium"
+              >
+                Register
+              </Link>
+            </p>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   );
 }
