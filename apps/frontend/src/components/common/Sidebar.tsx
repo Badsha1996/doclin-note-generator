@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
-import { Search, X, Settings, User, Bell, BookOpen } from "lucide-react";
+import { X, BookOpen } from "lucide-react";
 import { useState, useEffect } from "react";
+import GlassDropdown from "./GlassDropdown";
 
 function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,6 +18,28 @@ function Sidebar() {
     window.addEventListener("resize", checkIsMobile);
     return () => window.removeEventListener("resize", checkIsMobile);
   }, []);
+
+  const boardOptions = [
+    { value: "", label: "Select Board" },
+    { value: "CBSE", label: "CBSE" },
+    { value: "ICSE", label: "ICSE" },
+    { value: "State", label: "State Board" },
+  ];
+
+  const subjectOptions = [
+    { value: "", label: "Select Subject" },
+    { value: "Maths", label: "Maths" },
+    { value: "Physics", label: "Physics" },
+    { value: "Chemistry", label: "Chemistry" },
+    { value: "Biology", label: "Biology" },
+  ];
+
+  const marksOptions = [
+    { value: "", label: "Select Marks" },
+    { value: "50", label: "50" },
+    { value: "80", label: "80" },
+    { value: "100", label: "100" },
+  ];
 
   return (
     <motion.div
@@ -43,60 +66,40 @@ function Sidebar() {
         </button>
       )}
 
-      {/* Search section */}
-      <div className="p-6 border-b border-white/10 relative z-10">
-        <div className="relative"></div>
-      </div>
-
       {/* Dropdown Navigation */}
       <nav className="p-5 flex-1 overflow-y-auto relative z-10">
         <ul className="space-y-4">
           {/* Board Dropdown */}
           <li>
-            <label className="text-gray-300 text-sm mb-1 block">Board</label>
-            <select
+            <GlassDropdown
+              label="Board"
               value={selectedBoard}
-              onChange={(e) => setSelectedBoard(e.target.value)}
-              className="w-full bg-white/10 text-gray-100 p-2 rounded-lg border border-white/20 focus:ring-2 focus:ring-indigo-400/40"
-            >
-              <option value="">Select Board</option>
-              <option value="CBSE">CBSE</option>
-              <option value="ICSE">ICSE</option>
-              <option value="State">State Board</option>
-            </select>
+              onChange={(value) => setSelectedBoard(String(value))}
+              options={boardOptions}
+              placeholder="Select Board"
+            />
           </li>
 
           {/* Subject Dropdown */}
           <li>
-            <label className="text-gray-300 text-sm mb-1 block">Subject</label>
-            <select
+            <GlassDropdown
+              label="Subject"
               value={selectedSubject}
-              onChange={(e) => setSelectedSubject(e.target.value)}
-              className="w-full bg-white/10 text-gray-100 p-2 rounded-lg border border-white/20 focus:ring-2 focus:ring-indigo-400/40"
-            >
-              <option value="">Select Subject</option>
-              <option value="Maths">Maths</option>
-              <option value="Physics">Physics</option>
-              <option value="Chemistry">Chemistry</option>
-              <option value="Biology">Biology</option>
-            </select>
+              onChange={(value) => setSelectedSubject(String(value))}
+              options={subjectOptions}
+              placeholder="Select Subject"
+            />
           </li>
 
           {/* Marks Dropdown */}
           <li>
-            <label className="text-gray-300 text-sm mb-1 block">
-              Total Marks
-            </label>
-            <select
+            <GlassDropdown
+              label="Total Marks"
               value={selectedMarks}
-              onChange={(e) => setSelectedMarks(e.target.value)}
-              className="w-full bg-white/10 text-gray-100 p-2 rounded-lg border border-white/20 focus:ring-2 focus:ring-indigo-400/40"
-            >
-              <option value="">Select Marks</option>
-              <option value="50">50</option>
-              <option value="80">80</option>
-              <option value="100">100</option>
-            </select>
+              onChange={(value) => setSelectedMarks(String(value))}
+              options={marksOptions}
+              placeholder="Select Marks"
+            />
           </li>
         </ul>
 

@@ -1,26 +1,23 @@
 import ConfigContent from "@/components/common/ConfigContent";
+import PageHeader from "@/components/common/PageHeader";
 import Sidebar from "@/components/common/Sidebar";
 import GlassLayout from "@/layouts/GlassLayout";
 import { createFileRoute } from "@tanstack/react-router";
+import { motion } from "framer-motion";
 
 export const Route = createFileRoute("/config/")({
-  component: RouteComponent,
+  component: ConfigComponent,
 });
 
-function RouteComponent() {
+function ConfigComponent() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="text-center">
-        <h1 className="bg-gradient-to-r from-pink-400 via-blue-500 to-purple-500 bg-clip-text text-transparent  font-extrabold text-4xl">
-          Select Configuration 
-        </h1>
-
-        <p className="text-gray-400 text-sm mt-2">
-          Select configuration details to generate accurate exam papers or study
-          notes
-        </p>
-      </div>
+      <PageHeader
+        title="Select Configuration"
+        subTitle="Select configuration details to generate accurate exam papers or study
+          notes"
+      />
 
       {/* Main Layout */}
       <GlassLayout>
