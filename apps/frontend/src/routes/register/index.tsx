@@ -7,7 +7,6 @@ import { FormSchema, type registerTypes } from "@/types/type";
 import { apiResponseSchema } from "@/types/api";
 import type { ApiError } from "@/types/api";
 import type { ApiResponse } from "@/types/api";
-import { z } from "zod";
 import { useForm } from "react-hook-form";
 import {
   Form,
@@ -84,28 +83,28 @@ export function Register() {
           className="flex w-full max-w-4xl min-h-[500px] rounded-2xl shadow-lg overflow-hidden bg-white/5 backdrop-blur-md border border-white/10"
           style={{ height: "auto" }}
         >
-          <div className="hidden lg:flex flex-col w-1/2 bg-transparent text-white p-8 lg:p-12">
+          <div className="hidden lg:flex flex-col w-1/2 bg-transparent text-white p-8 lg:p-14  items-center">
             <motion.img
               src={doclinIcon}
               alt="Doclin Icon"
               initial={{ opacity: 0, y: -30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={transitionSlow}
-              className="w-16 h-16 lg:w-20 lg:h-20 object-contain"
+              className="w-16 h-16 lg:w-60 lg:h-46 object-contain"
             />
             <div className="flex flex-col justify-center flex-1">
               <motion.h1
                 variants={fadeInLeft}
                 transition={transitionSlow}
-                className="text-3xl sm:text-4xl lg:text-5xl font-bold text-left leading-tight"
+                className="text-3xl sm:text-4xl lg:text-5xl font-bold text-center leading-tight"
               >
                 Welcome!
               </motion.h1>
-              <div className="w-10 h-[2px] bg-white/70 my-4"></div>
+              <div className="w-10 h-[2px] bg-white/70 my-4 relative left-12 "></div>
               <motion.p
                 variants={fadeInLeft}
                 transition={transition}
-                className="mb-8 text-sm sm:text-base text-white/80 text-left max-w-xs"
+                className="mb-8 text-sm sm:text-base text-white/80 text-center max-w-xs"
               >
                 Doclin app for notes and question generation
               </motion.p>
@@ -115,7 +114,7 @@ export function Register() {
               >
                 <Button
                   variant="standOut"
-                  className="px-6 py-2 w-full max-w-xs rounded-md font-semibold"
+                  className="px-6 py-2 w-full max-w-xs rounded-md font-semibold cursor-pointer"
                 >
                   Learn More
                 </Button>
@@ -225,7 +224,7 @@ export function Register() {
                     <Button
                       type="submit"
                       variant="standOut"
-                      className="w-full max-w-xs py-2 rounded-md font-semibold"
+                      className="w-full max-w py-2 rounded-md font-semibold cursor-pointer"
                       disabled={mutation.isPending}
                     >
                       {mutation.isPending ? "Registering..." : "Register"}
