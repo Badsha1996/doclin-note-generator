@@ -39,6 +39,28 @@ function Sidebar() {
     return () => window.removeEventListener("resize", checkIsMobile);
   }, []);
 
+  const boardOptions = [
+    { value: "", label: "Select Board" },
+    { value: "CBSE", label: "CBSE" },
+    { value: "ICSE", label: "ICSE" },
+    { value: "State", label: "State Board" },
+  ];
+
+  const subjectOptions = [
+    { value: "", label: "Select Subject" },
+    { value: "Maths", label: "Maths" },
+    { value: "Physics", label: "Physics" },
+    { value: "Chemistry", label: "Chemistry" },
+    { value: "Biology", label: "Biology" },
+  ];
+
+  const marksOptions = [
+    { value: "", label: "Select Marks" },
+    { value: "50", label: "50" },
+    { value: "80", label: "80" },
+    { value: "100", label: "100" },
+  ];
+
   return (
     <>
       {/* 🔑 Hamburger button for mobile */}
