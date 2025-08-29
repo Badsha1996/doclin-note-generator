@@ -5,7 +5,6 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
 } from "../ui/navigation-menu";
-import doclinIcon from "@/assets/doclinIcon.png";
 import { NAVBAR_MENU } from "@/utils/Constants";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -16,7 +15,7 @@ function Navbar() {
       <div className="flex items-center justify-between w-full px-4">
         <div className="flex items-center">
           <motion.img
-            src={doclinIcon}
+            src='images/doclinIcon.png'
             alt="Doclin Icon"
             className="w-12 h-12 lg:w-15 lg:h-15 object-contain"
           />

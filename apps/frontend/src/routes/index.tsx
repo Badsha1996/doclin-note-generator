@@ -11,7 +11,7 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   return (
-    <div className="w-screen h-screen bg-[var(--card)]">
+    <div className="">
       <Canvas
         camera={{ position: [0, 1, 3], fov: 50 }}
         shadows
