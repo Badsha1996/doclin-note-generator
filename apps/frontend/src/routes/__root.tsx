@@ -10,9 +10,13 @@ function RootComponent() {
   const router = useRouter();
   const pathname = router.state.location.pathname;
   return (
-    <BackgroundLayout>
-     {!pathname.startsWith("/login") && !pathname.startsWith("/register") && <Navbar />}
-      <Outlet />
-    </BackgroundLayout>
+    <div>
+      {!pathname.startsWith("/login") && !pathname.startsWith("/register") && (
+        <Navbar />
+      )}
+      <BackgroundLayout>
+        <Outlet />
+      </BackgroundLayout>
+    </div>
   );
 }
