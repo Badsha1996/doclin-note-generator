@@ -1,55 +1,59 @@
+import DashboardNav from "@/components/common/DashboardNav";
 import { createFileRoute } from "@tanstack/react-router";
+import {
+  BrainCircuit,
+  LayoutDashboard,
+  NotepadTextDashed,
+  ScrollText,
+  UserRound,
+} from "lucide-react";
 import { useState } from "react";
-
 export const Route = createFileRoute("/dashboard/")({
   component: Dashboard,
 });
-const data = [
-  "Dashboard",
-  "Users",
-  "Documents",
-  "Model Selection",
-  "Templates",
-];
+
 function Dashboard() {
-  const [selected, setSelected] = useState(0);
+  const data = [
+    {
+      key: "Dashboard",
+      icon: <LayoutDashboard />,
+    },
+    {
+      key: "Users",
+      icon: <UserRound />,
+    },
+    {
+      key: "Documents",
+      icon: <ScrollText />,
+    },
+    {
+      key: "Model Selection",
+      icon: <BrainCircuit />,
+    },
+    {
+      key: "Templates",
+      icon: <NotepadTextDashed />,
+    },
+  ];
+  const [selected, setSelected] = useState("Dashboard");
+  const handleChange = (option: string) => {
+    setSelected(option);
+  };
   return (
     <div className="m-4 p-2  ">
-      <div className="bg-card rounded-xl p-1 h-[calc(100svh-5rem)]">
-        <div className="bg-background  rounded-xl w-56 h-full pt-4">
-          {data.map((menu_option, idx) => (
-            <div onClick={() => setSelected(idx)} className="cursor-pointer">
-              <div
-                className={`p-2   ml-5 relative rounded-l-3xl ${
-                  idx === selected ? "bg-card " : ""
-                } `}
-              >
-                {menu_option}
-
-                {idx === selected && (
-                  <>
-                    <div className="absolute -top-2  right-0 w-2 h-2  text-card ">
-                      <svg viewBox="0 0 200 200" className="w-full h-full">
-                        <path
-                          d="M0,200 A200,200 0 0,0 200,0 L200,200 Z"
-                          fill="currentColor"
-                        />
-                      </svg>
-                    </div>
-
-                    <div className="absolute -bottom-2 right-0 w-2 h-2 text-card ">
-                      <svg viewBox="0 0 200 200" className="w-full h-full">
-                        <path
-                          d="M0,0 A200,200 0 0,1 200,200 L200,0 Z"
-                          fill="currentColor"
-                        />
-                      </svg>
-                    </div>
-                  </>
-                )}
-              </div>
+      <div className="bg-white/70 rounded-xl p-2 h-[calc(100svh-8rem)] flex gap-3">
+        <DashboardNav value={selected} onChange={handleChange} options={data} />
+        <div className="bg-gray-100 backdrop-blur-md rounded-xl grow p-4 text-slate-700 overflow-auto">
+          <div className="flex h-1/2 gap-2 flex-wrap ">
+            <div className="w-1/3 h-full grid grid-cols-2 grid-rows-2 gap-2">
+              <div className="shadow-md shadow-slate-300 rounded-md bg-white"></div>
+              <div className=" shadow-md shadow-slate-300 rounded-md bg-white"></div>
+              <div className=" shadow-md shadow-slate-300 rounded-md bg-white"></div>
+              <div className=" shadow-md shadow-slate-300 rounded-md bg-white"></div>
             </div>
-          ))}
+            <div className="grow shadow-md shadow-slate-300 rounded-md bg-white"></div>
+          </div>
+          <div className=""></div>
         </div>
       </div>
     </div>
