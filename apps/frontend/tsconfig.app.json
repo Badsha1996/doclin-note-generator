@@ -28,5 +28,5 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src", "src/routes/_authenticated/login"]
+  "include": ["src", "src/routes/_authenticated/login","types"]
 }

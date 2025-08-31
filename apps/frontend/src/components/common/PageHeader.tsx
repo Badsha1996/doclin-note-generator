@@ -14,7 +14,7 @@ function PageHeader({title, subTitle}:PageHeaderProps) {
       transition={{ duration: 0.6 }}
     >
       <motion.h1
-        className="bg-gradient-to-r from-pink-400 via-blue-500 to-purple-500 bg-clip-text text-transparent font-extrabold text-4xl"
+        className="bg-gradient-to-r from-pink-400 via-blue-500 to-purple-500 bg-clip-text text-transparent font-extrabold text-4xl py-2"
         animate={{
           backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
         }}

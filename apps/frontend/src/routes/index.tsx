@@ -5,5 +5,5 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-  return <div>Welcome hihih</div>;
+  return <div className="">Hello jouthi</div>;
 }
