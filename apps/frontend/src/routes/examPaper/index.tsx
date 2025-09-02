@@ -368,17 +368,12 @@ type ExamData = typeof dummyAPIRes.data.exam_paper;
 const ExamPaperComponent = () => {
   const examData: ExamData = dummyAPIRes.data.exam_paper;
 
-  const handleDownload = (format: "pdf" | "doc") => {
-    const filename = `${examData.subject}_${examData.year}_${examData.code}.${format}`;
-    alert(`Downloading ${filename}...`);
-  };
-
   const renderMCQ = (question: ExamData["sections"][0]["questions"][0]) => (
     <div key={question.number} className="mb-6">
       <h4 className="text-lg font-bold underline mb-3">
         Question {question.number}
       </h4>
-      {question.subparts.map((sub, idx) => (
+      {question.subparts.map((sub) => (
         <div key={sub.id} className="mb-4">
           <p className="mb-2">
             <span className="font-semibold">({sub.id})</span> {sub.question}
@@ -419,7 +414,6 @@ const ExamPaperComponent = () => {
       <div className="space-y-8">
         {/* Printable Pages */}
         <div className="print-area max-w-4xl mx-auto text-black">
-          {/* First Page */}
           <div className="exam-page">
             <div className="border-4 border-black p-6 mb-6">
               <div className="text-center">
@@ -470,27 +464,6 @@ const ExamPaperComponent = () => {
           ))}
         </div>
       </div>
-      {/* <GlassLayout>
-       
-      </GlassLayout> */}
-
-      {/* Print/PDF Styles */}
-      <style>{`
-        .exam-page {
-          page-break-after: always;
-          padding: 2rem;
-          background: white;
-        }
-        @media print {
-          body {
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-          }
-          .exam-page {
-            min-height: 297mm;
-          }
-        }
-      `}</style>
     </div>
   );
 };
