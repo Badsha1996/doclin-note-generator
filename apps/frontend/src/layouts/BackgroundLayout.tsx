@@ -10,16 +10,27 @@ export default function BackgroundLayout({ children }: BackgroundLayoutProps) {
   const mouseY = useMotionValue(0);
 
   // Create smooth spring animations for mouse movement
-  const smoothMouseX = useSpring(mouseX, { stiffness: 50, damping: 20 });
-  const smoothMouseY = useSpring(mouseY, { stiffness: 50, damping: 20 });
+  const smoothMouseX = useSpring(mouseX, { stiffness: 40, damping: 30 });
+  const smoothMouseY = useSpring(mouseY, { stiffness: 40, damping: 30 });
 
   // Create different transform ranges for various layers (parallax effect)
-  const rotateX1 = useTransform(smoothMouseY, [0, window.innerHeight], [5, -5]);
-  const rotateY1 = useTransform(smoothMouseX, [0, window.innerWidth], [-5, 5]);
-  const rotateX2 = useTransform(smoothMouseY, [0, window.innerHeight], [3, -3]);
-  const rotateY2 = useTransform(smoothMouseX, [0, window.innerWidth], [-3, 3]);
-  const rotateX3 = useTransform(smoothMouseY, [0, window.innerHeight], [8, -8]);
-  const rotateY3 = useTransform(smoothMouseX, [0, window.innerWidth], [-8, 8]);
+  // Subtle tilt values (reduced from 5–8deg to 1–2deg)
+  const rotateX1 = useTransform(
+    smoothMouseY,
+    [0, window.innerHeight],
+    [1.5, -1.5]
+  );
+  const rotateY1 = useTransform(
+    smoothMouseX,
+    [0, window.innerWidth],
+    [-1.5, 1.5]
+  );
+
+  const rotateX2 = useTransform(smoothMouseY, [0, window.innerHeight], [1, -1]);
+  const rotateY2 = useTransform(smoothMouseX, [0, window.innerWidth], [-1, 1]);
+
+  const rotateX3 = useTransform(smoothMouseY, [0, window.innerHeight], [2, -2]);
+  const rotateY3 = useTransform(smoothMouseX, [0, window.innerWidth], [-2, 2]);
 
   // Transform for particles (subtle movement)
   const particleX = useTransform(

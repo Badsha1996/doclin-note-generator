@@ -13,6 +13,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RegisterIndexRouteImport } from './routes/register/index'
 import { Route as LoginIndexRouteImport } from './routes/login/index'
+import { Route as ExamPaperIndexRouteImport } from './routes/examPaper/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as ConfigIndexRouteImport } from './routes/config/index'
 import { Route as AuthenticatedAboutRouteImport } from './routes/_authenticated/about'
@@ -36,6 +37,11 @@ const LoginIndexRoute = LoginIndexRouteImport.update({
   path: '/login/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ExamPaperIndexRoute = ExamPaperIndexRouteImport.update({
+  id: '/examPaper/',
+  path: '/examPaper/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/dashboard/',
   path: '/dashboard/',
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AuthenticatedAboutRoute
   '/config': typeof ConfigIndexRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/examPaper': typeof ExamPaperIndexRoute
   '/login': typeof LoginIndexRoute
   '/register': typeof RegisterIndexRoute
 }
@@ -65,6 +72,7 @@ export interface FileRoutesByTo {
   '/about': typeof AuthenticatedAboutRoute
   '/config': typeof ConfigIndexRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/examPaper': typeof ExamPaperIndexRoute
   '/login': typeof LoginIndexRoute
   '/register': typeof RegisterIndexRoute
 }
@@ -75,14 +83,29 @@ export interface FileRoutesById {
   '/_authenticated/about': typeof AuthenticatedAboutRoute
   '/config/': typeof ConfigIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/examPaper/': typeof ExamPaperIndexRoute
   '/login/': typeof LoginIndexRoute
   '/register/': typeof RegisterIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/config' | '/dashboard' | '/login' | '/register'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/config'
+    | '/dashboard'
+    | '/examPaper'
+    | '/login'
+    | '/register'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/config' | '/dashboard' | '/login' | '/register'
+  to:
+    | '/'
+    | '/about'
+    | '/config'
+    | '/dashboard'
+    | '/examPaper'
+    | '/login'
+    | '/register'
   id:
     | '__root__'
     | '/'
@@ -90,6 +113,7 @@ export interface FileRouteTypes {
     | '/_authenticated/about'
     | '/config/'
     | '/dashboard/'
+    | '/examPaper/'
     | '/login/'
     | '/register/'
   fileRoutesById: FileRoutesById
@@ -99,6 +123,7 @@ export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   ConfigIndexRoute: typeof ConfigIndexRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
+  ExamPaperIndexRoute: typeof ExamPaperIndexRoute
   LoginIndexRoute: typeof LoginIndexRoute
   RegisterIndexRoute: typeof RegisterIndexRoute
 }
@@ -131,6 +156,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/examPaper/': {
+      id: '/examPaper/'
+      path: '/examPaper'
+      fullPath: '/examPaper'
+      preLoaderRoute: typeof ExamPaperIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard/': {
@@ -174,6 +206,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   ConfigIndexRoute: ConfigIndexRoute,
   DashboardIndexRoute: DashboardIndexRoute,
+  ExamPaperIndexRoute: ExamPaperIndexRoute,
   LoginIndexRoute: LoginIndexRoute,
   RegisterIndexRoute: RegisterIndexRoute,
 }
