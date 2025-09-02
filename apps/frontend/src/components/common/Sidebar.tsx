@@ -1,7 +1,21 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { X, BookOpen, Menu } from "lucide-react";
+import { X, BookOpen, Menu, ChevronDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import GlassDropdown from "./GlassDropdown";
+import { Input } from "../ui/input";
+import { RiFileHistoryLine } from "react-icons/ri";
+import type { Dispatch, SetStateAction } from "react";
+
+interface SidebarProps {
+  selectedBoard: string;
+  setSelectedBoard: Dispatch<SetStateAction<string>>;
+  selectedSubject: string;
+  setSelectedSubject: Dispatch<SetStateAction<string>>;
+  selectedMarks: string;
+  setSelectedMarks: Dispatch<SetStateAction<string>>;
+  selectedDuration: string;
+  setSelectedDuration: Dispatch<SetStateAction<string>>;
+}
 
 // ************** Dummy Data ********************
 const boardOptions = [
@@ -18,14 +32,21 @@ const subjectOptions = [
   { value: "Biology", label: "Biology" },
 ];
 
-function Sidebar() {
+function Sidebar({
+  selectedBoard,
+  setSelectedBoard,
+  selectedSubject,
+  setSelectedSubject,
+  selectedMarks,
+  setSelectedMarks,
+  selectedDuration,
+  setSelectedDuration,
+}: SidebarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
   // ********************  Dropdown states *******************************
-  const [selectedBoard, setSelectedBoard] = useState("");
-  const [selectedSubject, setSelectedSubject] = useState("");
-  const [selectedMarks, setSelectedMarks] = useState("");
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const checkIsMobile = () => {
@@ -141,7 +162,7 @@ function Sidebar() {
                   <label className="text-gray-300 text-sm mb-1 block">
                     Total Marks
                   </label>
-                  <input
+                  <Input
                     type="number"
                     value={selectedMarks}
                     onChange={(e) => setSelectedMarks(e.target.value)}
@@ -151,25 +172,94 @@ function Sidebar() {
                        placeholder:text-gray-400"
                   />
                 </li>
+                <li>
+                  <label className="text-gray-300 text-sm mb-1 block">
+                    Total Duration
+                  </label>
+                  <Input
+                    type="number"
+                    value={selectedDuration}
+                    onChange={(e) => setSelectedDuration(e.target.value)}
+                    placeholder="Enter total duration"
+                    className="w-full bg-white/10 backdrop-blur-md text-gray-100 p-2 rounded-lg border border-white/20 
+                       focus:ring-2 focus:ring-indigo-400/40 hover:bg-white/20 transition-colors
+                       placeholder:text-gray-400"
+                  />
+                </li>
               </ul>
 
               {/* Previous Year Questions Section */}
               <div className="mt-8">
-                <h3 className="text-gray-200 font-medium mb-3 flex items-center">
+                <h3
+                  className="text-gray-200 font-medium mb-3 flex items-center cursor-pointer select-none"
+                  onClick={() => setOpen(!open)}
+                >
                   <BookOpen className="h-4 w-4 mr-2 text-indigo-400" />
                   Previous Year Questions
+                  <motion.span
+                    animate={{ rotate: open ? 180 : 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="ml-2"
+                  >
+                    <ChevronDown className="h-4 w-4 text-gray-400" />
+                  </motion.span>
                 </h3>
-                <ul className="space-y-2">
-                  {["2021", "2020", "2019", "2018"].map((year) => (
-                    <motion.li
-                      key={year}
-                      whileHover={{ x: 5 }}
-                      className="px-3 py-2 rounded-lg bg-white/5 text-gray-300 hover:text-white hover:bg-indigo-600/40 cursor-pointer transition"
+
+                <AnimatePresence>
+                  {open && (
+                    <motion.ul
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="space-y-2 overflow-hidden"
                     >
-                      {year} Question Paper
-                    </motion.li>
-                  ))}
-                </ul>
+                      {["2021", "2020", "2019", "2018"].map((year) => (
+                        <motion.li
+                          key={year}
+                          whileHover={{ x: 5 }}
+                          className="px-3 py-2 rounded-lg bg-white/5 text-gray-300 hover:text-white hover:bg-indigo-600/40 cursor-pointer transition"
+                        >
+                          {year} Question Paper
+                        </motion.li>
+                      ))}
+                    </motion.ul>
+                  )}
+                </AnimatePresence>
+              </div>
+              <div className="mt-8">
+                <h3 className="text-gray-200 font-medium mb-3 flex items-center">
+                  <RiFileHistoryLine className="h-4 w-4 mr-2 text-indigo-400" />
+                  Previous Generated Questions
+                  <motion.span
+                    animate={{ rotate: open ? 180 : 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="ml-2"
+                  >
+                    <ChevronDown className="h-4 w-4 text-gray-400" />
+                  </motion.span>
+                </h3>
+                <AnimatePresence>
+                  {open && (
+                    <motion.ul
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="space-y-2 overflow-hidden"
+                    >
+                      {["2021", "2020", "2019", "2018"].map((year) => (
+                        <motion.li
+                          key={year}
+                          whileHover={{ x: 5 }}
+                          className="px-3 py-2 rounded-lg bg-white/5 text-gray-300 hover:text-white hover:bg-indigo-600/40 cursor-pointer transition"
+                        >
+                          {year} Question Paper
+                        </motion.li>
+                      ))}
+                    </motion.ul>
+                  )}
+                </AnimatePresence>
               </div>
             </nav>
           </motion.div>
