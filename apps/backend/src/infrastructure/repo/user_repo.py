@@ -1,9 +1,11 @@
 from typing import Optional, List
 from sqlalchemy.orm import Session
+from sqlalchemy import and_
+
+from ..models.user_models import OAuthModel, UserModel, UserRole
 from ...core.repo.user_repo import OAuthRepo, UserRepo
 from ...core.entities.user_entities import OAuthUser, User, UserCreate, UserUpdate, InternalUser
-from ..models.user_models import OAuthModel, UserModel, UserRole
-from sqlalchemy import and_
+
 class SQLUserRepo(UserRepo):
     def __init__(self, db: Session):
         self.db = db
@@ -34,7 +36,20 @@ class SQLUserRepo(UserRepo):
         return self.db.query(UserModel).filter(UserModel.id == user_id).first()
 
     async def update_user(self, user_id: str, user_data: UserUpdate) -> Optional[User]:
-        ...
+        user = self.db.query(UserModel).filter(UserModel.id == user_id).first()
+        if not user:
+            return None 
+
+        for field, value in user_data.model_dump(exclude_unset=True).items():
+            setattr(user, field, value)
+
+        
+        self.db.add(user)
+        self.db.commit()
+        self.db.refresh(user)
+
+        return User.model_validate(user)
+
     
     async def delete_user(self, user_id: str) -> bool:
         ...
@@ -83,7 +98,7 @@ class SQLOAuthRepo(OAuthRepo):
             provider_id=oauth_user.provider_id
         )
         self.db.add(oauth_entry)
-        self.db.commit()
+        self.db.commit()    
         self.db.refresh(user)
 
         return User.model_validate(user)

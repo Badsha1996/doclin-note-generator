@@ -64,3 +64,69 @@ Thumbs.db
 
 # Optional: lock files (only if not committing them intentionally)
 # pnpm-lock.yaml
+
+
+# Node.js / pnpm
+node_modules/
+.pnpm-store/
+.npm/
+.npmrc
+.pnpm-debug.log
+.turbo/
+apps/frontend/node_modules/
+apps/frontend/.next/
+apps/frontend/.nuxt/
+apps/frontend/dist/
+apps/frontend/.turbo/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+*.egg-info/
+.eggs/
+.venv/
+venv/
+.env
+*.log
+
+# Docker
+*.pid
+*.seed
+*.bak
+*.swp
+docker-compose.override.yml
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Hugging Face / Transformers cache
+# (models are huge; use volumes instead)
+~/.cache/huggingface/
+.cache/huggingface/
+huggingface_cache/
+
+# VSCode / IDEs
+.vscode/
+.idea/
+*.iml
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Redis / Postgres / MinIO / Ollama volumes (handled by Docker volumes)
+pgdata/
+minio_data/
+ollama_data/
+redis_data/
+
+# Coverage / test
+.coverage
+coverage/
+htmlcov/
+pytest_cache/

@@ -23,3 +23,60 @@ turbo
 .git
 .DS_Store
 .env
+
+
+# Ignore Git
+.git
+.gitignore
+
+# Node.js / pnpm
+node_modules
+.pnpm-store
+.npm
+.pnpm-debug.log
+.turbo
+apps/frontend/node_modules
+apps/frontend/.next
+apps/frontend/.nuxt
+apps/frontend/dist
+apps/frontend/.turbo
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+*.egg-info/
+.eggs/
+.venv
+venv
+.env
+*.log
+
+# Hugging Face / Transformers cache
+.cache/huggingface
+huggingface_cache
+~/.cache/huggingface
+
+# Docker volumes (not needed in image)
+pgdata
+minio_data
+ollama_data
+redis_data
+
+# IDE / editor
+.vscode
+.idea
+*.iml
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Tests / coverage
+.coverage
+coverage
+htmlcov
+pytest_cache

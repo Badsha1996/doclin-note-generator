@@ -1,12 +1,12 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+
 class Settings(BaseSettings):
     # ALL the environment TYPE defination 🚒
     DATABASE_URL: str
     SECRET_KEY : str
     ALGORITHM : str
     BACKEND_CORS_ORIGINS: list = ["http://localhost:3000", "http://localhost:5173"]
-    FRONTEND_URL:str
 
     GOOGLE_CLIENT_ID:str
     GOOGLE_CLIENT_SECRET:str
@@ -26,6 +26,17 @@ class Settings(BaseSettings):
     S3_SECRET_KEY : str
     S3_BUCKET : str
 
+    EMAIL:str
+    GOOGLE_APP_PASSWORD:str
+
+    LLM_PROVIDER : str  
+    OLLAMA_URL : str
+    OLLAMA_MODEL : str
+
+    VECTOR_MODEL : str
+
+    LLM_MODELS : list[str]
+    LLM_API_KEY : str 
 
     model_config = SettingsConfigDict(env_file=".env")
 

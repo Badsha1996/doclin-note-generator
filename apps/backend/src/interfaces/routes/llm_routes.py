@@ -1,32 +1,41 @@
-from fastapi import APIRouter, HTTPException, status
-from ..schemas.upload_schemas import FileSchema
-from ..schemas.base_schemas import APIResponseSchema
-import requests
-import pdfplumber
-import io
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+
+from ..schemas.response_schemas import APIResponseSchema
+from ..schemas.llm_schemas import LLMGenQuestionSchema
+from ..dependencies.dependencies import get_current_user
+
+from ...database.database import get_DB
+from ...infrastructure.repo.llm_repo import SQLLMRepo
+from ...infrastructure.repo.exam_paper_repo import SQLExamPaperRepo
+from ...core.services.llm_service import LLMService
+
 
 llm_router = APIRouter(prefix="/llm", tags=["llm"])
 
 
-@llm_router.post('/doc-parse')
-async def doc_parse(
-    upload_data : FileSchema
+@llm_router.post('/gen-question-paper',dependencies=[Depends(get_current_user)])
+async def generate_question_paper(
+    llm_gen_data : LLMGenQuestionSchema,
+    db: Session = Depends(get_DB)
 ):
     try:
-        # Download the pdf by url 
-        response = requests.get(upload_data.url)
-      
-        if response.status_code != 200:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to download PDF")
-        
-        with pdfplumber.open(io.BytesIO(response.content)) as pdf:
-            full_text = ""
-            for page in pdf.pages:
-                full_text += page.extract_text() or ""
+        llm_repo = SQLLMRepo(db=db)
+        exam_paper_repo = SQLExamPaperRepo(db=db)
+        llm_service = LLMService(llm_repo=llm_repo, subject=llm_gen_data.subject, exam_paper_repo=exam_paper_repo)
 
-        return APIResponseSchema(success=True,
-                                 data={"parsed_text":full_text},
-                                 message="The pdf content has been extracted")
+        exam_paper = await llm_service.gen_question_paper(subject=llm_gen_data.subject,board=llm_gen_data.board,
+                                                        paper=llm_gen_data.paper,code=llm_gen_data.code,year=llm_gen_data.year)
+        return APIResponseSchema(
+            success=True,
+            data={"exam_paper":exam_paper},
+            message="Exam Paper has been fetched"
+        )
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+        import traceback
+        print("GEN PAPER ERROR:", e)
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
     
+
+        

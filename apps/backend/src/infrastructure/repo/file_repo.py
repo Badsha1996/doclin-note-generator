@@ -1,7 +1,8 @@
-from ...core.repo.file_repo import FileRepo
 from sqlalchemy.orm import Session 
-from ...core.entities.file_entities import File, FileUpload
+
 from ..models.file_models import FileModel
+from ...core.repo.file_repo import FileRepo
+from ...core.entities.file_entities import File, FileUpload
 
 
 class SQLFileRepo(FileRepo):

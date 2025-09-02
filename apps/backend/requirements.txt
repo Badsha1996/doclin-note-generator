@@ -15,7 +15,7 @@ psycopg2-binary  # PostgreSQL driver
 # Authentication and Security
 python-jose[cryptography]
 passlib[bcrypt]
-bcrypt==4.0.1  # 🔧 Pinning due to issues with newer versions (__about__ module separation)
+bcrypt==4.0.1  # 🔧 Pinning due to issues with newer versions (>4.0) (__about__ module separation)
 itsdangerous
 python-multipart  # For handling form data
 authlib  # OAuth & JWT handling
@@ -32,6 +32,17 @@ python-decouple==3.8
 # Libraries needed
 pdfplumber==0.11.7
 requests==2.32.4
+google-genai==1.29.0
+llama-cpp-python==0.3.15
+langchain_community
+langchain
+pgvector==0.4.1
+sentence-transformers==5.1.0
+psycopg2
+langchain_google_genai==2.1.9
+langchain-ollama==0.3.6
+json-repair==0.50.0
 
 # DEV ONLY - COMMENT THIS WHEN PUSHING TO PRODUCTION
 minio==7.2.16
+
