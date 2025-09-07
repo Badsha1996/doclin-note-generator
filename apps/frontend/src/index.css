@@ -91,10 +91,10 @@
   --sidebar-accent-foreground: #e2e8f0;
   --sidebar-border: rgba(99, 102, 241, 0.3);
   --sidebar-ring: #818cf8;
-  
+
   /* StandOut Gradient Colors - Modern purple to orange */
   --standout-from: #c084fc;
-  --standout-to: #fdba74;  
+  --standout-to: #fdba74;
 }
 
 .dark {
@@ -139,8 +139,24 @@
   --sidebar-border: rgba(99, 102, 241, 0.3);
   --sidebar-ring: #818cf8;
 }
-body, html {
-  height: 100%; 
+body,
+html {
+  height: 100%;
   margin: 0;
   background: linear-gradient(to right, #0f172a, #581c87, #1e293b);
+}
+
+.exam-page {
+  page-break-after: always;
+  padding: 2rem;
+  background: white;
+}
+@media print {
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .exam-page {
+    min-height: 297mm;
+  }
 }
