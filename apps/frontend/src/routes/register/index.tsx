@@ -27,6 +27,9 @@ import {
 } from "@/lib/motion";
 import { useApiMutation } from "@/hook/useApi";
 
+import { EyeClosed, Eye } from "lucide-react";
+import { useState } from "react";
+
 export const Route = createFileRoute("/register/")({
   component: Register,
 });
@@ -43,6 +46,8 @@ export function Register() {
       confirmpassword: "",
     },
   });
+const [showPassword, setShowPassword] = useState(false);
+const [confirmPassword, setConfirmPassword]=useState(false);
 
   const navigate = useNavigate();
   const mutation = useApiMutation<
@@ -69,6 +74,15 @@ export function Register() {
   function onSubmit(data: registerTypes) {
     const { confirmpassword, ...payload } = data;
     mutation.mutate(payload);
+  }
+
+  
+  function showHidePassword(){
+  setShowPassword(!showPassword)
+
+  }
+  function showHideConfirmPassword(){
+    setConfirmPassword(!confirmPassword)
   }
 
   return (
@@ -178,15 +192,21 @@ export function Register() {
                     <FormItem>
                       <FormLabel className="text-white">Password</FormLabel>
                       <FormControl>
-                        <Input
-                          type="password"
-                          variant="custom"
-                          placeholder="••••••••"
-                          {...field}
-                          className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
-                        />
+                        <div>
+                          <Input
+                            type={showPassword ? "text" : "password"}
+                            variant="custom"
+                            placeholder="••••••••"
+                            {...field}
+                            className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
+                          />
+                          <div className=" relative bottom-8 left-11/12 h-1 cursor-pointer">
+                            {showPassword ? (<Eye className=" w-3" onClick={showHidePassword}/>) : (<EyeClosed className="w-3" onClick={showHidePassword}/>)}
+
+                          </div>
+                        </div>
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage/>
                     </FormItem>
                   )}
                 />
@@ -199,13 +219,20 @@ export function Register() {
                         Confirm Password
                       </FormLabel>
                       <FormControl>
-                        <Input
-                          type="password"
-                          variant="custom"
-                          placeholder="••••••••"
-                          {...field}
-                          className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
-                        />
+                        <div>
+                          <Input
+                            type={confirmPassword ? "text":"password"}
+                            variant="custom"
+                            placeholder="••••••••"
+                            {...field}
+                            className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
+                          />
+                          <div className=" relative bottom-8 left-11/12 h-1 cursor-pointer ">
+                            
+                            {confirmPassword ? (<Eye className=" w-3" onClick={showHideConfirmPassword}/>) : (<EyeClosed className="w-3" onClick={showHideConfirmPassword}/>)}
+
+                            </div>
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
