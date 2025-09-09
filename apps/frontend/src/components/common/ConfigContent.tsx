@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { Button } from "../ui/button";
 
 interface ConfigContentProps {
   selectedBoard: string;
@@ -13,7 +14,6 @@ function ConfigContent({
   selectedMarks,
   selectedDuration,
 }: ConfigContentProps) {
-
   const year = new Date().getFullYear();
   const isCBSE = selectedBoard?.toUpperCase() === "CBSE";
   const isICSE = selectedBoard?.toUpperCase() === "ICSE";
@@ -26,21 +26,21 @@ function ConfigContent({
         transition={{ duration: 0.3 }}
         className="w-full p-6 rounded-3xl overflow-hidden"
       >
-          {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
           <div className="bg-gradient-to-br from-pink-500 via-rose-400 to-orange-400 p-2 rounded-xl border border-white/10">
-            <h2 className="text-lg font-semibold mb-2 text-white">
+            <h2 className="text-base font-medium mb-2 text-white">
               Selected Board
             </h2>
             <p className="text-white/80">{selectedBoard || "Not selected"}</p>
           </div>
           <div className="bg-gradient-to-br from-blue-500 via-indigo-500 to-sky-400 p-2 rounded-xl border border-white/10">
-            <h2 className="text-lg font-semibold mb-2 text-white">
+            <h2 className="text-base font-medium mb-2 text-white">
               Selected Subject
             </h2>
             <p className="text-white/80">{selectedSubject || "Not selected"}</p>
           </div>
           <div className="bg-gradient-to-br from-emerald-500 via-teal-500 to-green-400 p-2 rounded-xl border border-white/10">
-            <h2 className="text-lg font-semibold mb-2 text-white">
+            <h2 className="text-base font-medium mb-2 text-white">
               Total Marks
             </h2>
             <p className="text-white/80">
@@ -48,14 +48,14 @@ function ConfigContent({
             </p>
           </div>
           <div className="bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-400 p-2 rounded-xl border border-white/10">
-            <h2 className="text-lg font-semibold mb-2 text-white">
+            <h2 className="text-base font-medium mb-2 text-white">
               Total Duration
             </h2>
             <p className="text-white/80">
-              {selectedDuration ? `${selectedDuration} mins` : "Not set"}
+              {selectedDuration ? `${selectedDuration} hrs` : "Not set"}
             </p>
           </div>
-        </div> */}
+        </div>
         <div className="bg-white border border-gray-300 shadow-lg rounded-xl p-8 max-w-3xl mx-auto text-gray-800">
           {isCBSE && (
             <>
@@ -182,6 +182,9 @@ function ConfigContent({
           )}
         </div>
       </motion.div>
+      <div className="flex justify-end">
+        <Button variant="standOut">Generate</Button>
+      </div>
     </div>
   );
 }
