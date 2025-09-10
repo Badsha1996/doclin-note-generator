@@ -46,8 +46,8 @@ export function Register() {
       confirmpassword: "",
     },
   });
-const [showPassword, setShowPassword] = useState(false);
-const [confirmPassword, setConfirmPassword]=useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState(false);
 
   const navigate = useNavigate();
   const mutation = useApiMutation<
@@ -76,13 +76,11 @@ const [confirmPassword, setConfirmPassword]=useState(false);
     mutation.mutate(payload);
   }
 
-  
-  function showHidePassword(){
-  setShowPassword(!showPassword)
-
+  function showHidePassword() {
+    setShowPassword(!showPassword);
   }
-  function showHideConfirmPassword(){
-    setConfirmPassword(!confirmPassword)
+  function showHideConfirmPassword() {
+    setConfirmPassword(!confirmPassword);
   }
 
   return (
@@ -201,12 +199,21 @@ const [confirmPassword, setConfirmPassword]=useState(false);
                             className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
                           />
                           <div className=" relative bottom-8 left-11/12 h-1 cursor-pointer">
-                            {showPassword ? (<Eye className=" w-3" onClick={showHidePassword}/>) : (<EyeClosed className="w-3" onClick={showHidePassword}/>)}
-
+                            {showPassword ? (
+                              <Eye
+                                className=" w-3"
+                                onClick={showHidePassword}
+                              />
+                            ) : (
+                              <EyeClosed
+                                className="w-3"
+                                onClick={showHidePassword}
+                              />
+                            )}
                           </div>
                         </div>
                       </FormControl>
-                      <FormMessage/>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -221,17 +228,25 @@ const [confirmPassword, setConfirmPassword]=useState(false);
                       <FormControl>
                         <div>
                           <Input
-                            type={confirmPassword ? "text":"password"}
+                            type={confirmPassword ? "text" : "password"}
                             variant="custom"
                             placeholder="••••••••"
                             {...field}
                             className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
                           />
                           <div className=" relative bottom-8 left-11/12 h-1 cursor-pointer ">
-                            
-                            {confirmPassword ? (<Eye className=" w-3" onClick={showHideConfirmPassword}/>) : (<EyeClosed className="w-3" onClick={showHideConfirmPassword}/>)}
-
-                            </div>
+                            {confirmPassword ? (
+                              <Eye
+                                className=" w-3"
+                                onClick={showHideConfirmPassword}
+                              />
+                            ) : (
+                              <EyeClosed
+                                className="w-3"
+                                onClick={showHideConfirmPassword}
+                              />
+                            )}
+                          </div>
                         </div>
                       </FormControl>
                       <FormMessage />
