@@ -1,11 +1,8 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sentence_transformers import SentenceTransformer
-from sqlalchemy.orm import joinedload
 
+from ..models.exam_paper_models import ExamPaperModel, SubpartModel, QuestionModel, SectionModel
 from ...core.entities.exam_paper_entities import ExamPaperCreate, ExamPaper
-
-from ..models.exam_paper_models import ExamPaperModel,SubpartModel, QuestionModel,SectionModel
-
 from ...config.config import settings
 
 
@@ -25,9 +22,9 @@ class SQLExamPaperRepo:
                 max_marks=exam_paper_data.exam.max_marks,
                 time_allowed=exam_paper_data.exam.time_allowed,
                 instructions=exam_paper_data.exam.instructions,
+                ai_generated=exam_paper_data.exam.ai_generated,  
             )
 
-           
             subpart_texts = []
             subpart_refs = [] 
 
@@ -40,6 +37,7 @@ class SQLExamPaperRepo:
                         type=q.type,
                         marks=q.marks,
                         instruction=q.instruction,
+                        tikz=getattr(q, "tikz", None),  
                     )
 
                     for sp in q.subparts:
@@ -53,13 +51,12 @@ class SQLExamPaperRepo:
                     section.questions.append(question)
                 exam.sections.append(section)
 
-            
+            # Generate embeddings for subparts
             if subpart_texts:
                 embeddings = self.model.encode(subpart_texts, batch_size=32)
                 import numpy as np
-                embeddings = [ (e / np.linalg.norm(e)).tolist() for e in embeddings ]  # normalize
+                embeddings = [(e / np.linalg.norm(e)).tolist() for e in embeddings]  
 
-                # Map embeddings back to subparts
                 for (question, sp), emb in zip(subpart_refs, embeddings):
                     subpart = SubpartModel(
                         sub_id=sp.id,
@@ -67,6 +64,7 @@ class SQLExamPaperRepo:
                         options=getattr(sp, "options", None),
                         tags=getattr(sp, "tags", None),
                         difficulty=getattr(sp, "difficulty", None),
+                        tikz=getattr(sp, "tikz", None),  
                         embedding=emb
                     )
                     question.subparts.append(subpart)
@@ -79,7 +77,7 @@ class SQLExamPaperRepo:
             self.db.rollback()
             raise e
 
-    async def create_exam_paper_json(self, subject: str, year: int) -> ExamPaper:
+    async def get_exam_paper_json(self, subject: str, year: int) -> ExamPaper:
         exam = (
             self.db.query(ExamPaperModel)
             .options(
@@ -90,6 +88,43 @@ class SQLExamPaperRepo:
             .filter(
                 ExamPaperModel.subject == subject,
                 ExamPaperModel.year == year
+            )
+            .first()
+        )
+
+        if not exam:
+            return None
+
+        return ExamPaper.model_validate(exam)
+
+    async def get_exam_paper_boards(self) -> list[str]:
+        boards = self.db.query(ExamPaperModel.board).distinct().all()
+        return [b[0] for b in boards]
+
+    async def get_exam_paper_subjects(self) -> list[str]:
+        subjects = self.db.query(ExamPaperModel.subject).distinct().all()
+        return [s[0] for s in subjects]
+
+    async def get_exam_paper_prev_years(self, subject: str) -> list[int]:
+        years = (
+            self.db.query(ExamPaperModel.year)
+            .filter(ExamPaperModel.subject == subject, ExamPaperModel.ai_generated == False)
+            .all()
+        )
+        return [y[0] for y in years]
+
+    async def get_prev_year_exam_paper(self, subject: str, year: int) -> ExamPaper:
+        exam = (
+            self.db.query(ExamPaperModel)
+            .options(
+                joinedload(ExamPaperModel.sections)
+                .joinedload(SectionModel.questions)
+                .joinedload(QuestionModel.subparts)
+            )
+            .filter(
+                ExamPaperModel.subject == subject,
+                ExamPaperModel.year == year,
+                ExamPaperModel.ai_generated == False
             )
             .first()
         )
