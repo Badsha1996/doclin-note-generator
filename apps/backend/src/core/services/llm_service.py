@@ -27,7 +27,7 @@ class LLMService:
         if not saved:
             raise HTTPException(status_code=500, detail="Failed to save exam paper")
 
-        exam_paper = await self.exam_paper_repo.create_exam_paper_json(subject=subject, year=year)
+        exam_paper = await self.exam_paper_repo.get_exam_paper_json(subject=subject, year=year)
 
         return exam_paper.model_dump()
 

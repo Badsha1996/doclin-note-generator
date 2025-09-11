@@ -7,20 +7,20 @@ from pydantic import BaseModel, Field
 
 
 class MCQSubpart(BaseModel):
-    id: str = Field(alias="sub_id")  
-    question: str = Field(alias="question_text")  
+    id: str = Field(alias="sub_id")
+    question: str = Field(alias="question_text")
     options: List[str]
-    
+
     class Config:
         from_attributes = True
-        populate_by_name = True  
+        populate_by_name = True
 
 
 class FillReasonSubpart(BaseModel):
     id: str = Field(alias="sub_id")
     question: str = Field(alias="question_text")
     options: List[str]
-    
+
     class Config:
         from_attributes = True
         populate_by_name = True
@@ -30,11 +30,14 @@ class DiagramNumericalSubpart(BaseModel):
     id: str = Field(alias="sub_id")
     question: str = Field(alias="question_text")
     options: Optional[List[str]] = None
-    
+    tikz: Optional[str] = Field(
+        default=None,
+        description="TikZ code for the diagram (include only when diagram is required)."
+    )
+
     class Config:
         from_attributes = True
         populate_by_name = True
-
 
 
 class MCQQuestion(BaseModel):
@@ -43,6 +46,7 @@ class MCQQuestion(BaseModel):
     marks: int
     instruction: Optional[str] = None
     subparts: List[MCQSubpart]
+
     class Config:
         from_attributes = True
 
@@ -53,6 +57,7 @@ class FillReasonQuestion(BaseModel):
     marks: int
     instruction: Optional[str] = None
     subparts: List[FillReasonSubpart]
+
     class Config:
         from_attributes = True
 
@@ -63,6 +68,11 @@ class DiagramNumericalQuestion(BaseModel):
     marks: int
     instruction: Optional[str] = None
     subparts: List[DiagramNumericalSubpart]
+    tikz: Optional[str] = Field(
+        default=None,
+        description="TikZ code for the diagram at question level (use when the same diagram applies to all subparts)."
+    )
+
     class Config:
         from_attributes = True
 
@@ -77,6 +87,7 @@ class Section(BaseModel):
     name: str
     marks: int
     questions: List[Question]
+
     class Config:
         from_attributes = True
 
@@ -90,6 +101,11 @@ class ExamInfo(BaseModel):
     max_marks: int
     time_allowed: str
     instructions: List[str]
+    ai_generated: bool = Field(
+        default=False,
+        description="True if the exam was generated (or substantially produced) by an our AI"
+    )
+
     class Config:
         from_attributes = True
 
@@ -97,6 +113,7 @@ class ExamInfo(BaseModel):
 class ExamPaperCreate(BaseModel):
     exam: ExamInfo
     sections: List[Section]
+
     class Config:
         from_attributes = True
 
@@ -114,6 +131,7 @@ class ExamPaper(BaseModel):
     sections: List[Section]
     created_at: datetime
     updated_at: datetime
-    
+    ai_generated: bool
+
     class Config:
         from_attributes = True
