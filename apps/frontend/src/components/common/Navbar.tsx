@@ -48,13 +48,13 @@ function Navbar() {
           animate={{ y: 0 }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
           className={`flex items-center justify-between w-full px-4 lg:px-8 py-3 mx-4 mt-4 transition-all duration-300 ${
-            scrolled 
-              ? "bg-white/20 backdrop-blur-xl border border-white/30 shadow-2xl" 
+            scrolled
+              ? "bg-white/20 backdrop-blur-xl border border-white/30 shadow-2xl"
               : "bg-white/10 backdrop-blur-md border border-white/20 shadow-lg"
           } rounded-2xl`}
         >
           {/* Logo Section */}
-          <motion.div 
+          <motion.div
             className="flex items-center gap-3 z-50"
             whileHover={{ scale: 1.05 }}
             transition={{ type: "spring", stiffness: 400, damping: 17 }}
@@ -69,7 +69,7 @@ function Navbar() {
                 className="w-10 h-10 lg:w-12 lg:h-12 object-contain drop-shadow-lg"
               />
             </motion.div>
-            <motion.p 
+            <motion.p
               className="text-white text-xl lg:text-2xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent"
               whileHover={{ scale: 1.05 }}
             >
@@ -97,9 +97,7 @@ function Navbar() {
                         className="absolute inset-0 bg-white/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                         whileHover={{ scale: 1.05 }}
                       />
-                      <motion.div
-                        className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-purple-400 to-pink-400 group-hover:w-full group-hover:left-0 transition-all duration-300"
-                      />
+                      <motion.div className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-purple-400 to-pink-400 group-hover:w-full group-hover:left-0 transition-all duration-300" />
                     </Link>
                   </motion.div>
                 </NavigationMenuLink>
@@ -109,31 +107,13 @@ function Navbar() {
 
           {/* Desktop Action Buttons */}
           <div className="hidden lg:flex items-center gap-3">
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Button 
-                variant="snowFlake" 
-                className="relative overflow-hidden group"
-              >
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"
-                />
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button className="relative overflow-hidden group backdrop-blur-md bg-white/20 border border-white/30 text-white hover:bg-white/30 transition-all duration-300">
                 <span className="relative z-10">Login</span>
               </Button>
             </motion.div>
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Button 
-                variant="standOut"
-                className="relative overflow-hidden group shadow-lg"
-              >
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                />
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button className="relative overflow-hidden group backdrop-blur-md bg-[#e4558d]/70 border border-[#e4558d]/40 text-white hover:bg-[#e4558d]/80 shadow-lg transition-all duration-300">
                 <span className="relative z-10">Sign Up</span>
               </Button>
             </motion.div>
@@ -210,16 +190,15 @@ function Navbar() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
                 >
-                  <Button 
-                    variant="snowFlake" 
-                    className="w-full"
+                  <Button
+                    className="w-full relative overflow-hidden group backdrop-blur-md bg-white/20 border border-white/30 text-white hover:bg-white/30 transition-all duration-300"
                     onClick={closeMobileMenu}
                   >
                     Login
                   </Button>
-                  <Button 
-                    variant="standOut" 
-                    className="w-full shadow-lg"
+
+                  <Button
+                    className="w-full shadow-lg relative overflow-hidden group backdrop-blur-md bg-[#e4558d]/70 border border-[#e4558d]/40 text-white hover:bg-[#e4558d]/80 transition-all duration-300"
                     onClick={closeMobileMenu}
                   >
                     Sign Up

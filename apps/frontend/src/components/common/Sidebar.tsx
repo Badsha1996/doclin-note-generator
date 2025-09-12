@@ -15,6 +15,8 @@ interface SidebarProps {
   setSelectedMarks: Dispatch<SetStateAction<string>>;
   selectedDuration: string;
   setSelectedDuration: Dispatch<SetStateAction<string>>;
+  selectedUnit: string;
+  setSelectedUnit: Dispatch<SetStateAction<string>>;
 }
 
 // ************** Dummy Data ********************
@@ -22,6 +24,7 @@ const boardOptions = [
   { value: "", label: "Select Board" },
   { value: "CBSE", label: "CBSE" },
   { value: "ICSE", label: "ICSE" },
+  { value: "Custom", label: "Custom" },
 ];
 
 const subjectOptions = [
@@ -30,6 +33,11 @@ const subjectOptions = [
   { value: "Physics", label: "Physics" },
   { value: "Chemistry", label: "Chemistry" },
   { value: "Biology", label: "Biology" },
+];
+const timeUnit = [
+  { value: "", label: "unit" },
+  { value: "hrs", label: "hrs" },
+  { value: "mins", label: "mins" },
 ];
 
 function Sidebar({
@@ -41,12 +49,15 @@ function Sidebar({
   setSelectedMarks,
   selectedDuration,
   setSelectedDuration,
+  selectedUnit,
+  setSelectedUnit,
 }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
   // ********************  Dropdown states *******************************
   const [open, setOpen] = useState(false);
+  const [isCustom, setIsCustom] = useState(false);
 
   useEffect(() => {
     const checkIsMobile = () => {
@@ -59,28 +70,6 @@ function Sidebar({
     window.addEventListener("resize", checkIsMobile);
     return () => window.removeEventListener("resize", checkIsMobile);
   }, []);
-
-  const boardOptions = [
-    { value: "", label: "Select Board" },
-    { value: "CBSE", label: "CBSE" },
-    { value: "ICSE", label: "ICSE" },
-    { value: "State", label: "State Board" },
-  ];
-
-  const subjectOptions = [
-    { value: "", label: "Select Subject" },
-    { value: "Maths", label: "Maths" },
-    { value: "Physics", label: "Physics" },
-    { value: "Chemistry", label: "Chemistry" },
-    { value: "Biology", label: "Biology" },
-  ];
-
-  const marksOptions = [
-    { value: "", label: "Select Marks" },
-    { value: "50", label: "50" },
-    { value: "80", label: "80" },
-    { value: "100", label: "100" },
-  ];
 
   return (
     <>
@@ -139,13 +128,31 @@ function Sidebar({
                 <li>
                   <GlassDropdown
                     label="Board"
-                    value={selectedBoard}
-                    onChange={(value) => setSelectedBoard(String(value))}
+                    value={isCustom ? "" : selectedBoard}
+                    onChange={(value) => {
+                      if (value === "Custom") {
+                        setIsCustom(true);
+                        setSelectedBoard("");
+                      } else {
+                        setIsCustom(false);
+                        setSelectedBoard(String(value));
+                      }
+                    }}
                     options={boardOptions}
                     placeholder="Select Board"
                   />
-                </li>
 
+                  {isCustom && (
+                    <Input
+                      type="text"
+                      value={selectedBoard}
+                      onChange={(e) => setSelectedBoard(e.target.value)}
+                      placeholder="Enter Title"
+                      className="mt-2 w-full bg-white/10 backdrop-blur-md text-gray-100 p-2 rounded-lg border border-white/20 
+        focus:ring-2 focus:ring-indigo-400/40 hover:bg-white/20 transition-colors placeholder:text-white"
+                    />
+                  )}
+                </li>
                 {/* Subject Dropdown */}
                 <li>
                   <GlassDropdown
@@ -159,7 +166,7 @@ function Sidebar({
 
                 {/* Marks Input */}
                 <li>
-                  <label className="text-gray-300 text-sm mb-1 block">
+                  <label className="text-white text-base mb-1 block">
                     Total Marks
                   </label>
                   <Input
@@ -168,23 +175,37 @@ function Sidebar({
                     onChange={(e) => setSelectedMarks(e.target.value)}
                     placeholder="Enter total marks"
                     className="w-full bg-white/10 backdrop-blur-md text-gray-100 p-2 rounded-lg border border-white/20 
-                       focus:ring-2 focus:ring-indigo-400/40 hover:bg-white/20 transition-colors
-                       placeholder:text-gray-400"
+     focus:ring-2 focus:ring-indigo-400/40 hover:bg-white/20 transition-colors
+     placeholder:text-white
+     [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </li>
                 <li>
-                  <label className="text-gray-300 text-sm mb-1 block">
+                  <label className="text-white text-base mb-1 block">
                     Total Duration
                   </label>
-                  <Input
-                    type="number"
-                    value={selectedDuration}
-                    onChange={(e) => setSelectedDuration(e.target.value)}
-                    placeholder="Enter total duration"
-                    className="w-full bg-white/10 backdrop-blur-md text-gray-100 p-2 rounded-lg border border-white/20 
-                       focus:ring-2 focus:ring-indigo-400/40 hover:bg-white/20 transition-colors
-                       placeholder:text-gray-400"
-                  />
+                  <div className="flex flex-row items-center gap-2">
+                    <Input
+                      type="number"
+                      value={selectedDuration}
+                      onChange={(e) => setSelectedDuration(e.target.value)}
+                      placeholder="Enter total duration"
+                      className="flex-1 bg-white/10 backdrop-blur-md text-white p-5 rounded-lg border border-white/20 
+       focus:ring-2 focus:ring-indigo-400/40 hover:bg-white/20 transition-colors
+       placeholder:text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                    <div className="flex-1">
+                      <li>
+                        <GlassDropdown
+                          label=""
+                          value={selectedUnit}
+                          onChange={(value) => setSelectedUnit(String(value))}
+                          options={timeUnit}
+                          placeholder="Unit"
+                        />
+                      </li>
+                    </div>
+                  </div>
                 </li>
               </ul>
 

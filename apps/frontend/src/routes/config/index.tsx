@@ -1,10 +1,11 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useState, type SetStateAction } from "react";
+
 import ConfigContent from "@/components/common/ConfigContent";
 import PageHeader from "@/components/common/PageHeader";
 import Sidebar from "@/components/common/Sidebar";
 import GlassLayout from "@/layouts/GlassLayout";
 
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
 
 export const Route = createFileRoute("/config/")({
   component: ConfigComponent,
@@ -15,6 +16,7 @@ function ConfigComponent() {
   const [selectedSubject, setSelectedSubject] = useState("");
   const [selectedMarks, setSelectedMarks] = useState("");
   const [selectedDuration, setSelectedDuration] = useState("");
+  const [selectedUnit, setSelectedUnit] = useState("")
   return (
     <div className="space-y-8 mt-24">
       {/*************************** Header ***************************/}
@@ -35,13 +37,16 @@ function ConfigComponent() {
             selectedMarks={selectedMarks}
             setSelectedMarks={setSelectedMarks}
             selectedDuration={selectedDuration}
-            setSelectedDuration={setSelectedDuration}
-          />
+            setSelectedDuration={setSelectedDuration} 
+            selectedUnit={selectedUnit} 
+            setSelectedUnit={setSelectedUnit}
+            />
           <ConfigContent
             selectedBoard={selectedBoard}
             selectedSubject={selectedSubject}
             selectedMarks={selectedMarks}
             selectedDuration={selectedDuration}
+            selectedUnit={selectedUnit}
           />
         </div>
       </GlassLayout>
