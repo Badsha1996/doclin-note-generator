@@ -112,9 +112,13 @@ function ConfigContent({
                 </span>
               </div>
 
-              <p className="text-sm text-center text-gray-600">
-                Custom board template. Adjust instructions as needed.
-              </p>
+             <h5 className="font-bold underline mb-2">General Instructions</h5>
+              <ul className="list-decimal ml-6 text-sm space-y-1">
+                <li>All questions are compulsory.</li>
+                <li>This paper comprises four sections A, B, C, D.</li>
+                <li>Internal choices are provided in sections B and C.</li>
+                <li>Section D comprises multiple choice questions.</li>
+              </ul>
             </>
           )}
 
