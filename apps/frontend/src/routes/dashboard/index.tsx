@@ -1,9 +1,12 @@
-import DashboardNav from "@/components/common/DashboardNav";
+import DashboardNav from "@/components/dashboard/DashboardNav";
+import Model from "@/components/dashboard/Model";
+import Users from "@/components/dashboard/users";
+import PageHeader from "@/components/common/PageHeader";
+import GlassLayout from "@/layouts/GlassLayout";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   BrainCircuit,
   LayoutDashboard,
-  NotepadTextDashed,
   ScrollText,
   UserRound,
 } from "lucide-react";
@@ -30,32 +33,41 @@ function Dashboard() {
       key: "Model Selection",
       icon: <BrainCircuit />,
     },
-    {
-      key: "Templates",
-      icon: <NotepadTextDashed />,
-    },
   ];
   const [selected, setSelected] = useState("Dashboard");
   const handleChange = (option: string) => {
     setSelected(option);
   };
   return (
-    <div className="m-4 p-2  ">
-      <div className="bg-white/70 rounded-xl p-2 h-[calc(100svh-8rem)] flex gap-3">
-        <DashboardNav value={selected} onChange={handleChange} options={data} />
-        <div className="bg-gray-100 backdrop-blur-md rounded-xl grow p-4 text-slate-700 overflow-auto">
-          <div className="flex h-1/2 gap-2 flex-wrap ">
-            <div className="w-1/3 h-full grid grid-cols-2 grid-rows-2 gap-2">
-              <div className="shadow-md shadow-slate-300 rounded-md bg-white"></div>
-              <div className=" shadow-md shadow-slate-300 rounded-md bg-white"></div>
-              <div className=" shadow-md shadow-slate-300 rounded-md bg-white"></div>
-              <div className=" shadow-md shadow-slate-300 rounded-md bg-white"></div>
-            </div>
-            <div className="grow shadow-md shadow-slate-300 rounded-md bg-white"></div>
+    <div className="p-2 space-y-8">
+      <PageHeader title="Dashboard" subTitle="sub header" />
+      <GlassLayout>
+        <div className="bg-transparent rounded-xl p-2 h-[calc(100svh-8rem)] flex gap-4">
+          <DashboardNav
+            value={selected}
+            onChange={handleChange}
+            options={data}
+          />
+          <div className="bg-[linear-gradient(135deg,rgba(255,255,255,0.1)_0%,rgba(255,255,255,0.05)_50%,rgba(255,255,255,0.1)_100%)] rounded-xl grow p-4 text-slate-700 overflow-auto">
+            {selected === "Users" && <Users />}
+            {selected === "Dashboard" && (
+              <>
+                <div className="flex h-1/2 gap-2 flex-wrap ">
+                  <div className="w-1/3 h-full grid grid-cols-2 grid-rows-2 gap-2">
+                    <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl  p-4 shadow-inner shadow-purple-500/10 hover:bg-white/20 hover:shadow-xl transition-all duration-300 "></div>
+                    <div className=" bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl shadow-lg p-4  hover:bg-white/20 hover:shadow-xl transition-all duration-300"></div>
+                    <div className=" bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl shadow-lg p-4  hover:bg-white/20 hover:shadow-xl transition-all duration-300"></div>
+                    <div className=" bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl shadow-lg p-4  hover:bg-white/20 hover:shadow-xl transition-all duration-300"></div>
+                  </div>
+                  <div className="grow bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl shadow-lg p-4 hover:bg-white/20 hover:shadow-xl transition-all duration-300"></div>
+                </div>
+                <div className=""></div>
+              </>
+            )}
+            {selected === "Model Selection" && <Model />}
           </div>
-          <div className=""></div>
         </div>
-      </div>
+      </GlassLayout>
     </div>
   );
 }
