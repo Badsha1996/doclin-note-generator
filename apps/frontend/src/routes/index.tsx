@@ -169,7 +169,7 @@ function Home() {
   };
 
   return (
-    <div className="relative w-full min-h-screen overflow-hidden ">
+    <div className="relative w-full min-h-screen overflow-hidden mt-24">
       {/* Animated Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div

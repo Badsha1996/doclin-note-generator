@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from uuid import uuid4
 from sqlalchemy import (
-    Column, String, Integer, DateTime, ForeignKey, Text
+    Column, String, Integer, DateTime, ForeignKey, Text, Boolean
 )
 from sqlalchemy.dialects.postgresql import UUID, ARRAY
 from sqlalchemy.orm import relationship
@@ -23,14 +23,21 @@ class ExamPaperModel(Base):
     time_allowed = Column(String, nullable=False)
     instructions = Column(ARRAY(String), nullable=False)
 
+    ai_generated = Column(Boolean, nullable=False, default=False)
+
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    updated_at = Column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )
 
     sections = relationship(
         "SectionModel",
         back_populates="exam",
         cascade="all, delete-orphan"
     )
+
 
 class SectionModel(Base):
     __tablename__ = "sections"
@@ -47,8 +54,6 @@ class SectionModel(Base):
         cascade="all, delete-orphan"
     )
 
-   
-
 
 class QuestionModel(Base):
     __tablename__ = "questions"
@@ -60,6 +65,8 @@ class QuestionModel(Base):
     marks = Column(Integer, nullable=False)
     instruction = Column(Text, nullable=True)
 
+    tikz = Column(Text, nullable=True)
+
     section = relationship("SectionModel", back_populates="questions")
     subparts = relationship(
         "SubpartModel",
@@ -67,20 +74,19 @@ class QuestionModel(Base):
         cascade="all, delete-orphan"
     )
 
-    
-
 
 class SubpartModel(Base):
     __tablename__ = "subparts"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     question_id = Column(UUID(as_uuid=True), ForeignKey("questions.id", ondelete="CASCADE"))
-    sub_id = Column(String, nullable=False)  
+    sub_id = Column(String, nullable=False)
     question_text = Column(Text, nullable=False)
     options = Column(ARRAY(String))  
     tags = Column(ARRAY(String))  
     difficulty = Column(String, nullable=True)
     embedding = Column(Vector(768))
 
-    question = relationship("QuestionModel", back_populates="subparts")
+    tikz = Column(Text, nullable=True)
 
+    question = relationship("QuestionModel", back_populates="subparts")

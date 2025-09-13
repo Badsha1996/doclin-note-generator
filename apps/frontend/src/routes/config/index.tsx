@@ -11,7 +11,7 @@ export const Route = createFileRoute("/config/")({
 
 function ConfigComponent() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 mt-24">
       {/*************************** Header ***************************/}
       <PageHeader
         title="Select Configuration"
