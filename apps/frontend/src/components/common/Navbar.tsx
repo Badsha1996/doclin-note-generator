@@ -12,10 +12,11 @@ import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 
 function Navbar() {
+  // *********** All States ***********
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  // Handle scroll effect
+  // *********** Effects ***********
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
@@ -24,12 +25,10 @@ function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mobile menu when clicking outside or on link
   const closeMobileMenu = () => setIsOpen(false);
 
   return (
     <>
-      {/* Backdrop blur overlay for mobile menu */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -53,7 +52,6 @@ function Navbar() {
               : "bg-white/10 backdrop-blur-md border border-white/20 shadow-lg"
           } rounded-2xl`}
         >
-          {/* Logo Section */}
           <motion.div
             className="flex items-center gap-3 z-50"
             whileHover={{ scale: 1.05 }}
@@ -70,14 +68,14 @@ function Navbar() {
               />
             </motion.div>
             <motion.p
-              className="text-white text-xl lg:text-2xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent"
+              className="text-white text-xl lg:text-2xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text"
               whileHover={{ scale: 1.05 }}
             >
               Doclin
             </motion.p>
           </motion.div>
 
-          {/* Desktop Navigation */}
+          {/***************** Desktop Navigation *****************/}
           <NavigationMenuList className="hidden lg:flex flex-1 justify-center gap-8">
             {NAVBAR_MENU.map((item, index) => (
               <NavigationMenuItem key={item.href}>
@@ -105,7 +103,6 @@ function Navbar() {
             ))}
           </NavigationMenuList>
 
-          {/* Desktop Action Buttons */}
           <div className="hidden lg:flex items-center gap-3">
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button className="relative overflow-hidden group backdrop-blur-md bg-white/20 border border-white/30 text-white hover:bg-white/30 transition-all duration-300">
@@ -119,7 +116,7 @@ function Navbar() {
             </motion.div>
           </div>
 
-          {/* Mobile Menu Button */}
+          {/************** Mobile Menu Button **************/}
           <motion.button
             className="lg:hidden relative z-50 p-2 text-white"
             onClick={() => setIsOpen(!isOpen)}
@@ -152,7 +149,7 @@ function Navbar() {
           </motion.button>
         </motion.div>
 
-        {/* Mobile Navigation Menu */}
+        {/************** Mobile Navigation Menu *************/}
         <AnimatePresence>
           {isOpen && (
             <motion.div
@@ -163,7 +160,6 @@ function Navbar() {
               className="fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-white/10 backdrop-blur-xl border-l border-white/20 shadow-2xl z-40 lg:hidden"
             >
               <div className="flex flex-col h-full pt-24 px-6">
-                {/* Mobile Navigation Links */}
                 <nav className="flex flex-col gap-2 mb-8">
                   {NAVBAR_MENU.map((item, index) => (
                     <motion.div
@@ -182,8 +178,6 @@ function Navbar() {
                     </motion.div>
                   ))}
                 </nav>
-
-                {/* Mobile Action Buttons */}
                 <motion.div
                   className="flex flex-col gap-3 mt-auto mb-8"
                   initial={{ opacity: 0, y: 50 }}

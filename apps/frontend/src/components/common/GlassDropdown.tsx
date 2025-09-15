@@ -4,18 +4,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import type { Options } from "@/types/type";
 import { ChevronDown } from "lucide-react";
-
-type Option = {
-  label: string;
-  value: string | number;
-};
 
 type GlassDropdownProps = {
   label: string;
   value: string | number;
   onChange: (value: string | number) => void;
-  options: Option[];
+  options: Options[];
   placeholder?: string;
 };
 

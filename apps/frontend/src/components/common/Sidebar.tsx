@@ -1,10 +1,12 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { X, BookOpen, Menu, ChevronDown } from "lucide-react";
 import { useState, useEffect } from "react";
-import GlassDropdown from "./GlassDropdown";
-import { Input } from "../ui/input";
 import { RiFileHistoryLine } from "react-icons/ri";
+import { Input } from "../ui/input";
 import type { Dispatch, SetStateAction } from "react";
+
+import GlassDropdown from "./GlassDropdown";
+import { useApi } from "@/hook/useApi";
 
 interface SidebarProps {
   selectedBoard: string;
@@ -20,20 +22,52 @@ interface SidebarProps {
 }
 
 // ************** Dummy Data ********************
-const boardOptions = [
-  { value: "", label: "Select Board" },
-  { value: "CBSE", label: "CBSE" },
-  { value: "ICSE", label: "ICSE" },
-  { value: "Custom", label: "Custom" },
-];
+
+interface Board {
+  value: string;
+  label: string;
+}
+// Inside Sidebar component
+const {
+  data: boards = [],
+  isLoading: isLoadingBoards,
+  isError: isErrorBoards,
+} = useApi<Board[]>({
+  endpoint: "/boards",
+  method: "GET",
+});
+
+const boardOptions = [{ value: "", label: "Select Board" }, ...(boards || [])];
+const { data: subjects = [], isLoading: isLoadingSubjects } = useApi<Board[]>(
+  {
+    endpoint: "/subjects",
+    method: "GET",
+    // queryParams: { board: selectedBoard }, // assuming your API accepts ?board=CBSE
+  }
+  // {
+  //   enabled: !!selectedBoard && !isCustom, // only fetch if board selected and not custom
+  // }
+);
 
 const subjectOptions = [
   { value: "", label: "Select Subject" },
-  { value: "Maths", label: "Maths" },
-  { value: "Physics", label: "Physics" },
-  { value: "Chemistry", label: "Chemistry" },
-  { value: "Biology", label: "Biology" },
+  ...(subjects || []),
 ];
+const { data: previousPapers = [], isLoading: isLoadingPapers } = useApi<
+  { year: string; title: string }[]
+>(
+  {
+    endpoint: "/papers/previous",
+    method: "GET",
+    // queryParams: {
+    //   board: selectedBoard,
+    //   subject: selectedSubject,
+    // },
+  }
+  // {
+  //   enabled: !!selectedBoard && !!selectedSubject && open, // only fetch when section is open and filters are set
+  // }
+);
 const timeUnit = [
   { value: "", label: "unit" },
   { value: "hrs", label: "hrs" },
@@ -52,20 +86,23 @@ function Sidebar({
   selectedUnit,
   setSelectedUnit,
 }: SidebarProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  // ****************** All states ********************
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
 
-  // ********************  Dropdown states *******************************
-  const [open, setOpen] = useState(false);
-  const [isCustom, setIsCustom] = useState(false);
+  //Dropdown
+  const [open, setOpen] = useState<boolean>(false);
+  const [isCustom, setIsCustom] = useState<boolean>(false);
 
+  // ******** Functions ***************
+  const checkIsMobile = () => {
+    const mobile = window.innerWidth < 768;
+    setIsMobile(mobile);
+    if (!mobile) setIsOpen(true);
+  };
+
+  // *********** Effects ***************
   useEffect(() => {
-    const checkIsMobile = () => {
-      const mobile = window.innerWidth < 768;
-      setIsMobile(mobile);
-      if (!mobile) setIsOpen(true);
-    };
-
     checkIsMobile();
     window.addEventListener("resize", checkIsMobile);
     return () => window.removeEventListener("resize", checkIsMobile);
@@ -109,8 +146,6 @@ function Sidebar({
              rounded-r-3xl md:rounded-3xl overflow-hidden backdrop-blur-xl border border-white/10"
           >
             <div className="absolute inset-0 bg-white/10 z-0"></div>
-
-            {/* Close button for mobile */}
             {isMobile && (
               <button
                 onClick={() => setIsOpen(false)}
@@ -121,26 +156,31 @@ function Sidebar({
               </button>
             )}
 
-            {/* Dropdown Navigation */}
+            {/*************** Dropdown Navigation ***************/}
             <nav className="p-5 flex-1 overflow-y-auto relative z-10">
               <ul className="space-y-4">
-                {/* Board Dropdown */}
                 <li>
-                  <GlassDropdown
-                    label="Board"
-                    value={isCustom ? "" : selectedBoard}
-                    onChange={(value) => {
-                      if (value === "Custom") {
-                        setIsCustom(true);
-                        setSelectedBoard("");
-                      } else {
-                        setIsCustom(false);
-                        setSelectedBoard(String(value));
-                      }
-                    }}
-                    options={boardOptions}
-                    placeholder="Select Board"
-                  />
+                  {isLoadingBoards ? (
+                    <p className="text-gray-400">Loading boards...</p>
+                  ) : isErrorBoards ? (
+                    <p className="text-red-400">Failed to load boards</p>
+                  ) : (
+                    <GlassDropdown
+                      label="Board"
+                      value={isCustom ? "" : selectedBoard}
+                      onChange={(value) => {
+                        if (value === "Custom") {
+                          setIsCustom(true);
+                          setSelectedBoard("");
+                        } else {
+                          setIsCustom(false);
+                          setSelectedBoard(String(value));
+                        }
+                      }}
+                      options={boardOptions}
+                      placeholder="Select Board"
+                    />
+                  )}
 
                   {isCustom && (
                     <Input
@@ -149,22 +189,24 @@ function Sidebar({
                       onChange={(e) => setSelectedBoard(e.target.value)}
                       placeholder="Enter Title"
                       className="mt-2 w-full bg-white/10 backdrop-blur-md text-gray-100 p-2 rounded-lg border border-white/20 
-        focus:ring-2 focus:ring-indigo-400/40 hover:bg-white/20 transition-colors placeholder:text-white"
+focus:ring-2 focus:ring-indigo-400/40 hover:bg-white/20 transition-colors placeholder:text-white"
                     />
                   )}
                 </li>
-                {/* Subject Dropdown */}
                 <li>
-                  <GlassDropdown
-                    label="Subject"
-                    value={selectedSubject}
-                    onChange={(value) => setSelectedSubject(String(value))}
-                    options={subjectOptions}
-                    placeholder="Select Subject"
-                  />
+                  {isLoadingSubjects ? (
+                    <p className="text-gray-400">Loading subjects...</p>
+                  ) : (
+                    <GlassDropdown
+                      label="Subject"
+                      value={selectedSubject}
+                      onChange={(value) => setSelectedSubject(String(value))}
+                      options={subjectOptions}
+                      placeholder="Select Subject"
+                    />
+                  )}
                 </li>
 
-                {/* Marks Input */}
                 <li>
                   <label className="text-white text-base mb-1 block">
                     Total Marks
@@ -209,7 +251,7 @@ function Sidebar({
                 </li>
               </ul>
 
-              {/* Previous Year Questions Section */}
+              {/************* Previous Year Questions Section ***************/}
               <div className="mt-8">
                 <h3
                   className="text-gray-200 font-medium mb-3 flex items-center cursor-pointer select-none"
@@ -235,15 +277,21 @@ function Sidebar({
                       transition={{ duration: 0.3 }}
                       className="space-y-2 overflow-hidden"
                     >
-                      {["2021", "2020", "2019", "2018"].map((year) => (
-                        <motion.li
-                          key={year}
-                          whileHover={{ x: 5 }}
-                          className="px-3 py-2 rounded-lg bg-white/5 text-gray-300 hover:text-white hover:bg-indigo-600/40 cursor-pointer transition"
-                        >
-                          {year} Question Paper
-                        </motion.li>
-                      ))}
+                      {isLoadingPapers ? (
+                        <p className="px-3 py-2 text-gray-400">
+                          Loading papers...
+                        </p>
+                      ) : (
+                        previousPapers.map((paper) => (
+                          <motion.li
+                            key={paper.year}
+                            whileHover={{ x: 5 }}
+                            className="px-3 py-2 rounded-lg bg-white/5 text-gray-300 hover:text-white hover:bg-indigo-600/40 cursor-pointer transition"
+                          >
+                            {paper.title || `${paper.year} Question Paper`}
+                          </motion.li>
+                        ))
+                      )}
                     </motion.ul>
                   )}
                 </AnimatePresence>

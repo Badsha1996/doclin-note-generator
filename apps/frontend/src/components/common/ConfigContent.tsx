@@ -31,8 +31,7 @@ function ConfigContent({
         className="w-full p-6 rounded-3xl overflow-hidden"
       >
         <div className="bg-white border border-gray-300 shadow-lg rounded-xl p-8 max-w-3xl mx-auto text-gray-800">
-
-          {/* CBSE Template */}
+          {/************* CBSE Template **************/}
           {isCBSE && (
             <>
               <h2 className="text-center font-bold text-lg uppercase">CBSE</h2>
@@ -61,7 +60,7 @@ function ConfigContent({
             </>
           )}
 
-          {/* ICSE Template */}
+          {/*************** ICSE Template *******************/}
           {isICSE && (
             <>
               <h2 className="text-center font-bold text-xl uppercase">
@@ -72,27 +71,32 @@ function ConfigContent({
               </h3>
 
               <div className="text-center text-sm mb-4">
-                <p className="italic">Maximum Marks: {selectedMarks || "___"}</p>
+                <p className="italic">
+                  Maximum Marks: {selectedMarks || "___"}
+                </p>
                 <p className="italic font-medium">
                   Time allowed: {selectedDuration || "___"} {selectedUnit || ""}
                 </p>
                 <p className="text-sm italic mb-2">
-                  Answers to this Paper must be written on the paper provided separately.
+                  Answers to this Paper must be written on the paper provided
+                  separately.
                 </p>
                 <p className="text-sm italic mb-2">
-                  You will <span className="font-bold">not</span> be allowed to write during first 15 minutes.
+                  You will <span className="font-bold">not</span> be allowed to
+                  write during first 15 minutes.
                 </p>
                 <p className="text-sm italic mb-4">
                   This time is to be spent in reading the question paper.
                 </p>
                 <p className="text-sm italic font-semibold mb-4 pb-2 border-b border-gray-400">
-                  The time given at the head of this Paper is the time allowed for writing the answers.
+                  The time given at the head of this Paper is the time allowed
+                  for writing the answers.
                 </p>
               </div>
             </>
           )}
 
-          {/* Custom Board Template */}
+          {/*************** Custom Board Template *****************/}
           {isCustom && (
             <>
               <h2 className="text-center font-bold text-lg uppercase">
@@ -112,7 +116,7 @@ function ConfigContent({
                 </span>
               </div>
 
-             <h5 className="font-bold underline mb-2">General Instructions</h5>
+              <h5 className="font-bold underline mb-2">General Instructions</h5>
               <ul className="list-decimal ml-6 text-sm space-y-1">
                 <li>All questions are compulsory.</li>
                 <li>This paper comprises four sections A, B, C, D.</li>
@@ -122,7 +126,7 @@ function ConfigContent({
             </>
           )}
 
-          {/* Default Message */}
+          {/************* Default Message **************/}
           {!selectedBoard && (
             <p className="text-center text-gray-500">
               Select a board to preview its template.

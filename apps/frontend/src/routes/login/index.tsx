@@ -25,7 +25,11 @@ export const Route = createFileRoute("/login/")({
 });
 
 function Login() {
+  const router = useRouter();
+  // *************** All States **************
   const [showEmailInput, setShowEmailInput] = useState(false);
+
+  // ********** Hooks *************
   const form = useForm<loginTypes>({
     resolver: zodResolver(LoginFormSchema),
     defaultValues: {
@@ -34,7 +38,7 @@ function Login() {
     },
   });
 
-  const router = useRouter();
+  // *********** API Hook **************
   const mutation = useApiMutation<LoginResponse, loginTypes>(
     {
       endpoint: "/auth/login",
@@ -53,6 +57,7 @@ function Login() {
     }
   );
 
+  // ********** Functions ***********
   function onSubmit(data: loginTypes) {
     console.log("Submitting:", data);
     mutation.mutate(data);
@@ -111,7 +116,7 @@ function Login() {
           </motion.h2>
 
           <CardContent className="space-y-4">
-            {/* OAuth Buttons */}
+            {/*************** OAuth Buttons ***************/}
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button
                 name="google"
