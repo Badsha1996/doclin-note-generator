@@ -4,7 +4,6 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from json_repair import repair_json  
 import json
 import re
-import aiohttp
 
 from ..config.config import settings
 
@@ -17,30 +16,7 @@ class LLMProviderManager:
         self.gemini_api_key = settings.LLM_API_KEY
         self.gemini_models = settings.LLM_MODELS
         self.current_model_index = 0
-
-    async def stream_ollama(self, prompt: str):
-            """Stream output from Ollama in chunks."""
-            url = f"{self.ollama_url}/api/generate"
-            headers = {"Content-Type": "application/json"}
-            payload = {
-                "model": self.ollama_model,
-                "prompt": prompt,
-                "stream": True
-            }
-
-            async with aiohttp.ClientSession() as session:
-                async with session.post(url, headers=headers, json=payload) as resp:
-                    async for line in resp.content:
-                        if not line:
-                            continue
-                        try:
-                            data = json.loads(line.decode("utf-8"))
-                            if "response" in data:
-                                yield data["response"]  # stream token chunk
-                            if data.get("done", False):
-                                break
-                        except Exception:
-                            continue      
+    
 
     def _clean_json_output(self, raw_output: str) -> str:
         """Remove markdown fences and trim whitespace."""

@@ -15,3 +15,9 @@ class GetExamPaperSchema(BaseModel):
     year : int
     class Config:
         from_attributes = True
+
+class GetExamPaperYearsSchema(BaseModel):
+    subject: str
+    class Config:
+        from_attributes = True
+
