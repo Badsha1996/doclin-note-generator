@@ -30,9 +30,9 @@ class DiagramNumericalSubpart(BaseModel):
     id: str = Field(alias="sub_id")
     question: str = Field(alias="question_text")
     options: Optional[List[str]] = None
-    tikz: Optional[str] = Field(
+    figure: Optional[str] = Field(
         default=None,
-        description="TikZ code for the diagram (include only when diagram is required)."
+        description="include only when diagram is required"
     )
 
     class Config:
@@ -68,9 +68,9 @@ class DiagramNumericalQuestion(BaseModel):
     marks: int
     instruction: Optional[str] = None
     subparts: List[DiagramNumericalSubpart]
-    tikz: Optional[str] = Field(
+    figure: Optional[str] = Field(
         default=None,
-        description="TikZ code for the diagram at question level (use when the same diagram applies to all subparts)."
+        description="include only when diagram is required"
     )
 
     class Config:

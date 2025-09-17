@@ -65,7 +65,7 @@ class QuestionModel(Base):
     marks = Column(Integer, nullable=False)
     instruction = Column(Text, nullable=True)
 
-    tikz = Column(Text, nullable=True)
+    figure = Column(Text, nullable=True)
 
     section = relationship("SectionModel", back_populates="questions")
     subparts = relationship(
@@ -87,6 +87,6 @@ class SubpartModel(Base):
     difficulty = Column(String, nullable=True)
     embedding = Column(Vector(768))
 
-    tikz = Column(Text, nullable=True)
+    figure = Column(Text, nullable=True)
 
     question = relationship("QuestionModel", back_populates="subparts")

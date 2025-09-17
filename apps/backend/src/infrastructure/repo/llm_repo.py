@@ -1,11 +1,12 @@
 from sqlalchemy.orm import Session
 from sentence_transformers import SentenceTransformer
+
 from ...config.config import settings
 from ...LLMs.LLMs import LLMProviderManager
 from ...infrastructure.models.exam_paper_models import SubpartModel
 from ...core.entities.exam_paper_entities import ExamInfo, ExamPaperCreate
 from ...prompts.ICSE_questions import QUESTION_PAPER_PROMPT
-from string import Template
+
 
 
 embedding_model = SentenceTransformer(settings.VECTOR_MODEL)
