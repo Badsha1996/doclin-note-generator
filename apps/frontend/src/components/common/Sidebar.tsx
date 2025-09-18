@@ -7,7 +7,9 @@ import type { Dispatch, SetStateAction } from "react";
 
 import GlassDropdown from "./GlassDropdown";
 import { useApi } from "@/hook/useApi";
+import { boardResponseSchema, subjectResponseSchema } from "@/types/api";
 
+// ************** Props ********************
 interface SidebarProps {
   selectedBoard: string;
   setSelectedBoard: Dispatch<SetStateAction<string>>;
@@ -21,53 +23,7 @@ interface SidebarProps {
   setSelectedUnit: Dispatch<SetStateAction<string>>;
 }
 
-// ************** Dummy Data ********************
-
-interface Board {
-  value: string;
-  label: string;
-}
-// Inside Sidebar component
-const {
-  data: boards = [],
-  isLoading: isLoadingBoards,
-  isError: isErrorBoards,
-} = useApi<Board[]>({
-  endpoint: "/boards",
-  method: "GET",
-});
-
-const boardOptions = [{ value: "", label: "Select Board" }, ...(boards || [])];
-const { data: subjects = [], isLoading: isLoadingSubjects } = useApi<Board[]>(
-  {
-    endpoint: "/subjects",
-    method: "GET",
-    // queryParams: { board: selectedBoard }, // assuming your API accepts ?board=CBSE
-  }
-  // {
-  //   enabled: !!selectedBoard && !isCustom, // only fetch if board selected and not custom
-  // }
-);
-
-const subjectOptions = [
-  { value: "", label: "Select Subject" },
-  ...(subjects || []),
-];
-const { data: previousPapers = [], isLoading: isLoadingPapers } = useApi<
-  { year: string; title: string }[]
->(
-  {
-    endpoint: "/papers/previous",
-    method: "GET",
-    // queryParams: {
-    //   board: selectedBoard,
-    //   subject: selectedSubject,
-    // },
-  }
-  // {
-  //   enabled: !!selectedBoard && !!selectedSubject && open, // only fetch when section is open and filters are set
-  // }
-);
+// *************** Dummy Data *********************
 const timeUnit = [
   { value: "", label: "unit" },
   { value: "hrs", label: "hrs" },
@@ -94,6 +50,43 @@ function Sidebar({
   const [open, setOpen] = useState<boolean>(false);
   const [isCustom, setIsCustom] = useState<boolean>(false);
 
+  // ***************** API Hook Calls *****************
+  const {
+    data: subjectData,
+    isLoading: isSubjectsLoading,
+    isError: isSubjectsError,
+    error: subjectsError,
+  } = useApi({
+    endpoint: "/exam-paper/get/subjects",
+    method: "GET",
+    responseSchema: subjectResponseSchema,
+  });
+
+  const subjectOptions = subjectData?.data.exam_subjects ?? [];
+
+  const {
+    data: boardData,
+    isLoading: isBoardsLoading,
+    isError: isBoardsError,
+    error: boardsError,
+  } = useApi({
+    endpoint: "/exam-paper/get/boards",
+    method: "GET",
+    responseSchema: boardResponseSchema,
+  });
+
+  const boardOptions = boardData?.data.exam_boards ?? [];
+
+  const {
+    data: previousPapers = [],
+    isLoading: isLoadingPapers,
+    isError: isPapersError,
+    error: papersError,
+  } = useApi<{ year: string; title: string }[]>({
+    endpoint: "/papers/previous",
+    method: "GET",
+  });
+
   // ******** Functions ***************
   const checkIsMobile = () => {
     const mobile = window.innerWidth < 768;
@@ -107,6 +100,13 @@ function Sidebar({
     window.addEventListener("resize", checkIsMobile);
     return () => window.removeEventListener("resize", checkIsMobile);
   }, []);
+
+  // *********** Skeleton Loader ***********
+  const Skeleton = ({ className }: { className?: string }) => (
+    <div
+      className={`animate-pulse rounded-lg bg-white/10 backdrop-blur-md ${className}`}
+    />
+  );
 
   return (
     <>
@@ -159,11 +159,14 @@ function Sidebar({
             {/*************** Dropdown Navigation ***************/}
             <nav className="p-5 flex-1 overflow-y-auto relative z-10">
               <ul className="space-y-4">
+                {/* Board */}
                 <li>
-                  {isLoadingBoards ? (
-                    <p className="text-gray-400">Loading boards...</p>
-                  ) : isErrorBoards ? (
-                    <p className="text-red-400">Failed to load boards</p>
+                  {isBoardsLoading ? (
+                    <Skeleton className="h-10 w-full" />
+                  ) : isBoardsError ? (
+                    <p className="text-red-400 text-sm">
+                      {boardsError?.message || "Failed to load boards"}
+                    </p>
                   ) : (
                     <GlassDropdown
                       label="Board"
@@ -189,13 +192,19 @@ function Sidebar({
                       onChange={(e) => setSelectedBoard(e.target.value)}
                       placeholder="Enter Title"
                       className="mt-2 w-full bg-white/10 backdrop-blur-md text-gray-100 p-2 rounded-lg border border-white/20 
-focus:ring-2 focus:ring-indigo-400/40 hover:bg-white/20 transition-colors placeholder:text-white"
+                      focus:ring-2 focus:ring-indigo-400/40 hover:bg-white/20 transition-colors placeholder:text-white"
                     />
                   )}
                 </li>
+
+                {/* Subject */}
                 <li>
-                  {isLoadingSubjects ? (
-                    <p className="text-gray-400">Loading subjects...</p>
+                  {isSubjectsLoading ? (
+                    <Skeleton className="h-10 w-full" />
+                  ) : isSubjectsError ? (
+                    <p className="text-red-400 text-sm">
+                      {subjectsError?.message || "Failed to load subjects"}
+                    </p>
                   ) : (
                     <GlassDropdown
                       label="Subject"
@@ -207,6 +216,7 @@ focus:ring-2 focus:ring-indigo-400/40 hover:bg-white/20 transition-colors placeh
                   )}
                 </li>
 
+                {/* Marks */}
                 <li>
                   <label className="text-white text-base mb-1 block">
                     Total Marks
@@ -217,11 +227,13 @@ focus:ring-2 focus:ring-indigo-400/40 hover:bg-white/20 transition-colors placeh
                     onChange={(e) => setSelectedMarks(e.target.value)}
                     placeholder="Enter total marks"
                     className="w-full bg-white/10 backdrop-blur-md text-gray-100 p-2 rounded-lg border border-white/20 
-     focus:ring-2 focus:ring-indigo-400/40 hover:bg-white/20 transition-colors
-     placeholder:text-white
-     [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    focus:ring-2 focus:ring-indigo-400/40 hover:bg-white/20 transition-colors
+                    placeholder:text-white
+                    [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </li>
+
+                {/* Duration */}
                 <li>
                   <label className="text-white text-base mb-1 block">
                     Total Duration
@@ -233,19 +245,17 @@ focus:ring-2 focus:ring-indigo-400/40 hover:bg-white/20 transition-colors placeh
                       onChange={(e) => setSelectedDuration(e.target.value)}
                       placeholder="Enter total duration"
                       className="flex-1 bg-white/10 backdrop-blur-md text-white p-5 rounded-lg border border-white/20 
-       focus:ring-2 focus:ring-indigo-400/40 hover:bg-white/20 transition-colors
-       placeholder:text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      focus:ring-2 focus:ring-indigo-400/40 hover:bg-white/20 transition-colors
+                      placeholder:text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                     <div className="flex-1">
-                      <li>
-                        <GlassDropdown
-                          label=""
-                          value={selectedUnit}
-                          onChange={(value) => setSelectedUnit(String(value))}
-                          options={timeUnit}
-                          placeholder="Unit"
-                        />
-                      </li>
+                      <GlassDropdown
+                        label=""
+                        value={selectedUnit}
+                        onChange={(value) => setSelectedUnit(String(value))}
+                        options={timeUnit}
+                        placeholder="Unit"
+                      />
                     </div>
                   </div>
                 </li>
@@ -278,8 +288,14 @@ focus:ring-2 focus:ring-indigo-400/40 hover:bg-white/20 transition-colors placeh
                       className="space-y-2 overflow-hidden"
                     >
                       {isLoadingPapers ? (
-                        <p className="px-3 py-2 text-gray-400">
-                          Loading papers...
+                        <>
+                          <Skeleton className="h-6 w-full" />
+                          <Skeleton className="h-6 w-3/4" />
+                        </>
+                      ) : isPapersError ? (
+                        <p className="px-3 py-2 text-red-400 text-sm">
+                          {papersError?.message ||
+                            "Failed to load previous papers"}
                         </p>
                       ) : (
                         previousPapers.map((paper) => (
@@ -296,39 +312,23 @@ focus:ring-2 focus:ring-indigo-400/40 hover:bg-white/20 transition-colors placeh
                   )}
                 </AnimatePresence>
               </div>
+
+              {/* Previous Generated Questions */}
               <div className="mt-8">
                 <h3 className="text-gray-200 font-medium mb-3 flex items-center">
                   <RiFileHistoryLine className="h-4 w-4 mr-2 text-indigo-400" />
                   Previous Generated Questions
-                  <motion.span
-                    animate={{ rotate: open ? 180 : 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="ml-2"
-                  >
-                    <ChevronDown className="h-4 w-4 text-gray-400" />
-                  </motion.span>
                 </h3>
-                <AnimatePresence>
-                  {open && (
-                    <motion.ul
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="space-y-2 overflow-hidden"
+                <ul className="space-y-2">
+                  {["2021", "2020", "2019", "2018"].map((year) => (
+                    <li
+                      key={year}
+                      className="px-3 py-2 rounded-lg bg-white/5 text-gray-300 hover:text-white hover:bg-indigo-600/40 cursor-pointer transition"
                     >
-                      {["2021", "2020", "2019", "2018"].map((year) => (
-                        <motion.li
-                          key={year}
-                          whileHover={{ x: 5 }}
-                          className="px-3 py-2 rounded-lg bg-white/5 text-gray-300 hover:text-white hover:bg-indigo-600/40 cursor-pointer transition"
-                        >
-                          {year} Question Paper
-                        </motion.li>
-                      ))}
-                    </motion.ul>
-                  )}
-                </AnimatePresence>
+                      {year} Question Paper
+                    </li>
+                  ))}
+                </ul>
               </div>
             </nav>
           </motion.div>

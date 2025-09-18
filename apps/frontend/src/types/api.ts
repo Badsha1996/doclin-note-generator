@@ -1,15 +1,12 @@
 import { z } from "zod";
 
-export interface ApiConfig<
-  TResponse,
-  TPayload = undefined
-> {
+export interface ApiConfig<TResponse, TPayload = undefined> {
   endpoint: string;
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   headers?: Record<string, string>;
   queryParams?: Record<string, string | number | boolean>;
   payload?: TPayload;
-  responseSchema?: z.ZodSchema<TResponse>; 
+  responseSchema?: z.ZodSchema<TResponse>;
   payloadSchema?: z.ZodSchema<TPayload>;
 }
 
@@ -18,8 +15,6 @@ export interface ApiError {
   status?: number;
   details?: unknown;
 }
-
-
 
 // Base User Schema
 export const userSchema = z.object({
@@ -54,8 +49,6 @@ export const registerResponseSchema = apiResponseSchema(registerDataSchema);
 //Inferred Types
 export type RegisterResponse = z.infer<typeof registerResponseSchema>;
 
-
-
 // Login Endpoint API Type
 export const loginDataSchema = z.object({
   user: userSchema,
@@ -63,7 +56,28 @@ export const loginDataSchema = z.object({
   refresh_token: z.string(),
 });
 
-
 export const loginResponseSchema = apiResponseSchema(loginDataSchema);
 
 export type LoginResponse = z.infer<typeof loginResponseSchema>;
+
+// Subject EndPoint Schema
+export const subjectBoardSchema = z.object({
+  value: z.string(),
+  label: z.string(),
+});
+
+export const subjectResponseSchema = apiResponseSchema(
+  z.object({
+    exam_subjects: z.array(subjectBoardSchema),
+  })
+);
+
+export type SubjectResponse = z.infer<typeof subjectResponseSchema>;
+
+export const boardResponseSchema = apiResponseSchema(
+  z.object({
+    exam_boards: z.array(subjectBoardSchema),
+  })
+);
+
+export type boardResponse = z.infer<typeof boardResponseSchema>;
