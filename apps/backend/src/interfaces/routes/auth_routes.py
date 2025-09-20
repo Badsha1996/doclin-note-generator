@@ -47,6 +47,7 @@ async def login_user(
 ):
     try:
         ''' LOG IN POINT'''
+        
         user_repo = SQLUserRepo(db)
         auth_service = AuthService(user_repo=user_repo,
                                    security=security_manager)

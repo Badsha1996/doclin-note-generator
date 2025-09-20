@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from ..schemas.response_schemas import APIResponseSchema
 from ..schemas.llm_schemas import LLMGenQuestionSchema
-from ..dependencies.dependencies import get_current_user
+from ..dependencies.dependencies import get_current_user,admin_or_super_admin_only
 
 from ...database.database import get_DB
 from ...infrastructure.repo.llm_repo import SQLLMRepo
@@ -26,6 +26,7 @@ async def generate_question_paper(
 
         exam_paper = await llm_service.gen_question_paper(subject=llm_gen_data.subject,board=llm_gen_data.board,
                                                         paper=llm_gen_data.paper,code=llm_gen_data.code,year=llm_gen_data.year)
+        
         return APIResponseSchema(
             success=True,
             data={"exam_paper":exam_paper},
@@ -38,4 +39,6 @@ async def generate_question_paper(
         raise HTTPException(status_code=500, detail=str(e))
     
 
-        
+@llm_router.post("model-change",dependencies=[Depends(admin_or_super_admin_only)])   
+async def change_model():
+    return True

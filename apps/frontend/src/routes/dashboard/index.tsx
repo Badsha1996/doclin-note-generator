@@ -1,16 +1,17 @@
 import DashboardNav from "@/components/dashboard/DashboardNav";
-import Model from "@/components/dashboard/Model";
-import Users from "@/components/dashboard/users";
+import Model from "@/components/dashboard/Modelmanagement";
+import UserManagement from "@/components/dashboard/UserManagement";
 import PageHeader from "@/components/common/PageHeader";
 import GlassLayout from "@/layouts/GlassLayout";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   BrainCircuit,
   LayoutDashboard,
-  ScrollText,
+  FileText,
   UserRound,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Syllabus from "@/components/dashboard/SyllabusManagement";
 export const Route = createFileRoute("/dashboard/")({
   component: Dashboard,
 });
@@ -26,8 +27,8 @@ function Dashboard() {
       icon: <UserRound />,
     },
     {
-      key: "Documents",
-      icon: <ScrollText />,
+      key: "Exam Papers",
+      icon: <FileText />,
     },
     {
       key: "Model Selection",
@@ -35,6 +36,14 @@ function Dashboard() {
     },
   ];
   const [selected, setSelected] = useState("Dashboard");
+
+  useEffect(() => {
+    localStorage.setItem(
+      "token",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYTQ4MjU2ODQtZGNlNy00YWVkLWI4NTUtNTg3OWE5MTgyZWU0IiwiZW1haWwiOiJhbmlydWRoYXByYWRoYW40MDNAZ21haWwuY29tIiwicm9sZSI6ImFkbWluIiwidXNlcm5hbWUiOiJBbmlydWRoYSBELiBQcmFkaGFuIiwiZXhwIjoxNzU4Mzk1MzYxfQ.z0iu0fMlevkOTqEFpmivamjiKbsw01KIba9yiT4_zK0"
+    );
+  }, []);
+
   const handleChange = (option: string) => {
     setSelected(option);
   };
@@ -49,7 +58,7 @@ function Dashboard() {
             options={data}
           />
           <div className="bg-[linear-gradient(135deg,rgba(255,255,255,0.1)_0%,rgba(255,255,255,0.05)_50%,rgba(255,255,255,0.1)_100%)] rounded-xl grow p-4 text-slate-700 overflow-auto">
-            {selected === "Users" && <Users />}
+            {selected === "Users" && <UserManagement />}
             {selected === "Dashboard" && (
               <>
                 <div className="flex h-1/2 gap-2 flex-wrap ">
@@ -65,6 +74,7 @@ function Dashboard() {
               </>
             )}
             {selected === "Model Selection" && <Model />}
+            {selected === "Exam Papers" && <Syllabus />}
           </div>
         </div>
       </GlassLayout>

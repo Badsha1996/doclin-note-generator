@@ -1,41 +1,22 @@
-import { Button } from "@/components/ui/button";
 import { chartData, models } from "@/lib/data";
-import { motion } from "framer-motion";
 import { useState } from "react";
 import {
-  LineChart,
-  Line,
   XAxis,
-  YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
   AreaChart,
   Area,
 } from "recharts";
 
 import {
-  Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  Card,
 } from "@/components/ui/card";
-const chartConfig = {
-  visitors: {
-    label: "Visitors",
-  },
-  desktop: {
-    label: "Desktop",
-    color: "var(--primary)",
-  },
-  mobile: {
-    label: "Mobile",
-    color: "var(--primary)",
-  },
-} satisfies ChartConfig;
+
 function Model() {
   const [timeRange, setTimeRange] = useState("90d");
   const filteredData = chartData.filter((item) => {
@@ -53,15 +34,6 @@ function Model() {
   });
   return (
     <div className="">
-      <div className="flex px-6">
-        <Button
-          variant="standOut"
-          className="relative overflow-hidden group shadow-lg ml-auto"
-        >
-          <motion.div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          <span className="relative z-10">Add New Model</span>
-        </Button>
-      </div>
       <div className="space-y-8 p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {models.map((m) => (

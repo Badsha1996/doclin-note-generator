@@ -1,13 +1,18 @@
+from uuid import UUID
 from datetime import datetime
 from enum import Enum
 from typing import Optional
 from pydantic import BaseModel
-from uuid import UUID
 
 
 class UserRole(str,Enum):
     USER = "user"
     ADMIN = "admin"
+    SUPER_ADMIN = "superAdmin"
+
+class UserPlan(str,Enum):
+    free="free"
+
 
 class OAuthProvider(str,Enum):
     GOOGLE='google'
@@ -19,10 +24,13 @@ class User(BaseModel):
     # email:EmailStr 
     email:str
     role: UserRole
-    is_active: bool
     is_verified: bool
+    plan:UserPlan
+    blocked:bool
+    model_hit_count:int
     created_at: datetime
     updated_at: datetime
+
 
     # This is important as this will allow us to use SQLalchemy objects 
     class Config:
@@ -40,16 +48,24 @@ class UserCreate(BaseModel):
     password : str
     role: UserRole = UserRole.USER
 
+class UserCreateByAdmin(BaseModel):
+    username: str
+    # email:EmailStr 
+    email:str
+    password : str
+    role: UserRole = UserRole.USER
+    is_verified:bool
 
 class UserUpdate(BaseModel):
     # email: Optional[EmailStr] = None
     email: Optional[str] = None
     username: Optional[str] = None
-    is_active: Optional[bool] = None
+    blocked: Optional[bool] = None
     is_verified: Optional[bool] = None
     role: Optional[UserRole] = None
+    
 
-# we need oAuth class
+
 
 class OAuthUser(BaseModel):
     email:str

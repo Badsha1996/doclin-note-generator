@@ -37,4 +37,10 @@ def admin_only(current_user: User = Depends(get_current_user)) -> User:
         )
     return current_user
 
-    
+def admin_or_super_admin_only(current_user: User = Depends(get_current_user)) -> User:
+    if  current_user.role not in ["admin","superAdmin"]:
+        raise   HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admins or Super admins only"
+        )
+    return current_user

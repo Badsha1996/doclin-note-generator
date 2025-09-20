@@ -23,8 +23,23 @@ class SQLUserRepo(UserRepo):
 
         return User.model_validate(db_user)
 
+    async def create_user_by_admin(self, user_data):
+        db_user = UserModel(
+            email = user_data.email,
+            username = user_data.username,
+            hash_password = user_data.password,
+            role = user_data.role,
+            is_verified=user_data.is_verified
+        ) 
+        self.db.add(db_user)
+        self.db.commit()
+        self.db.refresh(db_user)
+
+        return User.model_validate(db_user)
+    
+    
     async def get_all_user(self,skip: int, limit: int = 100 )-> List[User]:
-        ...
+        return self.db.query(UserModel).offset(skip).limit(limit).all()
     
     async def get_user_by_email(self, email: str) -> Optional[InternalUser]:
         return self.db.query(UserModel).filter(UserModel.email == email).first()
@@ -52,7 +67,13 @@ class SQLUserRepo(UserRepo):
 
     
     async def delete_user(self, user_id: str) -> bool:
-        ...
+        user = self.db.query(UserModel).filter(UserModel.id == user_id).first()
+        if not user:
+            return False
+
+        self.db.delete(user)
+        self.db.commit()
+        return True
 
 
 class SQLOAuthRepo(OAuthRepo):
