@@ -1,11 +1,12 @@
 from fastapi import HTTPException
+
 from typing import List
 from datetime import datetime, timezone
 from ...core.repo.user_repo import UserRepo
 from ...interfaces.schemas.user_schemas import UserRoleChangeSchema
 from ...utils.security import SecurityManager
 from ...utils.exceptions import ConflictException, NotFoundExceptionError, ValidationExceptionError
-from ...core.entities.user_entities import User, UserCreate, UserCreateByAdmin, UserRole, UserUpdate
+from ...core.entities.user_entities import User, UserCreate, UserCreateByAdmin, UserKPI, UserRole, UserUpdate
 
 
 class UserService:
@@ -80,35 +81,9 @@ class UserService:
         return True
 
 
-    async def get_kpi(self):
-        now = datetime.now(timezone.utc)
-        current_year = now.year
-        current_month = now.month
-
-        if current_month == 1:
-            last_month = 12
-            last_month_year = current_year - 1
-        else:
-            last_month = current_month - 1
-            last_month_year = current_year
-
-        users= await self.get_all_user()
-
-        users_this_month_count = users_last_month_count = total_blobked_user=subscribed_users= 0
-
-        for user in users:
-            if user.plan !='free':
-                subscribed_users+=1
-            if user.blocked:
-                total_users+=1
-            if user.created_at.year == current_year and user.created_at.month == current_month:
-                users_this_month_count += 1
-            elif user.created_at.year == last_month_year and user.created_at.month == last_month:
-                users_last_month_count += 1
-
+    async def get_kpi(self)->UserKPI:
+        return await self.user_repo.get_kpi()
         
-
-        return users
 
     async def verify_user(self,id:str)->bool:
 

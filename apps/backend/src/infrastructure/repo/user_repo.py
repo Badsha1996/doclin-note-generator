@@ -1,10 +1,12 @@
+
+import calendar
 from typing import Optional, List
 from sqlalchemy.orm import Session
-from sqlalchemy import and_
-
+from sqlalchemy import and_, func, extract, case
+from datetime import datetime, timezone
 from ..models.user_models import OAuthModel, UserModel, UserRole
 from ...core.repo.user_repo import OAuthRepo, UserRepo
-from ...core.entities.user_entities import OAuthUser, User, UserCreate, UserUpdate, InternalUser
+from ...core.entities.user_entities import OAuthUser, User, UserCreate, UserKPI, UserUpdate, InternalUser
 
 class SQLUserRepo(UserRepo):
     def __init__(self, db: Session):
@@ -74,6 +76,55 @@ class SQLUserRepo(UserRepo):
         self.db.delete(user)
         self.db.commit()
         return True
+
+    async def get_kpi(self) -> UserKPI:
+        now = datetime.now(timezone.utc)
+        current_year = now.year
+        current_month = now.month
+
+        monthly_counts = (
+            self.db.query(
+                extract('month', UserModel.created_at).label('month'),
+                func.count().label('count')
+            )
+            .filter(extract('year', UserModel.created_at) == current_year)
+            .group_by('month')
+            .order_by('month')
+            .all()
+        )
+
+        trend = {calendar.month_abbr[m]: 0 for m in range(1, 13)}
+        for month, count in monthly_counts:
+            trend[calendar.month_abbr[int(month)]] = count
+
+        stats = (
+            self.db.query(
+                func.count(UserModel.id).label('total_users'),
+                func.sum(case((UserModel.plan != 'free', 1), else_=0)).label('paid_users'),
+                func.sum(case((UserModel.blocked == True, 1), else_=0)).label('blocked_users'),
+                func.sum(
+                    case(
+                        (
+                            (extract('year', UserModel.created_at) == current_year) &
+                            (extract('month', UserModel.created_at) == current_month),
+                            1
+                        ),
+                        else_=0
+                    )
+                ).label('new_users')
+            )
+            .one()
+        )
+
+        return UserKPI(
+            total_users=stats.total_users or 0,
+            paid_users=stats.paid_users or 0,
+            blocked_users=stats.blocked_users or 0,
+            new_users=stats.new_users or 0,
+            trend=trend
+        )
+
+
 
 
 class SQLOAuthRepo(OAuthRepo):

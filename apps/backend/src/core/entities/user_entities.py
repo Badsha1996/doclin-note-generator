@@ -63,7 +63,14 @@ class UserUpdate(BaseModel):
     blocked: Optional[bool] = None
     is_verified: Optional[bool] = None
     role: Optional[UserRole] = None
-    
+
+
+class UserKPI(BaseModel):
+    total_users:int
+    blocked_users:int
+    paid_users:int
+    new_users:int
+    trend:dict[str, int]
 
 
 

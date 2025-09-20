@@ -37,14 +37,17 @@ async def get_all_user(
 @user_router.get("/kpi",dependencies=[Depends(admin_or_super_admin_only)])
 async def get_kpi(
     db: Session = Depends(get_DB),
-    current_user: User = Depends(get_current_user),
     security_manager:SecurityManager = Depends(get_security_manager)
 ):
     try:
         user_repo = SQLUserRepo(db)
         user_service= UserService(user_repo,security_manager)
-        kpis=await user_service.get_kpi()
-        return kpis
+        kpi=await user_service.get_kpi()
+        return APIResponseSchema(
+            success=True,
+            message="KPIs fetched successfully",
+            data={"totalUsers":kpi.total_users,"newUsers":kpi.new_users,"blockedUser":kpi.blocked_users,"paidUsers":kpi.paid_users,"trend":kpi.trend}
+        )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 

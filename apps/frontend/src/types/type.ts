@@ -74,12 +74,10 @@ const FillReasoningQuestion = QuestionBase.extend({
 
 const DiagramNumericalQuestion = QuestionBase.extend({
   type: z.literal("Diagram-based + Numericals"),
-  // question-level optional tikz as in your sample
   tikz: z.string().optional(),
   subparts: z.array(SubpartWithMaybeTikz).min(1),
 });
 
-/* discriminated union of question types */
 const Question = z.discriminatedUnion("type", [
   MCQQuestion,
   FillReasoningQuestion,
