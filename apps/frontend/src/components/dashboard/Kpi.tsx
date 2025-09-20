@@ -143,7 +143,7 @@ function Kpi() {
       <div className="grid grid-cols-4 gap-4 my-6">
         <div className="col-span-1 rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 shadow-lg p-4 flex flex-col justify-between">
           <h2 className="text-lg font-semibold text-white mb-2">User Status</h2>
-          <ResponsiveContainer width="100%" height={120}>
+          <ResponsiveContainer width="100%" height={200}>
             <PieChart>
               <defs>
                 <linearGradient id="activeGradient" x1="0" y1="0" x2="1" y2="1">
@@ -160,7 +160,6 @@ function Kpi() {
                   <stop offset="0%" stopColor="rgba(253, 164, 175, 0.9)" />
                   <stop offset="100%" stopColor="rgba(239, 68, 68, 0.7)" />
                 </linearGradient>
-                {/* Optional glow */}
                 <filter
                   id="shadow"
                   x="-50%"
@@ -179,9 +178,7 @@ function Kpi() {
               <Pie
                 data={pieData}
                 cx="50%"
-                cy="100%"
-                startAngle={180}
-                endAngle={0}
+                cy="50%"
                 innerRadius={50}
                 outerRadius={70}
                 paddingAngle={5}
@@ -200,7 +197,7 @@ function Kpi() {
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold text-white">User Trend</h2>
               </div>
-              <ResponsiveContainer width="100%" height={120}>
+              <ResponsiveContainer width="100%" height={200}>
                 <LineChart data={kpi.trend}>
                   <XAxis dataKey="month" stroke="white" />
                   <YAxis stroke="white" />

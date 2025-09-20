@@ -46,7 +46,7 @@ async def get_kpi(
         return APIResponseSchema(
             success=True,
             message="KPIs fetched successfully",
-            data={"totalUsers":kpi.total_users,"newUsers":kpi.new_users,"blockedUser":kpi.blocked_users,"paidUsers":kpi.paid_users,"trend":kpi.trend}
+            data={"totalUsers":kpi.total_users,"newUsers":kpi.new_users,"blockedUsers":kpi.blocked_users,"paidUsers":kpi.paid_users,"trend":kpi.trend}
         )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
