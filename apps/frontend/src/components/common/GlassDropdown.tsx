@@ -4,18 +4,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import type { Options } from "@/types/type";
 import { ChevronDown } from "lucide-react";
-
-type Option = {
-  label: string;
-  value: string | number;
-};
 
 type GlassDropdownProps = {
   label: string;
   value: string | number;
   onChange: (value: string | number) => void;
-  options: Option[];
+  options: Options[];
   placeholder?: string;
 };
 
@@ -30,14 +26,14 @@ function GlassDropdown({
 
   return (
     <div>
-      <label className="text-gray-300 text-sm mb-1 block">{label}</label>
+      <label className="text-white text-base mb-1 block">{label}</label>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button
-            className="w-full bg-white/10 backdrop-blur-md text-gray-100 p-2 rounded-lg border border-white/20 
+            className="w-full bg-white/10 backdrop-blur-md text-white p-2 rounded-lg border border-white/20 
                      focus:ring-2 focus:ring-indigo-400/40 flex items-center justify-between hover:bg-white/20 transition-colors"
           >
-            <span className={value ? "text-gray-100" : "text-gray-400"}>
+            <span className={value ? "text-white" : "text-white text-sm"}>
               {selectedOption?.label || placeholder}
             </span>
             <ChevronDown className="h-4 w-4" />
@@ -52,7 +48,7 @@ function GlassDropdown({
             <DropdownMenuItem
               key={option.value}
               onClick={() => onChange(option.value)}
-              className="text-gray-100 hover:bg-white/20 focus:bg-white/20 rounded-md cursor-pointer
+              className="text-white hover:bg-white/20 focus:bg-white/20 rounded-md cursor-pointer
                        transition-colors duration-200"
             >
               {option.label}

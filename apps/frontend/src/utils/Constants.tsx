@@ -8,12 +8,7 @@ export const NAVBAR_MENU: NavbarMenuData[] = [
     desc: "",
   },
   {
-    title: "Solution",
-    href: "",
-    desc: "",
-  },
-  {
-    title: "Contact",
+    title: "Product",
     href: "",
     desc: "",
   },
