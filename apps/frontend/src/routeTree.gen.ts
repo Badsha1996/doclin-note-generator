@@ -16,7 +16,8 @@ import { Route as LoginIndexRouteImport } from './routes/login/index'
 import { Route as ExamPaperIndexRouteImport } from './routes/examPaper/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as ConfigIndexRouteImport } from './routes/config/index'
-import { Route as AuthenticatedAboutRouteImport } from './routes/_authenticated/about'
+import { Route as AboutIndexRouteImport } from './routes/about/index'
+import { Route as AuthenticatedTestRouteImport } from './routes/_authenticated/test'
 
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
@@ -52,15 +53,21 @@ const ConfigIndexRoute = ConfigIndexRouteImport.update({
   path: '/config/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedAboutRoute = AuthenticatedAboutRouteImport.update({
-  id: '/about',
-  path: '/about',
+const AboutIndexRoute = AboutIndexRouteImport.update({
+  id: '/about/',
+  path: '/about/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedTestRoute = AuthenticatedTestRouteImport.update({
+  id: '/test',
+  path: '/test',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/about': typeof AuthenticatedAboutRoute
+  '/test': typeof AuthenticatedTestRoute
+  '/about': typeof AboutIndexRoute
   '/config': typeof ConfigIndexRoute
   '/dashboard': typeof DashboardIndexRoute
   '/examPaper': typeof ExamPaperIndexRoute
@@ -69,7 +76,8 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/about': typeof AuthenticatedAboutRoute
+  '/test': typeof AuthenticatedTestRoute
+  '/about': typeof AboutIndexRoute
   '/config': typeof ConfigIndexRoute
   '/dashboard': typeof DashboardIndexRoute
   '/examPaper': typeof ExamPaperIndexRoute
@@ -80,7 +88,8 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
-  '/_authenticated/about': typeof AuthenticatedAboutRoute
+  '/_authenticated/test': typeof AuthenticatedTestRoute
+  '/about/': typeof AboutIndexRoute
   '/config/': typeof ConfigIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/examPaper/': typeof ExamPaperIndexRoute
@@ -91,6 +100,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/test'
     | '/about'
     | '/config'
     | '/dashboard'
@@ -100,6 +110,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/test'
     | '/about'
     | '/config'
     | '/dashboard'
@@ -110,7 +121,8 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
-    | '/_authenticated/about'
+    | '/_authenticated/test'
+    | '/about/'
     | '/config/'
     | '/dashboard/'
     | '/examPaper/'
@@ -121,6 +133,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  AboutIndexRoute: typeof AboutIndexRoute
   ConfigIndexRoute: typeof ConfigIndexRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
   ExamPaperIndexRoute: typeof ExamPaperIndexRoute
@@ -179,22 +192,29 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConfigIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/about': {
-      id: '/_authenticated/about'
+    '/about/': {
+      id: '/about/'
       path: '/about'
       fullPath: '/about'
-      preLoaderRoute: typeof AuthenticatedAboutRouteImport
+      preLoaderRoute: typeof AboutIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/test': {
+      id: '/_authenticated/test'
+      path: '/test'
+      fullPath: '/test'
+      preLoaderRoute: typeof AuthenticatedTestRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
   }
 }
 
 interface AuthenticatedRouteChildren {
-  AuthenticatedAboutRoute: typeof AuthenticatedAboutRoute
+  AuthenticatedTestRoute: typeof AuthenticatedTestRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
-  AuthenticatedAboutRoute: AuthenticatedAboutRoute,
+  AuthenticatedTestRoute: AuthenticatedTestRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
@@ -204,6 +224,7 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  AboutIndexRoute: AboutIndexRoute,
   ConfigIndexRoute: ConfigIndexRoute,
   DashboardIndexRoute: DashboardIndexRoute,
   ExamPaperIndexRoute: ExamPaperIndexRoute,
