@@ -1,12 +1,12 @@
 import DashboardNav from "@/components/dashboard/DashboardNav";
-import Model from "@/components/dashboard/Modelmanagement";
+import Model from "@/components/dashboard/ModelManagement";
 import UserManagement from "@/components/dashboard/UserManagement";
 import PageHeader from "@/components/common/PageHeader";
 import GlassLayout from "@/layouts/GlassLayout";
 import { createFileRoute } from "@tanstack/react-router";
 import {
-  BrainCircuit,
-  LayoutDashboard,
+  // BrainCircuit,
+  // LayoutDashboard,
   FileText,
   UserRound,
 } from "lucide-react";
@@ -18,10 +18,10 @@ export const Route = createFileRoute("/dashboard/")({
 
 function Dashboard() {
   const data = [
-    {
-      key: "Dashboard",
-      icon: <LayoutDashboard />,
-    },
+    // {
+    //   key: "Dashboard",
+    //   icon: <LayoutDashboard />,
+    // },
     {
       key: "Users",
       icon: <UserRound />,
@@ -30,19 +30,12 @@ function Dashboard() {
       key: "Exam Papers",
       icon: <FileText />,
     },
-    {
-      key: "Model Selection",
-      icon: <BrainCircuit />,
-    },
+    // {
+    //   key: "Model Selection",
+    //   icon: <BrainCircuit />,
+    // },
   ];
-  const [selected, setSelected] = useState("Dashboard");
-
-  useEffect(() => {
-    localStorage.setItem(
-      "token",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYTQ4MjU2ODQtZGNlNy00YWVkLWI4NTUtNTg3OWE5MTgyZWU0IiwiZW1haWwiOiJhbmlydWRoYXByYWRoYW40MDNAZ21haWwuY29tIiwicm9sZSI6ImFkbWluIiwidXNlcm5hbWUiOiJBbmlydWRoYSBELiBQcmFkaGFuIiwiZXhwIjoxNzU4Mzk1MzYxfQ.z0iu0fMlevkOTqEFpmivamjiKbsw01KIba9yiT4_zK0"
-    );
-  }, []);
+  const [selected, setSelected] = useState("Users");
 
   const handleChange = (option: string) => {
     setSelected(option);

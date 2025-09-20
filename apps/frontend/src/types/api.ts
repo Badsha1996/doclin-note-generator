@@ -61,7 +61,7 @@ export const loginDataSchema = z.object({
 export const loginResponseSchema = apiResponseSchema(loginDataSchema);
 
 export type LoginResponse = z.infer<typeof loginResponseSchema>;
-
+//all use end point
 export const allUserDataSchema = z.object({
   users: z.array(userSchema),
 });
@@ -94,3 +94,16 @@ export const boardResponseSchema = apiResponseSchema(
 );
 
 export type boardResponse = z.infer<typeof boardResponseSchema>;
+
+// KPI end point
+export const userKpiDataSchema = z.object({
+  totalUsers: z.number(),
+  blockedUsers: z.number(),
+  paidUsers: z.number(),
+  newUsers: z.number(),
+  trend: z.array(z.record(z.string(), z.number())),
+});
+
+export const userKpiResponseSchema = apiResponseSchema(userKpiDataSchema);
+
+export type UserKPIResponse = z.infer<typeof userKpiResponseSchema>;

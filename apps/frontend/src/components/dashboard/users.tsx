@@ -45,7 +45,7 @@ function Users() {
     },
   });
   const { data, isLoading, isError, refetch } = useApi<AllUserResponse>({
-    endpoint: "/user/all", // replace with your endpoint
+    endpoint: "/user/all",
     method: "GET",
     queryParams: {
       skip: 0,
@@ -238,19 +238,6 @@ function Users() {
       </div>
       <div className="w-full ">
         <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-lg p-6">
-          {/* <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold text-white">Users</h2>
-            <select
-              value={showActive}
-              onChange={(e) => setShowActive(e.target.value)}
-              className="bg-white/20 text-white border border-white/30 rounded-lg px-3 py-1 outline-none backdrop-blur-md"
-            >
-              <option value="all">All</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
-          </div> */}
-
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>

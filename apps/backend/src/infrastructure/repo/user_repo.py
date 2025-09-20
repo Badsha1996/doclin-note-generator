@@ -87,15 +87,16 @@ class SQLUserRepo(UserRepo):
                 extract('month', UserModel.created_at).label('month'),
                 func.count().label('count')
             )
-            .filter(extract('year', UserModel.created_at) == current_year)
             .group_by('month')
             .order_by('month')
             .all()
         )
-
-        trend = {calendar.month_abbr[m]: 0 for m in range(1, 13)}
+        trend_dict = {calendar.month_abbr[m]: 0 for m in range(1, 13)}
         for month, count in monthly_counts:
-            trend[calendar.month_abbr[int(month)]] = count
+            trend_dict[calendar.month_abbr[int(month)]] = count
+
+        trend = [{"month":m,"users":count} for m, count in trend_dict.items()]
+       
 
         stats = (
             self.db.query(

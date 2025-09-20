@@ -1,7 +1,7 @@
 from uuid import UUID
 from datetime import datetime
 from enum import Enum
-from typing import Optional
+from typing import Optional,List,Dict, Union
 from pydantic import BaseModel
 
 
@@ -70,7 +70,7 @@ class UserKPI(BaseModel):
     blocked_users:int
     paid_users:int
     new_users:int
-    trend:dict[str, int]
+    trend:List[Dict[str, Union[str, int]]]
 
 
 
