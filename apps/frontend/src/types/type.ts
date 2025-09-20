@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// Register File Types
+// **************** Register File Types ****************
 export const FormSchema = z
   .object({
     username: z.string().min(2, "Username must be at least 2 characters."),
@@ -15,13 +15,22 @@ export const FormSchema = z
 
 export type registerTypes = z.infer<typeof FormSchema>;
 
-// Login File Types
+// **************** Login File Types ****************
 export const LoginFormSchema = z.object({
   email: z.email("Please enter a valid email"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 export type loginTypes = z.infer<typeof LoginFormSchema>;
+
+// **************** GlassDropdown File Types ****************
+
+export const OptionSchema = z.object({
+  label: z.string(),
+  value: z.union([z.string(), z.number()]),
+});
+
+export type Options = z.infer<typeof OptionSchema>;
 
 // exam  file upload  types
 

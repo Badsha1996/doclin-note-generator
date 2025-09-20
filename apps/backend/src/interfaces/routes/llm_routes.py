@@ -30,7 +30,7 @@ async def generate_question_paper(
         return APIResponseSchema(
             success=True,
             data={"exam_paper":exam_paper},
-            message="Exam Paper has been fetched"
+            message="Exam Paper has been generated"
         )
     except Exception as e:
         import traceback

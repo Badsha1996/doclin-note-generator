@@ -72,3 +72,25 @@ export type AllUserResponse = z.infer<typeof allUserResponseSchema>;
 
 export const examPaperUploadSchema = apiResponseSchema(z.null());
 export type ExamPaperUploadResponse = z.infer<typeof examPaperUploadSchema>;
+
+// Subject EndPoint Schema
+export const subjectBoardSchema = z.object({
+  value: z.string(),
+  label: z.string(),
+});
+
+export const subjectResponseSchema = apiResponseSchema(
+  z.object({
+    exam_subjects: z.array(subjectBoardSchema),
+  })
+);
+
+export type SubjectResponse = z.infer<typeof subjectResponseSchema>;
+
+export const boardResponseSchema = apiResponseSchema(
+  z.object({
+    exam_boards: z.array(subjectBoardSchema),
+  })
+);
+
+export type boardResponse = z.infer<typeof boardResponseSchema>;

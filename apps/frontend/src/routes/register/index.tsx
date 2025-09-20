@@ -27,6 +27,9 @@ import {
 } from "@/lib/motion";
 import { useApiMutation } from "@/hook/useApi";
 
+import { EyeClosed, Eye } from "lucide-react";
+import { useState } from "react";
+
 export const Route = createFileRoute("/register/")({
   component: Register,
 });
@@ -43,6 +46,8 @@ export function Register() {
       confirmpassword: "",
     },
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState(false);
 
   const navigate = useNavigate();
   const mutation = useApiMutation<
@@ -71,6 +76,13 @@ export function Register() {
     mutation.mutate(payload);
   }
 
+  function showHidePassword() {
+    setShowPassword(!showPassword);
+  }
+  function showHideConfirmPassword() {
+    setConfirmPassword(!confirmPassword);
+  }
+
   return (
     <div className="relative w-full h-screen flex justify-center items-center overflow-hidden">
       <motion.div
@@ -82,14 +94,14 @@ export function Register() {
         className="flex w-full max-w-4xl min-h-[500px] rounded-2xl shadow-lg overflow-hidden bg-white/5 backdrop-blur-md border border-white/10"
         style={{ height: "auto" }}
       >
-        <div className="hidden lg:flex flex-col w-1/2 bg-transparent text-white p-8 lg:p-12">
+        <div className="hidden lg:flex flex-col w-1/2 bg-transparent text-white p-8 lg:p-14  items-center">
           <motion.img
             src="/images/doclinIcon.png"
             alt="Doclin Icon"
             initial={{ opacity: 0, y: -30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={transitionSlow}
-            className="w-16 h-16 lg:w-20 lg:h-20 object-contain"
+            className="w-16 h-16 lg:w-60 lg:h-46 object-contain"
           />
           <div className="flex flex-col justify-center flex-1">
             <motion.h1
@@ -99,7 +111,7 @@ export function Register() {
             >
               Welcome!
             </motion.h1>
-            <div className="w-10 h-[2px] bg-white/70 my-4"></div>
+            <div className="w-10 h-[2px] bg-white/70 my-4 "></div>
             <motion.p
               variants={fadeInLeft}
               transition={transition}
@@ -110,7 +122,7 @@ export function Register() {
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
               <Button
                 variant="standOut"
-                className="px-6 py-2 w-full max-w-xs rounded-md font-semibold"
+                className="px-6 py-2 w-full max-w-xs rounded-md font-semibold cursor-pointer"
               >
                 Learn More
               </Button>
@@ -178,13 +190,28 @@ export function Register() {
                     <FormItem>
                       <FormLabel className="text-white">Password</FormLabel>
                       <FormControl>
-                        <Input
-                          type="password"
-                          variant="custom"
-                          placeholder="••••••••"
-                          {...field}
-                          className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
-                        />
+                        <div>
+                          <Input
+                            type={showPassword ? "text" : "password"}
+                            variant="custom"
+                            placeholder="••••••••"
+                            {...field}
+                            className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
+                          />
+                          <div className=" relative bottom-8 left-11/12 h-1 cursor-pointer">
+                            {showPassword ? (
+                              <Eye
+                                className=" w-3"
+                                onClick={showHidePassword}
+                              />
+                            ) : (
+                              <EyeClosed
+                                className="w-3"
+                                onClick={showHidePassword}
+                              />
+                            )}
+                          </div>
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -199,13 +226,28 @@ export function Register() {
                         Confirm Password
                       </FormLabel>
                       <FormControl>
-                        <Input
-                          type="password"
-                          variant="custom"
-                          placeholder="••••••••"
-                          {...field}
-                          className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
-                        />
+                        <div>
+                          <Input
+                            type={confirmPassword ? "text" : "password"}
+                            variant="custom"
+                            placeholder="••••••••"
+                            {...field}
+                            className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
+                          />
+                          <div className=" relative bottom-8 left-11/12 h-1 cursor-pointer ">
+                            {confirmPassword ? (
+                              <Eye
+                                className=" w-3"
+                                onClick={showHideConfirmPassword}
+                              />
+                            ) : (
+                              <EyeClosed
+                                className="w-3"
+                                onClick={showHideConfirmPassword}
+                              />
+                            )}
+                          </div>
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -220,7 +262,7 @@ export function Register() {
                   <Button
                     type="submit"
                     variant="standOut"
-                    className="w-full max-w-xs py-2 rounded-md font-semibold"
+                    className="w-full max-w py-2 rounded-md font-semibold cursor-pointer"
                     disabled={mutation.isPending}
                   >
                     {mutation.isPending ? "Registering..." : "Register"}

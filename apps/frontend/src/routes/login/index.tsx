@@ -19,13 +19,18 @@ import { BsMeta } from "react-icons/bs";
 import { motion } from "framer-motion";
 
 import { fadeInUp, scaleIn, transition } from "@/lib/motion";
+import { setAuthTokens } from "@/lib/auth";
 
 export const Route = createFileRoute("/login/")({
   component: Login,
 });
 
 function Login() {
+  const router = useRouter();
+  // *************** All States **************
   const [showEmailInput, setShowEmailInput] = useState(false);
+
+  // ********** Hooks *************
   const form = useForm<loginTypes>({
     resolver: zodResolver(LoginFormSchema),
     defaultValues: {
@@ -34,7 +39,7 @@ function Login() {
     },
   });
 
-  const router = useRouter();
+  // *********** API Hook **************
   const mutation = useApiMutation<LoginResponse, loginTypes>(
     {
       endpoint: "/auth/login",
@@ -44,6 +49,8 @@ function Login() {
     },
     {
       onSuccess: (data) => {
+        const { access_token, refresh_token } = data.data;
+        setAuthTokens(access_token, refresh_token);
         toast.success(data.message || "Login successful!");
         router.navigate({ to: "/" });
       },
@@ -53,6 +60,7 @@ function Login() {
     }
   );
 
+  // ********** Functions ***********
   function onSubmit(data: loginTypes) {
     console.log("Submitting:", data);
     mutation.mutate(data);
@@ -111,7 +119,7 @@ function Login() {
           </motion.h2>
 
           <CardContent className="space-y-4">
-            {/* OAuth Buttons */}
+            {/*************** OAuth Buttons ***************/}
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button
                 name="google"

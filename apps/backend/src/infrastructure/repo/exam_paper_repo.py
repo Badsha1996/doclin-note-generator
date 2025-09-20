@@ -37,7 +37,7 @@ class SQLExamPaperRepo:
                         type=q.type,
                         marks=q.marks,
                         instruction=q.instruction,
-                        tikz=getattr(q, "tikz", None),  
+                        figure=getattr(q, "figure", None),  
                     )
 
                     for sp in q.subparts:
@@ -64,7 +64,7 @@ class SQLExamPaperRepo:
                         options=getattr(sp, "options", None),
                         tags=getattr(sp, "tags", None),
                         difficulty=getattr(sp, "difficulty", None),
-                        tikz=getattr(sp, "tikz", None),  
+                        figure=getattr(sp, "figure", None),  
                         embedding=emb
                     )
                     question.subparts.append(subpart)
