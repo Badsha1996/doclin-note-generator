@@ -7,7 +7,12 @@ import type { Dispatch, SetStateAction } from "react";
 
 import GlassDropdown from "./GlassDropdown";
 import { useApi } from "@/hook/useApi";
-import { boardResponseSchema, subjectResponseSchema } from "@/types/api";
+import {
+  boardResponseSchema,
+  prevExamPaperResponseSchema,
+  prevYearsResponseSchema,
+  subjectResponseSchema,
+} from "@/types/api";
 
 // ************** Props ********************
 interface SidebarProps {
@@ -45,6 +50,8 @@ function Sidebar({
   // ****************** All states ********************
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [availableYears, setAvailableYears] = useState<number[]>([]);
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
 
   //Dropdown
   const [open, setOpen] = useState<boolean>(false);
@@ -76,16 +83,42 @@ function Sidebar({
   });
 
   const boardOptions = boardData?.data.exam_boards ?? [];
+  useEffect(() => {
+    if (!selectedSubject) return;
 
+    const fetchYears = async () => {
+      const { data } = await useApi({
+        endpoint: "/exam-paper/get/prev-years",
+        method: "GET",
+        queryParams: { subject: selectedSubject },
+        responseSchema: prevYearsResponseSchema,
+      }).refetch();
+
+      setAvailableYears(data?.data.prev_years ?? []);
+    };
+
+    fetchYears();
+  }, [selectedSubject]);
   const {
-    data: previousPapers = [],
-    isLoading: isLoadingPapers,
-    isError: isPapersError,
-    error: papersError,
-  } = useApi<{ year: string; title: string }[]>({
-    endpoint: "/papers/previous",
-    method: "GET",
-  });
+    data: prevPaperData,
+    isLoading: isLoadingPrevPaper,
+    isError: isPrevPaperError,
+  } = useApi(
+    {
+      endpoint: "/exam-paper/get/prev-exam-paper",
+      method: "GET",
+      queryParams: {
+        subject: selectedSubject,
+        ...(selectedYear !== null ? { year: selectedYear } : {}),
+      },
+      responseSchema: prevExamPaperResponseSchema,
+    },
+    {
+      enabled: !!selectedSubject && !!selectedYear,
+    }
+  );
+
+  const prevPaper = prevPaperData?.data.exam_paper;
 
   // ******** Functions ***************
   const checkIsMobile = () => {
@@ -226,6 +259,7 @@ function Sidebar({
                     value={selectedMarks}
                     onChange={(e) => setSelectedMarks(e.target.value)}
                     placeholder="Enter total marks"
+                    disabled
                     className="w-full bg-white/10 backdrop-blur-md text-gray-100 p-2 rounded-lg border border-white/20 
                     focus:ring-2 focus:ring-indigo-400/40 hover:bg-white/20 transition-colors
                     placeholder:text-white
@@ -244,6 +278,7 @@ function Sidebar({
                       value={selectedDuration}
                       onChange={(e) => setSelectedDuration(e.target.value)}
                       placeholder="Enter total duration"
+                      disabled
                       className="flex-1 bg-white/10 backdrop-blur-md text-white p-5 rounded-lg border border-white/20 
                       focus:ring-2 focus:ring-indigo-400/40 hover:bg-white/20 transition-colors
                       placeholder:text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
@@ -255,6 +290,7 @@ function Sidebar({
                         onChange={(value) => setSelectedUnit(String(value))}
                         options={timeUnit}
                         placeholder="Unit"
+                        disabled
                       />
                     </div>
                   </div>
@@ -287,26 +323,50 @@ function Sidebar({
                       transition={{ duration: 0.3 }}
                       className="space-y-2 overflow-hidden"
                     >
-                      {isLoadingPapers ? (
+                      {availableYears.length > 0 && (
+                        <GlassDropdown
+                          label="Year"
+                          value={selectedYear ?? ""}
+                          onChange={(value) => setSelectedYear(Number(value))}
+                          options={availableYears.map((y) => ({
+                            value: y,
+                            label: y.toString(),
+                          }))}
+                          placeholder="Select Year"
+                        />
+                      )}
+
+                      {isLoadingPrevPaper ? (
                         <>
                           <Skeleton className="h-6 w-full" />
                           <Skeleton className="h-6 w-3/4" />
                         </>
-                      ) : isPapersError ? (
+                      ) : isPrevPaperError ? (
                         <p className="px-3 py-2 text-red-400 text-sm">
-                          {papersError?.message ||
-                            "Failed to load previous papers"}
+                          Failed to load paper
+                        </p>
+                      ) : prevPaper ? (
+                        <motion.li
+                          whileHover={{ x: 5 }}
+                          className="px-3 py-2 rounded-lg bg-white/5 text-gray-300 hover:text-white hover:bg-indigo-600/40 cursor-pointer transition"
+                        >
+                          <a
+                            href={prevPaper.file_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block"
+                          >
+                            {prevPaper.year} Paper → View / Download
+                          </a>
+                        </motion.li>
+                      ) : selectedYear ? (
+                        <p className="px-3 py-2 text-gray-400 text-sm">
+                          No paper found for {selectedYear}
                         </p>
                       ) : (
-                        previousPapers.map((paper) => (
-                          <motion.li
-                            key={paper.year}
-                            whileHover={{ x: 5 }}
-                            className="px-3 py-2 rounded-lg bg-white/5 text-gray-300 hover:text-white hover:bg-indigo-600/40 cursor-pointer transition"
-                          >
-                            {paper.title || `${paper.year} Question Paper`}
-                          </motion.li>
-                        ))
+                        <p className="px-3 py-2 text-gray-400 text-sm">
+                          Select a year to view papers
+                        </p>
                       )}
                     </motion.ul>
                   )}

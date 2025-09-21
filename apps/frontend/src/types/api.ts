@@ -81,3 +81,26 @@ export const boardResponseSchema = apiResponseSchema(
 );
 
 export type boardResponse = z.infer<typeof boardResponseSchema>;
+
+// prev years
+export const prevYearsResponseSchema = apiResponseSchema(
+  z.object({
+    prev_years: z.array(z.number()), // array of years
+  })
+);
+export type PrevYearsResponse = z.infer<typeof prevYearsResponseSchema>;
+
+// prev exam paper
+export const prevExamPaperSchema = z.object({
+  id: z.number(),
+  subject: z.string(),
+  year: z.number(),
+  file_url: z.url(),
+});
+
+export const prevExamPaperResponseSchema = apiResponseSchema(
+  z.object({
+    exam_paper: prevExamPaperSchema.nullable(),
+  })
+);
+export type PrevExamPaperResponse = z.infer<typeof prevExamPaperResponseSchema>;
