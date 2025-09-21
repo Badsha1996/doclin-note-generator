@@ -3,7 +3,7 @@ from sentence_transformers import SentenceTransformer
 
 from ...config.config import settings
 from ...LLMs.LLMs import LLMProviderManager
-from ...infrastructure.models.exam_paper_models import SubpartModel
+from ...infrastructure.models.exam_paper_models import SubPartModel
 from ...core.entities.exam_paper_entities import ExamInfo, ExamPaperCreate
 from ...prompts.ICSE_questions import QUESTION_PAPER_PROMPT
 
@@ -21,9 +21,9 @@ class SQLLMRepo:
         self, llm, query_embedding, subject: str, board: str, paper: str, code: str, year: int
     ):
         similar_subparts = (
-            self.db.query(SubpartModel)
-            .filter(SubpartModel.embedding.isnot(None))
-            .order_by(SubpartModel.embedding.cosine_distance(query_embedding))
+            self.db.query(SubPartModel)
+            .filter(SubPartModel.embedding.isnot(None))
+            .order_by(SubPartModel.embedding.cosine_distance(query_embedding))
             .limit(20)
             .all()
         )
