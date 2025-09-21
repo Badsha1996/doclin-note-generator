@@ -36,7 +36,11 @@ class Settings(BaseSettings):
     VECTOR_MODEL : str
 
     LLM_MODELS : list[str]
-    LLM_API_KEY : str 
+    LLM_API_KEY : str
+
+
+    MAX_COUNT_FOR_PREVILEGED:int
+    MAX_COUNT_FOR_USER:int 
 
     model_config = SettingsConfigDict(env_file=".env")
 

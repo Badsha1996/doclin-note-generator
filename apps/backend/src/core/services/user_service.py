@@ -1,7 +1,6 @@
 from fastapi import HTTPException
 
-from typing import List
-from datetime import datetime, timezone
+from typing import List, Optional
 from ...core.repo.user_repo import UserRepo
 from ...interfaces.schemas.user_schemas import UserRoleChangeSchema
 from ...utils.security import SecurityManager
@@ -46,6 +45,12 @@ class UserService:
         )
         return await self.user_repo.create_user_by_admin(user_data=user_data) 
     
+    async def update_user(self,user_id: str,user_data: UserUpdate)->Optional[User]:
+        updated_user= await self.user_repo.update_user(user_id=user_id,user_data=user_data)
+        if updated_user is None:
+            raise NotFoundExceptionError("User not found")
+        return updated_user
+        
     async def change_role(self,data:UserRoleChangeSchema,current_user:User)->User:
         user = await self.user_repo.get_user_by_id(data.user_id)
         if not user:

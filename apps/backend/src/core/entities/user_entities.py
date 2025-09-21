@@ -63,6 +63,9 @@ class UserUpdate(BaseModel):
     blocked: Optional[bool] = None
     is_verified: Optional[bool] = None
     role: Optional[UserRole] = None
+    plan:Optional[UserPlan]=None
+    blocked:Optional[bool]=None
+    model_hit_count:Optional[int]=None
 
 
 class UserKPI(BaseModel):
