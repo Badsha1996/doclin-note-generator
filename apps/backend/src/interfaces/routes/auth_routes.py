@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import Response,RedirectResponse
 from sqlalchemy.orm import Session
 
 from ..schemas.auth_schemas import RegisterSchema, LoginSchema, VerifySchema
 from ..schemas.response_schemas import APIResponseSchema
+from ...config.config import settings
 from ...utils.security import SecurityManager
 from ...infrastructure.providers.auth_provider import get_oauth_manager, get_security_manager
 from ...database.database import get_DB
@@ -41,9 +43,10 @@ async def register_user(
 
 @auth_router.post("/login")
 async def login_user(
+    response:Response,
     user_data : LoginSchema,
     db : Session = Depends(get_DB),
-    security_manager: SecurityManager = Depends(get_security_manager)
+    security_manager: SecurityManager = Depends(get_security_manager),
 ):
     try:
         ''' LOG IN POINT'''
@@ -58,11 +61,34 @@ async def login_user(
             password=user_data.password,
         )
 
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            httponly=True,
+            secure=True,   
+            samesite="None", 
+            domain=settings.BACKEND_DOMAIN, 
+            max_age=3600
+        )
+        response.set_cookie(
+            key="refresh_token",
+            value=refresh_token,
+            httponly=True,
+            secure=True,
+            samesite="None",
+            domain=settings.BACKEND_DOMAIN,
+            max_age=60*60*24*7
+        )
+
         return APIResponseSchema(
             success=True,
-            data = {"user":user,"access_token":access_token, "refresh_token":refresh_token},
-            message="User logged in succesfully"
-        )
+                data={
+                    "user": user,
+                    "access_token": access_token,
+                    "refresh_token": refresh_token
+                },
+                message="User logged in successfully"
+            )
         
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -88,11 +114,30 @@ async def oauthLogin(
             redirect_uri='http://localhost:8000/api/auth/oauth/login'
         )
         access_token, refresh_token, user = await auth_service.oauth_login(oauth_user)
-        return APIResponseSchema(
-            success=True,
-            data = {"user":user,"access_token":access_token, "refresh_token":refresh_token},
-            message="User logged in succesfully"
+
+        response = RedirectResponse(url=settings.FRONTEND_URL)
+
+
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            httponly=True,
+            secure=True,   
+            samesite="None", 
+            domain=settings.BACKEND_DOMAIN, 
+            max_age=3600
         )
+        response.set_cookie(
+            key="refresh_token",
+            value=refresh_token,
+            httponly=True,
+            secure=True,
+            samesite="None",
+            domain=settings.BACKEND_DOMAIN,
+            max_age=60*60*24*7
+        )
+
+        return response
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))   
 

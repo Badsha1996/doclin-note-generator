@@ -1,5 +1,5 @@
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from fastapi import Depends, HTTPException,status
+from fastapi import Depends, HTTPException,status,Request
 from sqlalchemy.orm import Session
 
 from ...database.database import get_DB
@@ -13,12 +13,16 @@ from ...utils.exceptions import AuthExceptionError
 auth_header = HTTPBearer()
 
 async def get_current_user(
-        auth_cred : HTTPAuthorizationCredentials =  Depends(auth_header),
+        request: Request,
         db : Session = Depends(get_DB),
         security_manager: SecurityManager = Depends(get_security_manager)
 ) -> User:
     try:
-        token_data = security_manager.verify_token(auth_cred.credentials)
+        access_token = request.cookies.get("access_token")
+        if not access_token:
+            raise AuthExceptionError("Missing access token")
+        
+        token_data = security_manager.verify_token(access_token)
         user_repo = SQLUserRepo(db=db)
         user = await user_repo.get_user_by_id(token_data.user_id)
 
