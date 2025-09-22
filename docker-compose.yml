@@ -83,22 +83,22 @@ services:
       - app-network
 
   # MinIO bucket initialization
-  minio-init:
-    image: minio/mc:latest
-    depends_on:
-      - minio
-    entrypoint: >
-      /bin/sh -c "
-      until /usr/bin/mc alias set myminio http://minio:9000 minio minio123; do
-        echo '...waiting for minio'
-        sleep 1
-      done;
-      /usr/bin/mc mb myminio/my-bucket --ignore-existing;
-      /usr/bin/mc policy set public myminio/my-bucket;
-      exit 0;
-      "
-    networks:
-      - app-network
+  # minio-init:
+  #   image: minio/mc:latest
+  #   depends_on:
+  #     - minio
+  #   entrypoint: >
+  #     /bin/sh -c "
+  #     until /usr/bin/mc alias set myminio http://minio:9000 minio minio123; do
+  #       echo '...waiting for minio'
+  #       sleep 1
+  #     done;
+  #     /usr/bin/mc mb myminio/my-bucket --ignore-existing;
+  #     /usr/bin/mc policy set public myminio/my-bucket;
+  #     exit 0;
+  #     "
+  #   networks:
+  #     - app-network
 
   ollama:
     image: ollama/ollama:latest
@@ -130,13 +130,13 @@ services:
       - app-network
 
   # Uncomment for GPU support
-  deploy:
-    resources:
-      reservations:
-        devices:
-          - driver: nvidia
-            count: 1
-            capabilities: [gpu]
+  # deploy:
+  #   resources:
+  #     reservations:
+  #       devices:
+  #         - driver: nvidia
+  #           count: 1
+  #           capabilities: [gpu]
 
   # Optional: Model initialization for Ollama
 
