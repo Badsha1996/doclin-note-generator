@@ -83,60 +83,60 @@ services:
       - app-network
 
   # MinIO bucket initialization
-  # minio-init:
-  #   image: minio/mc:latest
-  #   depends_on:
-  #     - minio
-  #   entrypoint: >
-  #     /bin/sh -c "
-  #     until /usr/bin/mc alias set myminio http://minio:9000 minio minio123; do
-  #       echo '...waiting for minio'
-  #       sleep 1
-  #     done;
-  #     /usr/bin/mc mb myminio/my-bucket --ignore-existing;
-  #     /usr/bin/mc policy set public myminio/my-bucket;
-  #     exit 0;
-  #     "
-  #   networks:
-  #     - app-network
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      until /usr/bin/mc alias set myminio http://minio:9000 minio minio123; do
+        echo '...waiting for minio'
+        sleep 1
+      done;
+      /usr/bin/mc mb myminio/my-bucket --ignore-existing;
+      /usr/bin/mc policy set public myminio/my-bucket;
+      exit 0;
+      "
+    networks:
+      - app-network
 
-  # ollama:
-  #   image: ollama/ollama:latest
-  #   ports:
-  #     - "11434:11434"
-  #   volumes:
-  #     - ollama_data:/root/.ollama
-  #   restart: unless-stopped
-  #   environment:
-  #     - OLLAMA_ORIGINS=http://localhost:5173,http://localhost:8000
-  #     - OLLAMA_MODEL=llama3:8b
-  #     - OLLAMA_NUM_PREDICT=1024
-  #     - OLLAMA_CTX=4096
-  #   deploy:
-  #     resources:
-  #       reservations:
-  #         devices:
-  #           - driver: nvidia
-  #             count: 1
-  #             capabilities: [gpu]
-  #       limits:
-  #         memory: 10g
-  #   healthcheck:
-  #     test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 5
-  #   networks:
-  #     - app-network
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+    environment:
+      - OLLAMA_ORIGINS=http://localhost:5173,http://localhost:8000
+      - OLLAMA_MODEL=llama3:8b
+      - OLLAMA_NUM_PREDICT=1024
+      - OLLAMA_CTX=4096
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+        limits:
+          memory: 10g
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - app-network
 
   # Uncomment for GPU support
-  # deploy:
-  #   resources:
-  #     reservations:
-  #       devices:
-  #         - driver: nvidia
-  #           count: 1
-  #           capabilities: [gpu]
+  deploy:
+    resources:
+      reservations:
+        devices:
+          - driver: nvidia
+            count: 1
+            capabilities: [gpu]
 
   # Optional: Model initialization for Ollama
 
@@ -159,7 +159,7 @@ services:
 volumes:
   pgdata:
   minio_data:
-  # ollama_data:
+  ollama_data:
   redis_data:
   node_modules:
   frontend_node_modules:
