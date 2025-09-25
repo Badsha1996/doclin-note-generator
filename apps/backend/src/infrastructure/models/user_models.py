@@ -26,13 +26,14 @@ class UserModel(Base):
     is_verified = Column(Boolean, default=False)
     plan = Column(Enum(UserPlan,name="user_plan"),default="free")
     blocked = Column(Boolean,default=False)
-    model_hit_count=Column(Integer,default=5)
+    model_hit_count=Column(Integer,default=0)
 
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     oauth_accounts = relationship("OAuthModel", back_populates="user")
     files = relationship("FileModel", back_populates="user", cascade="all, delete-orphan")
+    feedbacks = relationship("FeedbackModel", back_populates="user", cascade="all, delete-orphan")
 
 
 class OAuthModel(Base):
