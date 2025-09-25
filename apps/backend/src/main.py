@@ -1,3 +1,4 @@
+from .infrastructure.providers.auth_provider import get_security_manager
 from fastapi import FastAPI
 
 from .database.database import Base, engine
@@ -8,6 +9,8 @@ from .interfaces.routes.upload_routes import upload_router
 from .interfaces.routes.llm_routes import llm_router
 from .interfaces.routes.exam_paper_routes import exam_paper_router
 from .interfaces.routes.doc_routes import doc_router
+from .interfaces.routes.otp_routes import otp_router
+from .interfaces.routes.user_routes import user_router
 
 
 
@@ -31,10 +34,13 @@ app.include_router(upload_router, prefix="/api")
 app.include_router(llm_router, prefix="/api")
 app.include_router(exam_paper_router, prefix="/api")
 app.include_router(doc_router, prefix="/api")
+app.include_router(otp_router,prefix="/api") 
+app.include_router(user_router,prefix="/api")
 
 # ROOT ROUTE
 @app.get("/")
 async def root():
+    print(get_security_manager().hash_password("Robin@930"))
     return {"message": "Doclin Note generator Backend running 👍"}
 
 @app.get("/health")
