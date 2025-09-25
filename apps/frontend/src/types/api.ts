@@ -21,9 +21,11 @@ export const userSchema = z.object({
   id: z.uuid(),
   username: z.string(),
   email: z.email(),
-  role: z.literal("user"),
-  is_active: z.boolean(),
+  role: z.enum(["admin", "user", "superAdmin"]),
   is_verified: z.boolean(),
+  plan: z.enum(["free"]),
+  blocked: z.boolean(),
+  model_hit_count: z.int32(),
   created_at: z.coerce.date(),
   updated_at: z.coerce.date(),
 });

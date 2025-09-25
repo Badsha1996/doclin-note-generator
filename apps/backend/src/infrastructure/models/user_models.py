@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Boolean, DateTime, Enum, ForeignKey
+from sqlalchemy import Column, String, Boolean, DateTime, Enum, ForeignKey,Integer
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
@@ -10,6 +10,10 @@ from ...database.database import Base
 class UserRole(str, enum.Enum):
     user = "user"
     admin = "admin"
+    super_admin="superAdmin"
+
+class UserPlan(str,enum.Enum):
+    free="free"
 
 class UserModel(Base):
     __tablename__ = 'users'
@@ -19,8 +23,11 @@ class UserModel(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     hash_password = Column(String, nullable=False)
     role = Column(Enum(UserRole, name="user_role",), default="user")
-    is_active = Column(Boolean, default=True)
     is_verified = Column(Boolean, default=False)
+    plan = Column(Enum(UserPlan,name="user_plan"),default="free")
+    blocked = Column(Boolean,default=False)
+    model_hit_count=Column(Integer,default=5)
+
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 

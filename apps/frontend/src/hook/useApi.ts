@@ -44,11 +44,9 @@ export const fetchApi = async <TResponse, TPayload = undefined>(
     : `/${endpoint}`;
   const url = buildUrl(`${API_BASE_URL}${normalizedEndpoint}`, queryParams);
   console.log("url", url);
-  const token = getAccessToken();
 
   const defaultHeaders = {
     "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...headers,
   };
 
@@ -56,6 +54,7 @@ export const fetchApi = async <TResponse, TPayload = undefined>(
     method,
     headers: defaultHeaders,
     body: payload ? JSON.stringify(payload) : undefined,
+    credentials: "include",
   });
 
   if (!response.ok) {

@@ -8,229 +8,252 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
-import { Route as SplatRouteImport } from './routes/$'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as RegisterIndexRouteImport } from './routes/register/index'
-import { Route as LoginIndexRouteImport } from './routes/login/index'
-import { Route as ExamPaperIndexRouteImport } from './routes/examPaper/index'
-import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
-import { Route as ConfigIndexRouteImport } from './routes/config/index'
-import { Route as AuthenticatedAboutRouteImport } from './routes/_authenticated/about'
+import { Route as rootRouteImport } from "./routes/__root";
+import { Route as AuthenticatedRouteImport } from "./routes/_authenticated";
+import { Route as SplatRouteImport } from "./routes/$";
+import { Route as IndexRouteImport } from "./routes/index";
+import { Route as RegisterIndexRouteImport } from "./routes/register/index";
+import { Route as LoginIndexRouteImport } from "./routes/login/index";
+import { Route as ExamPaperIndexRouteImport } from "./routes/examPaper/index";
+import { Route as DashboardIndexRouteImport } from "./routes/dashboard/index";
+import { Route as ConfigIndexRouteImport } from "./routes/config/index";
+import { Route as AboutIndexRouteImport } from "./routes/about/index";
+import { Route as AuthenticatedTestRouteImport } from "./routes/_authenticated/test";
 
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
-  id: '/_authenticated',
+  id: "/_authenticated",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const SplatRoute = SplatRouteImport.update({
-  id: '/$',
-  path: '/$',
+  id: "/$",
+  path: "/$",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+  id: "/",
+  path: "/",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const RegisterIndexRoute = RegisterIndexRouteImport.update({
-  id: '/register/',
-  path: '/register/',
+  id: "/register/",
+  path: "/register/",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const LoginIndexRoute = LoginIndexRouteImport.update({
-  id: '/login/',
-  path: '/login/',
+  id: "/login/",
+  path: "/login/",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const ExamPaperIndexRoute = ExamPaperIndexRouteImport.update({
-  id: '/examPaper/',
-  path: '/examPaper/',
+  id: "/examPaper/",
+  path: "/examPaper/",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
-  id: '/dashboard/',
-  path: '/dashboard/',
+  id: "/dashboard/",
+  path: "/dashboard/",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const ConfigIndexRoute = ConfigIndexRouteImport.update({
-  id: '/config/',
-  path: '/config/',
+  id: "/config/",
+  path: "/config/",
   getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedAboutRoute = AuthenticatedAboutRouteImport.update({
-  id: '/about',
-  path: '/about',
+} as any);
+const AboutIndexRoute = AboutIndexRouteImport.update({
+  id: "/about/",
+  path: "/about/",
+  getParentRoute: () => rootRouteImport,
+} as any);
+const AuthenticatedTestRoute = AuthenticatedTestRouteImport.update({
+  id: "/test",
+  path: "/test",
   getParentRoute: () => AuthenticatedRoute,
-} as any)
+} as any);
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/$': typeof SplatRoute
-  '/about': typeof AuthenticatedAboutRoute
-  '/config': typeof ConfigIndexRoute
-  '/dashboard': typeof DashboardIndexRoute
-  '/examPaper': typeof ExamPaperIndexRoute
-  '/login': typeof LoginIndexRoute
-  '/register': typeof RegisterIndexRoute
+  "/": typeof IndexRoute;
+  "/$": typeof SplatRoute;
+  "/about": typeof AuthenticatedAboutRoute;
+  "/test": typeof AuthenticatedTestRoute;
+  "/about": typeof AboutIndexRoute;
+  "/config": typeof ConfigIndexRoute;
+  "/dashboard": typeof DashboardIndexRoute;
+  "/examPaper": typeof ExamPaperIndexRoute;
+  "/login": typeof LoginIndexRoute;
+  "/register": typeof RegisterIndexRoute;
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/$': typeof SplatRoute
-  '/about': typeof AuthenticatedAboutRoute
-  '/config': typeof ConfigIndexRoute
-  '/dashboard': typeof DashboardIndexRoute
-  '/examPaper': typeof ExamPaperIndexRoute
-  '/login': typeof LoginIndexRoute
-  '/register': typeof RegisterIndexRoute
+  "/": typeof IndexRoute;
+  "/$": typeof SplatRoute;
+  "/about": typeof AuthenticatedAboutRoute;
+  "/test": typeof AuthenticatedTestRoute;
+  "/about": typeof AboutIndexRoute;
+  "/config": typeof ConfigIndexRoute;
+  "/dashboard": typeof DashboardIndexRoute;
+  "/examPaper": typeof ExamPaperIndexRoute;
+  "/login": typeof LoginIndexRoute;
+  "/register": typeof RegisterIndexRoute;
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/$': typeof SplatRoute
-  '/_authenticated': typeof AuthenticatedRouteWithChildren
-  '/_authenticated/about': typeof AuthenticatedAboutRoute
-  '/config/': typeof ConfigIndexRoute
-  '/dashboard/': typeof DashboardIndexRoute
-  '/examPaper/': typeof ExamPaperIndexRoute
-  '/login/': typeof LoginIndexRoute
-  '/register/': typeof RegisterIndexRoute
+  __root__: typeof rootRouteImport;
+  "/": typeof IndexRoute;
+  "/$": typeof SplatRoute;
+  "/_authenticated": typeof AuthenticatedRouteWithChildren;
+  "/_authenticated/test": typeof AuthenticatedTestRoute;
+  "/about/": typeof AboutIndexRoute;
+  "/config/": typeof ConfigIndexRoute;
+  "/dashboard/": typeof DashboardIndexRoute;
+  "/examPaper/": typeof ExamPaperIndexRoute;
+  "/login/": typeof LoginIndexRoute;
+  "/register/": typeof RegisterIndexRoute;
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
+  fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
-    | '/'
-    | '/$'
-    | '/about'
-    | '/config'
-    | '/dashboard'
-    | '/examPaper'
-    | '/login'
-    | '/register'
-  fileRoutesByTo: FileRoutesByTo
+    | "/"
+    | "/$"
+    | "/test"
+    | "/about"
+    | "/config"
+    | "/dashboard"
+    | "/examPaper"
+    | "/login"
+    | "/register";
+  fileRoutesByTo: FileRoutesByTo;
   to:
-    | '/'
-    | '/$'
-    | '/about'
-    | '/config'
-    | '/dashboard'
-    | '/examPaper'
-    | '/login'
-    | '/register'
+    | "/"
+    | "/$"
+    | "/test"
+    | "/about"
+    | "/config"
+    | "/dashboard"
+    | "/examPaper"
+    | "/login"
+    | "/register";
   id:
-    | '__root__'
-    | '/'
-    | '/$'
-    | '/_authenticated'
-    | '/_authenticated/about'
-    | '/config/'
-    | '/dashboard/'
-    | '/examPaper/'
-    | '/login/'
-    | '/register/'
-  fileRoutesById: FileRoutesById
+    | "__root__"
+    | "/"
+    | "/$"
+    | "/_authenticated"
+    | "/_authenticated/test"
+    | "/about/"
+    | "/config/"
+    | "/dashboard/"
+    | "/examPaper/"
+    | "/login/"
+    | "/register/";
+  fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  SplatRoute: typeof SplatRoute
-  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
-  ConfigIndexRoute: typeof ConfigIndexRoute
-  DashboardIndexRoute: typeof DashboardIndexRoute
-  ExamPaperIndexRoute: typeof ExamPaperIndexRoute
-  LoginIndexRoute: typeof LoginIndexRoute
-  RegisterIndexRoute: typeof RegisterIndexRoute
+  IndexRoute: typeof IndexRoute;
+  SplatRoute: typeof SplatRoute;
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren;
+  AboutIndexRoute: typeof AboutIndexRoute;
+  ConfigIndexRoute: typeof ConfigIndexRoute;
+  DashboardIndexRoute: typeof DashboardIndexRoute;
+  ExamPaperIndexRoute: typeof ExamPaperIndexRoute;
+  LoginIndexRoute: typeof LoginIndexRoute;
+  RegisterIndexRoute: typeof RegisterIndexRoute;
 }
 
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
-    '/_authenticated': {
-      id: '/_authenticated'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof AuthenticatedRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/$': {
-      id: '/$'
-      path: '/$'
-      fullPath: '/$'
-      preLoaderRoute: typeof SplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/register/': {
-      id: '/register/'
-      path: '/register'
-      fullPath: '/register'
-      preLoaderRoute: typeof RegisterIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login/': {
-      id: '/login/'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/examPaper/': {
-      id: '/examPaper/'
-      path: '/examPaper'
-      fullPath: '/examPaper'
-      preLoaderRoute: typeof ExamPaperIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard/': {
-      id: '/dashboard/'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/config/': {
-      id: '/config/'
-      path: '/config'
-      fullPath: '/config'
-      preLoaderRoute: typeof ConfigIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/about': {
-      id: '/_authenticated/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AuthenticatedAboutRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
+    "/_authenticated": {
+      id: "/_authenticated";
+      path: "";
+      fullPath: "";
+      preLoaderRoute: typeof AuthenticatedRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/$": {
+      id: "/$";
+      path: "/$";
+      fullPath: "/$";
+      preLoaderRoute: typeof SplatRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/": {
+      id: "/";
+      path: "/";
+      fullPath: "/";
+      preLoaderRoute: typeof IndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/register/": {
+      id: "/register/";
+      path: "/register";
+      fullPath: "/register";
+      preLoaderRoute: typeof RegisterIndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/login/": {
+      id: "/login/";
+      path: "/login";
+      fullPath: "/login";
+      preLoaderRoute: typeof LoginIndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/examPaper/": {
+      id: "/examPaper/";
+      path: "/examPaper";
+      fullPath: "/examPaper";
+      preLoaderRoute: typeof ExamPaperIndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/dashboard/": {
+      id: "/dashboard/";
+      path: "/dashboard";
+      fullPath: "/dashboard";
+      preLoaderRoute: typeof DashboardIndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/config/": {
+      id: "/config/";
+      path: "/config";
+      fullPath: "/config";
+      preLoaderRoute: typeof ConfigIndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/about/": {
+      id: "/about/";
+      path: "/about";
+      fullPath: "/about";
+      preLoaderRoute: typeof AboutIndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/_authenticated/test": {
+      id: "/_authenticated/test";
+      path: "/test";
+      fullPath: "/test";
+      preLoaderRoute: typeof AuthenticatedTestRouteImport;
+      parentRoute: typeof AuthenticatedRoute;
+    };
   }
 }
 
 interface AuthenticatedRouteChildren {
-  AuthenticatedAboutRoute: typeof AuthenticatedAboutRoute
+  AuthenticatedTestRoute: typeof AuthenticatedTestRoute;
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
-  AuthenticatedAboutRoute: AuthenticatedAboutRoute,
-}
+  AuthenticatedTestRoute: AuthenticatedTestRoute,
+};
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
-  AuthenticatedRouteChildren,
-)
+  AuthenticatedRouteChildren
+);
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  AboutIndexRoute: AboutIndexRoute,
   ConfigIndexRoute: ConfigIndexRoute,
   DashboardIndexRoute: DashboardIndexRoute,
   ExamPaperIndexRoute: ExamPaperIndexRoute,
   LoginIndexRoute: LoginIndexRoute,
   RegisterIndexRoute: RegisterIndexRoute,
-}
+};
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+  ._addFileTypes<FileRouteTypes>();
