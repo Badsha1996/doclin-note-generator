@@ -10,33 +10,8 @@ class Subject(str, Enum):
     BIOLOGY = "biology"
     MATHEMATICS = "mathematics"
 
-class QuestionType(str, Enum):
-    MULTIPLE_CHOICE = "multiple_choice"
-    SHORT_ANSWER = "short_answer"
-    LONG_ANSWER = "long_answer"
-    DIAGRAM_BASED = "diagram_based"
-    CALCULATION = "calculation"
-    MATCHING = "matching"
-    FILL_BLANKS = "fill_blanks"
-    ARRANGE_SEQUENCE = "arrange_sequence"
-    COMPLETE_EQUATION = "complete_equation"
-    IDENTIFY_STRUCTURE = "identify_structure"
-
-class DiagramType(str, Enum):
-    CIRCUIT_DIAGRAM = "circuit_diagram"
-    RAY_DIAGRAM = "ray_diagram"
-    FORCE_DIAGRAM = "force_diagram"
-    MOLECULAR_STRUCTURE = "molecular_structure"
-    APPARATUS_SETUP = "apparatus_setup"
-    ANATOMICAL_DIAGRAM = "anatomical_diagram"
-    CELL_DIAGRAM = "cell_diagram"
-    SYSTEM_DIAGRAM = "system_diagram"
-    GRAPH = "graph"
-    FLOWCHART = "flowchart"
-    OTHERS = "Others"
-
 class Diagram(BaseModel):
-    type: DiagramType
+    type: str
     description: str
     elements: List[str] = Field(default_factory=list)
     labels: List[str] = Field(default_factory=list)
@@ -66,7 +41,7 @@ class SubPart(BaseModel):
 
 class QuestionPart(BaseModel):
     number: str  
-    type: QuestionType
+    type: str
     marks: int
     question: Optional[str] = Field(default=None, alias="question_text")
     description: Optional[str] = None
@@ -93,7 +68,7 @@ class QuestionPart(BaseModel):
 class Question(BaseModel):
     number: int
     title: Optional[str] = None
-    type: QuestionType
+    type: str
     total_marks: int
     instruction: Optional[str] = None
     parts: List[QuestionPart] = Field(default_factory=list)

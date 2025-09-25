@@ -69,8 +69,8 @@ class QuestionModel(Base):
     total_marks = Column(Integer, nullable=False)
     instruction = Column(Text, nullable=True)
     question_text = Column(Text, nullable=True)
-    options = Column(JSON, nullable=False, default=[])  # Store MCQ options as JSON
-    diagram = Column(JSON, nullable=True)  # Diagram details as JSON
+    options = Column(JSON, nullable=False, default=[])  
+    diagram = Column(JSON, nullable=True)  
 
     section = relationship("SectionModel", back_populates="questions")
     parts = relationship(

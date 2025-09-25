@@ -35,6 +35,8 @@ requests==2.32.4
 google-genai==1.29.0
 llama-cpp-python==0.3.15
 langchain_community
+langchain-openai==0.3.33
+langchain-huggingface==0.3.1
 langchain
 pgvector==0.4.1
 sentence-transformers==5.1.0
