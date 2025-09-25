@@ -1,3 +1,4 @@
+import json
 from typing import List, Optional
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -30,7 +31,15 @@ class Settings(BaseSettings):
     EMAIL:str
     GOOGLE_APP_PASSWORD:str
 
-    # ---------------- LLM Provider ---------------- #
+    MAX_COUNT_FOR_PREVILEGED:int
+    MAX_COUNT_FOR_USER:int 
+    
+    FRONTEND_DOMAIN:str
+    BACKEND_DOMAIN:str
+    FRONTEND_URL:str
+
+    LLM_MODELS : list[str]
+    
     LLM_PROVIDER: str
     OLLAMA_URL: str
     OLLAMA_MODEL: str
@@ -38,7 +47,6 @@ class Settings(BaseSettings):
     VECTOR_MODEL: str
 
     # Gemini
-    LLM_MODELS: List[str]
     LLM_API_KEY: str
     GEMINI_KEYS: Optional[List[str]] = None
 
@@ -78,6 +86,7 @@ class Settings(BaseSettings):
             values["GEMINI_KEYS"] = self._parse_list(values["GEMINI_KEYS"])
         super().__init__(**values)
 
+    
 
     model_config = SettingsConfigDict(env_file=".env")
 

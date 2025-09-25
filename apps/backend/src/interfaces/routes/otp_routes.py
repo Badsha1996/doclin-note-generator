@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends,HTTPException
 from sqlalchemy.orm import Session
 
 from ...utils.exceptions import AuthExceptionError
-from ...interfaces.schemas.base_schemas import APIResponseSchema
+from ...interfaces.schemas.response_schemas import APIResponseSchema
 from ...core.services.email_service import EmailService
 from ...core.services.otp_service import OTPService
 from ...infrastructure.repo.otp_repo import SQLOTPRepo

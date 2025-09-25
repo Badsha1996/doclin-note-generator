@@ -52,8 +52,8 @@ class AuthService:
         if not self.security.verify_password(entered_password=password, hashed_password=existing_user.hash_password):
             return None
         
-        if not existing_user.is_active:
-            raise AuthExceptionError("Account is deactivated")
+        if  existing_user.blocked:
+            raise AuthExceptionError("Account is blocked")
         
         return User.model_validate(existing_user) 
     

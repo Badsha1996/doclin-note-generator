@@ -19,7 +19,7 @@ import { BsMeta } from "react-icons/bs";
 import { motion } from "framer-motion";
 
 import { fadeInUp, scaleIn, transition } from "@/lib/motion";
-import { setAuthTokens } from "@/lib/auth";
+// import { setAuthTokens } from "@/lib/auth";
 
 export const Route = createFileRoute("/login/")({
   component: Login,
@@ -49,20 +49,20 @@ function Login() {
     },
     {
       onSuccess: (data) => {
-        const { access_token, refresh_token } = data.data;
-        setAuthTokens(access_token, refresh_token);
+        // const { access_token, refresh_token } = data.data;
+        // setAuthTokens(access_token, refresh_token);
         toast.success(data.message || "Login successful!");
         router.navigate({ to: "/" });
       },
       onError: (error: ApiError) => {
         toast.error(error.message || "Login failed. Please try again.");
+        console.log(error);
       },
     }
   );
 
   // ********** Functions ***********
   function onSubmit(data: loginTypes) {
-    console.log("Submitting:", data);
     mutation.mutate(data);
   }
 

@@ -28,3 +28,4 @@ class LoginSchema(BaseModel):
 
 class VerifySchema(BaseModel):
     id:str
+

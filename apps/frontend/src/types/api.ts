@@ -21,9 +21,11 @@ export const userSchema = z.object({
   id: z.uuid(),
   username: z.string(),
   email: z.email(),
-  role: z.literal("user"),
-  is_active: z.boolean(),
+  role: z.enum(["admin", "user", "superAdmin"]),
   is_verified: z.boolean(),
+  plan: z.enum(["free"]),
+  blocked: z.boolean(),
+  model_hit_count: z.int32(),
   created_at: z.coerce.date(),
   updated_at: z.coerce.date(),
 });
@@ -59,6 +61,17 @@ export const loginDataSchema = z.object({
 export const loginResponseSchema = apiResponseSchema(loginDataSchema);
 
 export type LoginResponse = z.infer<typeof loginResponseSchema>;
+//all use end point
+export const allUserDataSchema = z.object({
+  users: z.array(userSchema),
+});
+
+export const allUserResponseSchema = apiResponseSchema(allUserDataSchema);
+
+export type AllUserResponse = z.infer<typeof allUserResponseSchema>;
+
+export const examPaperUploadSchema = apiResponseSchema(z.null());
+export type ExamPaperUploadResponse = z.infer<typeof examPaperUploadSchema>;
 
 // Subject EndPoint Schema
 export const subjectBoardSchema = z.object({
@@ -81,3 +94,16 @@ export const boardResponseSchema = apiResponseSchema(
 );
 
 export type boardResponse = z.infer<typeof boardResponseSchema>;
+
+// KPI end point
+export const userKpiDataSchema = z.object({
+  totalUsers: z.number(),
+  blockedUsers: z.number(),
+  paidUsers: z.number(),
+  newUsers: z.number(),
+  trend: z.array(z.record(z.string(), z.number())),
+});
+
+export const userKpiResponseSchema = apiResponseSchema(userKpiDataSchema);
+
+export type UserKPIResponse = z.infer<typeof userKpiResponseSchema>;

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
-from ..entities.user_entities import OAuthUser, User, UserCreate, UserUpdate, InternalUser
+from ..entities.user_entities import OAuthUser, User, UserCreate, UserCreateByAdmin, UserKPI, UserUpdate, InternalUser
 
 class UserRepo(ABC):
     @abstractmethod
@@ -31,7 +31,13 @@ class UserRepo(ABC):
     async def delete_user(self, user_id: str) -> bool:
         ...
 
+    @abstractmethod
+    async def create_user_by_admin(self,user_data:UserCreateByAdmin)->User:
+        ...
 
+    @abstractmethod
+    async def get_kpi(self)->UserKPI:
+        ...
 
 class OAuthRepo(ABC):
     @abstractmethod
