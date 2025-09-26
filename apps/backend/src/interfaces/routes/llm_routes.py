@@ -7,11 +7,11 @@ from ..dependencies.dependencies import get_current_user,admin_or_super_admin_on
 
 from ...database.database import get_DB
 from ...infrastructure.repo.user_repo import SQLUserRepo
-from ...infrastructure.repo.llm_repo import SQLLMRepo
+from ...infrastructure.repo.ICSE_exam_paper_llm_repo import SQLLMRepo
 from ...infrastructure.repo.exam_paper_repo import SQLExamPaperRepo
 from ...infrastructure.providers.auth_provider import get_security_manager
 from ...utils.security import SecurityManager
-from ...core.services.llm_service import LLMService
+from ...core.services.ICSE_exam_paper_llm_service import LLMService
 from ...core.entities.user_entities import User, UserUpdate
 from ...core.services.user_service import UserService
 

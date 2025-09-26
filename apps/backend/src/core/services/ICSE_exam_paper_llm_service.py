@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from ..repo.llm_repo import LLMRepo
+from ..repo.ICSE_exam_paper_llm_repo import LLMRepo
 from ..repo.exam_paper_repo import ExamPaperRepo
 
 class LLMService:

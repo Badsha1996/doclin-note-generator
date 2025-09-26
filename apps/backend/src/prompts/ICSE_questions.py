@@ -5,29 +5,44 @@ You are an expert exam paper generator for ${board} ${subject} examinations.
 
 Generate Section A (compulsory section) for ${board} ${subject} exam paper ${code} for year ${year}.
 
-CRITICAL REQUIREMENTS:
-1. Generate EXACTLY the JSON structure shown in the demo. No extra or missing fields.
-2. Every 'parts' object MUST have 'type' and 'marks' fields.
-3. Use the exact field names from the demo JSON.
-4. Question 1: 15 multiple choice parts (i-xv), each with 4 options.
-5. Question 2: 5-7 parts (i-vii) with 2-4 marks each, totaling 15 marks.
-6. Question 3: 4-5 parts (i-v) with 2-3 marks each, totaling 10 marks.
+RULE: For any list field (sub_parts, options, diagram.elements, labels, column_a, column_b, etc.),
+never return null. If empty, return [].
+                                                        
+CRITICAL REQUIREMENTS (FOLLOW SCHEMA EXACTLY):
+1. Follow the DEMO JSON structure exactly. No extra fields, no missing fields.
+2. Every "parts" object MUST include "number", "type", and "marks".
+3. Field names must match the demo JSON exactly.
+4. Question 1: 15 multiple choice parts (i–xv), each worth 1 mark, each with 4 options.
+5. Question 2: 5–7 parts (i–vii), 2–4 marks each, total = 15 marks.
+6. Question 3: 4–5 parts (i–v), 2–3 marks each, total = 10 marks.
 
-MULTIPLE CHOICE RULES:
-- Use type = "multiple_choice" (never "mcq")
-- Each option must be an object: {"option_text": "...", "is_correct": true/false}
-- Only one option can have "is_correct": true
+MULTIPLE CHOICE OPTIONS FORMAT (STRICT):
+Each option must be an object with these exact fields:
+{
+  "option_letter": "(a)",
+  "text": "Option text here"
+}
 
-VALID TYPES FOR PARTS:
-"multiple_choice", "short_answer", "long_answer", "diagram_based",
-"calculation", "matching", "fill_blanks", "arrange_sequence",
-"complete_equation", "identify_structure"
-Default to "short_answer" if unsure.
+DIAGRAM RULES:
+- "diagram.elements" MUST be a list of plain strings only (no objects).
+  Example: ["Battery: 12 V", "Resistor: 4 Ω"]
+- "diagram.labels" MUST be a list of strings.
+- "diagram.type" must be one of:
+  "circuit_diagram", "ray_diagram", "force_diagram", "molecular_structure",
+  "apparatus_setup", "anatomical_diagram", "cell_diagram", "system_diagram",
+  "graph", "flowchart", "Others"
 
-SUB-PARTS AND PARTS:
-- Parts must be labeled with roman numerals: i, ii, iii...
-- Sub-parts (if any) must be labeled with letters: a, b, c...
-- Each question must total exactly the marks specified.
+FORMULA AND CONSTANTS:
+- If no formula is needed, either omit "formula_given" or set it to null.
+- "formula_given" must always be a plain string (e.g. "P = V * I").
+- "constants_given" must always be a dictionary with string key-value pairs:
+  Example: { "g": "10 m/s²", "c": "3×10^8 m/s" }
+- Do not wrap it in {"value": "..."}.
+
+
+PART/QUESTION LABELING:
+- Parts numbered in roman numerals ("i", "ii", "iii", ...).
+- Sub-parts lettered ("(a)", "(b)", "(c)", ...).
 
 DEMO JSON STRUCTURE (FOLLOW EXACTLY):
 ${demo_json}
@@ -36,11 +51,10 @@ AVAILABLE CONTEXT:
 ${retrieval_context}
 
 INSTRUCTIONS:
-- Use context to create relevant physics questions.
-- Multiple choice options should be plausible but only one correct.
-- Short answer parts can have sub_parts or direct question_text.
-- Ensure all marks add up exactly.
-- Return ONLY the valid JSON structure. No extra text.
+- Use the provided context to generate relevant ${subject} questions.
+- Ensure marks add up exactly as specified.
+- Provide only valid JSON — no explanations, no prose.
+- Validate that all fields conform strictly to the schema.
 """)
 
 SECTION_B_PROMPT = Template("""
@@ -48,34 +62,41 @@ You are an expert exam paper generator for ${board} ${subject} examinations.
 
 Generate Section B (optional section) for ${board} ${subject} exam paper ${code} for year ${year}.
 
-CRITICAL REQUIREMENTS:
-1. Generate EXACTLY the JSON structure shown in the demo. No extra or missing fields.
-2. Every 'parts' object MUST have 'type' and 'marks' fields.
-3. Use the exact field names from the demo JSON.
-4. Generate 6 questions (4-9), each worth exactly 10 marks.
-5. Each question should have 3 parts (i, ii, iii) with varying marks (e.g., 3+3+4).
+RULE: For any list field (sub_parts, options, diagram.elements, labels, column_a, column_b, etc.),
+never return null. If empty, return [].
+                            
+CRITICAL REQUIREMENTS (FOLLOW SCHEMA EXACTLY):
+1. Follow the DEMO JSON structure exactly. No extra fields, no missing fields.
+2. Every "parts" object MUST include "number", "type", and "marks".
+3. Field names must match the demo JSON exactly.
+4. Generate 6 questions (numbers 4–9), each worth exactly 10 marks.
+5. Each question has 3 parts (i, ii, iii), marks distribution = 3+3+4 or 2+3+5.
 
-VALID TYPES FOR PARTS:
-"multiple_choice", "short_answer", "long_answer", "diagram_based",
-"calculation", "matching", "fill_blanks", "arrange_sequence",
-"complete_equation", "identify_structure"
-Default to "short_answer" if unsure.
+MULTIPLE CHOICE OPTIONS FORMAT (STRICT):
+Each option must be an object with these exact fields:
+{
+  "option_letter": "(a)",
+  "text": "Option text here"
+}
 
-MULTIPLE CHOICE RULES:
-- type = "multiple_choice"
-- Each option must be an object: {"option_text": "...", "is_correct": true/false}
-- Only one option may have "is_correct": true
+DIAGRAM RULES:
+- "diagram.elements" MUST be a list of plain strings only (no objects).
+- "diagram.labels" MUST be a list of strings.
+- "diagram.type" must be one of the allowed types:
+  "circuit_diagram", "ray_diagram", "force_diagram", "molecular_structure",
+  "apparatus_setup", "anatomical_diagram", "cell_diagram", "system_diagram",
+  "graph", "flowchart", "Others"
 
-DIAGRAM BASED RULES:
-- diagram.type MUST be one of: "circuit_diagram", "ray_diagram", "force_diagram",
-  "molecular_structure", "apparatus_setup", "anatomical_diagram", "cell_diagram",
-  "system_diagram", "graph", "flowchart", "Others"
-- If unsure, use "Others"
+FORMULA AND CONSTANTS:
+- If no formula is needed, either omit "formula_given" or set it to null.
+- "formula_given" must always be a plain string (e.g. "P = V * I").
+- "constants_given" must always be a dictionary with string key-value pairs:
+  Example: { "g": "10 m/s²", "c": "3×10^8 m/s" }
+- Do not wrap it in {"value": "..."}.
 
-SUB-PARTS AND PARTS:
-- Parts must be labeled with roman numerals: i, ii, iii...
-- Sub-parts (if any) must be labeled with letters: a, b, c...
-- Each question must total exactly 10 marks.
+LABELING RULES:
+- Parts use roman numerals ("i", "ii", "iii").
+- Sub-parts use letters ("(a)", "(b)", "(c)").
 
 DEMO JSON STRUCTURE (FOLLOW EXACTLY):
 ${demo_json}
@@ -84,7 +105,11 @@ AVAILABLE CONTEXT:
 ${retrieval_context}
 
 INSTRUCTIONS:
-- Use context to create relevant physics questions.
-- Include variety: calculations, diagrams, explanations.
-- Return ONLY the valid JSON structure. No extra text.
+- Use context for realistic ${subject} questions.
+- Include variety: calculations, diagrams, reasoning.
+- Ensure scientific accuracy and difficulty level is appropriate.
+- Ensure all marks add up to exactly 10 per question.
+- Output ONLY valid JSON conforming to the schema.
+                            
+
 """)
