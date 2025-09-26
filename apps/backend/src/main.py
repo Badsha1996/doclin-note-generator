@@ -11,7 +11,8 @@ from .interfaces.routes.exam_paper_routes import exam_paper_router
 from .interfaces.routes.doc_routes import doc_router
 from .interfaces.routes.otp_routes import otp_router
 from .interfaces.routes.user_routes import user_router
-
+from .interfaces.routes.feedback_routes import feedback_router
+from .interfaces.routes.issues_routes import issue_router
 
 
 # main APP initiation 🎌
@@ -36,6 +37,8 @@ app.include_router(exam_paper_router, prefix="/api")
 app.include_router(doc_router, prefix="/api")
 app.include_router(otp_router,prefix="/api") 
 app.include_router(user_router,prefix="/api")
+app.include_router(feedback_router,prefix="/api")
+app.include_router(issue_router,prefix="/api")
 
 # ROOT ROUTE
 @app.get("/")

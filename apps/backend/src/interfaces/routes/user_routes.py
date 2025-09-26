@@ -16,8 +16,8 @@ user_router = APIRouter(prefix="/user", tags=[""])
 
 @user_router.get("/all",dependencies=[Depends(admin_or_super_admin_only)])
 async def get_all_user(
-    skip:int,
-    limit:int,
+    skip:int=0,
+    limit:int=10,
     db: Session = Depends(get_DB),
     security_manager:SecurityManager = Depends(get_security_manager)
 ):

@@ -30,6 +30,7 @@ class Settings(BaseSettings):
 
     EMAIL:str
     GOOGLE_APP_PASSWORD:str
+    SUPER_ADMIN_EMAIL:str
 
     MAX_COUNT_FOR_PREVILEGED:int
     MAX_COUNT_FOR_USER:int 
