@@ -5,21 +5,17 @@ import asyncio
 import json
 from uuid import uuid4
 import logging
+from string import Template
 
 from ...config.config import settings
 from ...LLMs.LLMs import LLMProviderManager
 from ...core.entities.exam_paper_entities import ExamInfo, ExamPaperCreate, Section
 from ..models.exam_paper_models import SubPartModel, QuestionPartModel, QuestionModel, SectionModel, ExamPaperModel
+from ...prompts.ICSE_questions import PERFECT_DIAGRAM, PERFECT_QUESTION, PERFECT_SECTION_A, PERFECT_SECTION_B, ULTRA_STRICT_SECTION_A_PROMPT, ULTRA_STRICT_SECTION_B_PROMPT
 
-# Set up logging
-logger = logging.getLogger(__name__)
 
 ROMAN_NUMERALS = ["i", "ii", "iii", "iv", "v", "vi", "vii", "viii", "ix", "x", "xi", "xii", "xiii", "xiv", "xv"]
-VALID_DIAGRAM_TYPES = {
-    "circuit_diagram", "ray_diagram", "force_diagram", "molecular_structure",
-    "apparatus_setup", "anatomical_diagram", "cell_diagram", "system_diagram",
-    "graph", "flowchart", "Others"
-}
+
 
 class SQLLMRepo:
     def __init__(self, db: Session):
@@ -28,13 +24,10 @@ class SQLLMRepo:
         self.llm_manager = LLMProviderManager()
         self.max_retrieval_limit = 300
         self.context_per_section = 50
-
     def _get_roman_numeral(self, num: int) -> str:
-        """Get roman numeral for given number."""
         return ROMAN_NUMERALS[num - 1] if 1 <= num <= len(ROMAN_NUMERALS) else str(num)
 
     def _create_exam_info(self, subject: str, board: str, paper: str, code: str, year: int) -> ExamInfo:
-        """Create exam info with standard ICSE format."""
         return ExamInfo(
             paper_code=code,
             subject=subject.lower(),
@@ -55,497 +48,279 @@ class SQLLMRepo:
             ],
         )
 
-    def _create_default_sections(self) -> List[Dict]:
-        """Create default section templates."""
-        return [
-            {
-                "name": "Section A",
-                "marks": 40,
-                "instruction": "Attempt all questions from this Section",
-                "is_compulsory": True,
-                "questions": []
-            },
-            {
-                "name": "Section B", 
-                "marks": 40,
-                "instruction": "Attempt any four questions from this Section",
-                "is_compulsory": False,
-                "questions": []
-            }
-        ]
-
-    def _validate_json_structure(self, section_json: Dict) -> List[str]:
-        """Validate the generated JSON matches expected structure."""
-        errors = []
-        
-        if not isinstance(section_json, dict):
-            return ["Section must be a dictionary"]
-        
-        # Check required section fields
-        required_section_fields = ["name", "marks", "instruction", "is_compulsory", "questions"]
-        for field in required_section_fields:
-            if field not in section_json:
-                errors.append(f"Missing section field: {field}")
-        
-        questions = section_json.get("questions", [])
-        if not isinstance(questions, list):
-            errors.append("Questions must be a list")
-            return errors
-        
-        for q_idx, question in enumerate(questions):
-            if not isinstance(question, dict):
-                errors.append(f"Question {q_idx} must be a dictionary")
+    def _prepare_retrieval_context(self, similar_subparts) -> List[Dict]:
+        retrieval_context = []
+        for sp in similar_subparts:
+            question_text = getattr(sp, "question_text", "").strip()
+            if not question_text:
                 continue
-                
-            # Check question fields
-            required_q_fields = ["number", "type", "total_marks"]
-            for field in required_q_fields:
-                if field not in question:
-                    errors.append(f"Question {q_idx} missing field: {field}")
             
-            parts = question.get("parts", [])
+            context_item = {
+                "sub_id": str(getattr(sp, "id", uuid4())),
+                "text": question_text,
+                "marks": getattr(sp, "marks", 1),
+                "choices_given": getattr(sp, "choices_given", []) or [],
+                "formula_given": getattr(sp, "formula_given", None),
+                "constants_given": getattr(sp, "constants_given", None),
+                "type": "subpart",
+            }
+            
+            part = getattr(sp, "part", None)
+            if part:
+                context_item["part_type"] = getattr(part, "type", None)
+                context_item["part_marks"] = getattr(part, "marks", None)
+                question = getattr(part, "question", None)
+                if question:
+                    context_item["question_type"] = getattr(question, "type", None)
+                    context_item["question_title"] = getattr(question, "title", None)
+            
+            retrieval_context.append(context_item)
+        
+        return retrieval_context
+
+    def _get_subparts_by_subject(self, subject: str, query_embedding: List[float]):
+        subparts = (
+            self.db.query(SubPartModel)
+            .join(QuestionPartModel, SubPartModel.part_id == QuestionPartModel.id)
+            .join(QuestionModel, QuestionPartModel.question_id == QuestionModel.id)
+            .join(SectionModel, QuestionModel.section_id == SectionModel.id)
+            .join(ExamPaperModel, SectionModel.exam_id == ExamPaperModel.id)
+            .filter(
+                SubPartModel.embedding.isnot(None),
+                SubPartModel.question_text.isnot(None),
+                SubPartModel.question_text != '',
+                ExamPaperModel.subject.ilike(f"%{subject.lower()}%")
+            )
+            .order_by(SubPartModel.embedding.cosine_distance(query_embedding))
+            .limit(self.max_retrieval_limit)
+            .all()
+        )
+        return subparts
+
+    def _enforce_perfect_schema(self, section_json: Dict, is_section_a: bool = True) -> Dict:
+        """Enforce perfect schema compliance with zero tolerance."""
+        template = PERFECT_SECTION_A.copy() if is_section_a else PERFECT_SECTION_B.copy()
+        
+        # Force exact structure match
+        if not isinstance(section_json, dict) or "questions" not in section_json:
+            return template
+            
+        # Validate section fields
+        result = {
+            "name": section_json.get("name", template["name"]),
+            "marks": int(section_json.get("marks", template["marks"])),
+            "instruction": section_json.get("instruction", template["instruction"]),
+            "is_compulsory": bool(section_json.get("is_compulsory", template["is_compulsory"])),
+            "questions": []
+        }
+        
+        # Process questions with strict validation
+        questions = section_json.get("questions", [])
+        expected_count = 3 if is_section_a else 6
+        
+        for i in range(expected_count):
+            if i < len(questions) and isinstance(questions[i], dict):
+                q = questions[i]
+            else:
+                q = template["questions"][0].copy() if template["questions"] else PERFECT_QUESTION.copy()
+            
+            # Force question structure
+            question = {
+                "number": int(q.get("number", i + 1)),
+                "title": q.get("title"),
+                "type": str(q.get("type", "short_answer")),
+                "total_marks": int(q.get("total_marks", 10)),
+                "instruction": q.get("instruction"),
+                "parts": [],
+                "question_text": q.get("question_text"),
+                "options": [],
+                "diagram": q.get("diagram")
+            }
+            
+                            # Process parts
+            parts = q.get("parts", [])
             for p_idx, part in enumerate(parts):
                 if not isinstance(part, dict):
-                    errors.append(f"Question {q_idx} part {p_idx} must be a dictionary")
                     continue
-                    
-                # Check part fields
-                required_p_fields = ["number", "type", "marks"]
-                for field in required_p_fields:
-                    if field not in part:
-                        errors.append(f"Question {q_idx} part {p_idx} missing field: {field}")
                 
-                # Check options format for multiple choice
+                # Handle missing_parts field - convert list to dict if needed
+                missing_parts = part.get("missing_parts")
+                if isinstance(missing_parts, list):
+                    # Convert list to dict with indexed keys
+                    missing_parts = {f"item_{i+1}": str(item) for i, item in enumerate(missing_parts)}
+                elif missing_parts is not None and not isinstance(missing_parts, dict):
+                    missing_parts = None
+                
+                # Handle choices_for_blanks - ensure it's list of lists
+                choices_for_blanks = part.get("choices_for_blanks")
+                if choices_for_blanks is not None and not isinstance(choices_for_blanks, list):
+                    choices_for_blanks = None
+                elif isinstance(choices_for_blanks, list):
+                    # Ensure each item is a list
+                    fixed_choices = []
+                    for choice in choices_for_blanks:
+                        if isinstance(choice, list):
+                            fixed_choices.append(choice)
+                        else:
+                            fixed_choices.append([str(choice)])
+                    choices_for_blanks = fixed_choices
+                
+                # Handle constants_given - ensure it's dict
+                constants_given = part.get("constants_given")
+                if isinstance(constants_given, list):
+                    constants_given = {f"constant_{i+1}": str(item) for i, item in enumerate(constants_given)}
+                elif constants_given is not None and not isinstance(constants_given, dict):
+                    constants_given = None
+                    
+                validated_part = {
+                    "number": self._get_roman_numeral(p_idx + 1),
+                    "type": str(part.get("type", "short_answer")),
+                    "marks": int(part.get("marks", 1)),
+                    "question_text": part.get("question_text"),
+                    "description": part.get("description"),
+                    "sub_parts": [],
+                    "options": [],
+                    "diagram": part.get("diagram"),
+                    "formula_given": part.get("formula_given"),
+                    "constants_given": constants_given,
+                    "column_a": part.get("column_a"),
+                    "column_b": part.get("column_b"),
+                    "items_to_arrange": part.get("items_to_arrange"),
+                    "sequence_type": part.get("sequence_type"),
+                    "statement_with_blanks": part.get("statement_with_blanks"),
+                    "choices_for_blanks": choices_for_blanks,
+                    "equation_template": part.get("equation_template"),
+                    "missing_parts": missing_parts
+                }
+                
+                # Process options for MCQ
                 if part.get("type") == "multiple_choice":
                     options = part.get("options", [])
                     for o_idx, option in enumerate(options):
-                        if not isinstance(option, dict):
-                            errors.append(f"Question {q_idx} part {p_idx} option {o_idx} must be a dictionary")
-                            continue
-                        if "text" not in option:
-                            errors.append(f"Question {q_idx} part {p_idx} option {o_idx} missing 'text' field")
-                        if "option_letter" not in option:
-                            errors.append(f"Question {q_idx} part {p_idx} option {o_idx} missing 'option_letter' field")
+                        if isinstance(option, dict):
+                            validated_part["options"].append({
+                                "option_letter": option.get("option_letter", f"({chr(97+o_idx)})"),
+                                "text": str(option.get("text", f"Option {chr(65+o_idx)}"))
+                            })
                 
-                # Check sub_parts
+                # Process sub-parts
                 sub_parts = part.get("sub_parts", [])
-                for s_idx, sub_part in enumerate(sub_parts):
-                    if not isinstance(sub_part, dict):
-                        errors.append(f"Question {q_idx} part {p_idx} sub_part {s_idx} must be a dictionary")
-                        continue
-                    if "letter" not in sub_part:
-                        errors.append(f"Question {q_idx} part {p_idx} sub_part {s_idx} missing 'letter' field")
-                    if "question_text" not in sub_part:
-                        errors.append(f"Question {q_idx} part {p_idx} sub_part {s_idx} missing 'question_text' field")
-        
-        return errors
-
-    def _fix_options_format(self, sections: List[Dict]) -> List[Dict]:
-        """Fix option format to match expected structure."""
-        for section in sections:
-            for question in section.get("questions", []):
-                for part in question.get("parts", []):
-                    if part.get("type") == "multiple_choice":
-                        options = part.get("options", [])
-                        fixed_options = []
+                for s_idx, sub in enumerate(sub_parts):
+                    if isinstance(sub, dict):
+                        # Handle constants_given in sub-parts
+                        sub_constants = sub.get("constants_given")
+                        if isinstance(sub_constants, list):
+                            sub_constants = {f"constant_{i+1}": str(item) for i, item in enumerate(sub_constants)}
+                        elif sub_constants is not None and not isinstance(sub_constants, dict):
+                            sub_constants = None
                         
-                        for idx, option in enumerate(options):
-                            if isinstance(option, dict):
-                                # Fix option structure
-                                fixed_option = {
-                                    "option_letter": option.get("option_letter", f"({chr(97+idx)})"),
-                                    "text": option.get("text", option.get("option_text", "Option text"))
-                                }
-                                # Remove unwanted fields
-                                fixed_options.append(fixed_option)
-                            else:
-                                # Fallback for malformed options
-                                fixed_options.append({
-                                    "option_letter": f"({chr(97+idx)})",
-                                    "text": str(option) if option else "Option text"
-                                })
-                        
-                        part["options"] = fixed_options
-        return sections
-
-    def _normalize_diagram_types(self, sections: List[Dict]) -> List[Dict]:
-        """Ensure diagram.type is always valid, default to 'Others', and add required fields."""
-        for section in sections:
-            for question in section.get("questions", []):
-                # Question-level diagram
-                diag = question.get("diagram")
-                if diag and isinstance(diag, dict):
-                    if diag.get("type") not in VALID_DIAGRAM_TYPES:
-                        diag["type"] = "Others"
-                    diag.setdefault("description", "Diagram description")
-                    diag.setdefault("elements", [])
-                    diag.setdefault("labels", [])
+                        # Handle choices_given - should be list
+                        choices_given = sub.get("choices_given")
+                        if choices_given is not None and not isinstance(choices_given, list):
+                            choices_given = None
+                            
+                        validated_part["sub_parts"].append({
+                            "letter": f"({chr(97+s_idx)})",
+                            "question_text": str(sub.get("question_text", "")),
+                            "marks": sub.get("marks"),
+                            "diagram": sub.get("diagram"),
+                            "formula_given": sub.get("formula_given"),
+                            "constants_given": sub_constants,
+                            "equation_template": sub.get("equation_template"),
+                            "choices_given": choices_given
+                        })
                 
-                # Parts-level diagram
-                for part in question.get("parts", []):
-                    diag = part.get("diagram")
-                    if diag and isinstance(diag, dict):
-                        if diag.get("type") not in VALID_DIAGRAM_TYPES:
-                            diag["type"] = "Others"
-                        diag.setdefault("description", "Diagram description")
-                        diag.setdefault("elements", [])
-                        diag.setdefault("labels", [])
-                    
-                    # Sub-parts level diagram
-                    for sub in part.get("sub_parts", []):
-                        diag = sub.get("diagram")
-                        if diag and isinstance(diag, dict):
-                            if diag.get("type") not in VALID_DIAGRAM_TYPES:
-                                diag["type"] = "Others"
-                            diag.setdefault("description", "Diagram description")
-                            diag.setdefault("elements", [])
-                            diag.setdefault("labels", [])
-        return sections
-
-    def _validate_structure(self, sections: List[Dict]) -> List[Dict]:
-        """Validate and fix every question, part, sub-part, and diagram."""
-        valid_sections = []
-        
-        for idx, section in enumerate(sections):
-            if not isinstance(section, dict):
-                section = {}
+                question["parts"].append(validated_part)
             
-            section.setdefault("name", f"Section {chr(65+idx)}")
-            section.setdefault("marks", 40)
-            section.setdefault("instruction", "Attempt all questions")
-            section.setdefault("is_compulsory", idx == 0)
-            section.setdefault("questions", [])
-
-            valid_questions = []
-            for q_idx, q in enumerate(section.get("questions", [])):
-                if not isinstance(q, dict):
-                    continue
-                    
-                q.setdefault("number", q_idx + 1)
-                q.setdefault("type", "short_answer")
-                q.setdefault("total_marks", 1)
-                q.setdefault("parts", [])
-                
-                # Validate parts
-                valid_parts = []
-                for pidx, part in enumerate(q.get("parts", [])):
-                    if not isinstance(part, dict):
-                        continue
-                        
-                    part.setdefault("type", "short_answer")
-                    part.setdefault("marks", 1)
-                    part.setdefault("number", self._get_roman_numeral(pidx + 1))
-                    part.setdefault("sub_parts", [])
-                    
-                    # Fix multiple choice options
-                    if part.get("type") == "multiple_choice":
-                        options = part.get("options", [])
-                        fixed_options = []
-                        for oidx, option in enumerate(options):
-                            if isinstance(option, dict):
-                                fixed_option = {
-                                    "option_letter": option.get("option_letter", f"({chr(97+oidx)})"),
-                                    "text": option.get("text", option.get("option_text", f"Option {chr(65+oidx)}"))
-                                }
-                                fixed_options.append(fixed_option)
-                        part["options"] = fixed_options
-                    
-                    # Validate sub-parts
-                    valid_sub_parts = []
-                    for sidx, sub in enumerate(part.get("sub_parts", [])):
-                        if not isinstance(sub, dict):
-                            continue
-                        sub.setdefault("letter", f"({chr(97+sidx)})")
-                        sub.setdefault("question_text", "Sub-part question text")
-                        
-                        # Validate diagram
-                        diag = sub.get("diagram")
-                        if diag and isinstance(diag, dict) and diag.get("type") not in VALID_DIAGRAM_TYPES:
-                            diag["type"] = "Others"
-                        
-                        valid_sub_parts.append(sub)
-                    
-                    part["sub_parts"] = valid_sub_parts
-                    valid_parts.append(part)
-                
-                q["parts"] = valid_parts
-                valid_questions.append(q)
-            
-            section["questions"] = valid_questions
-            valid_sections.append(section)
-
-        return self._normalize_diagram_types(valid_sections)
-
-    def _prepare_retrieval_context(self, similar_subparts) -> List[Dict]:
-        """Prepare retrieval context from database subparts for LLM prompts."""
-        retrieval_context = []
+            result["questions"].append(question)
         
-        for sp in similar_subparts:
-            try:
-                question_text = getattr(sp, "question_text", "").strip()
-                if not question_text:
-                    continue
+        return result
 
-                context_item = {
-                    "sub_id": str(getattr(sp, "id", uuid4())),
-                    "text": question_text,
-                    "marks": getattr(sp, "marks", 1),
-                    "choices_given": getattr(sp, "choices_given", []) or [],
-                    "formula_given": getattr(sp, "formula_given", None),
-                    "constants_given": getattr(sp, "constants_given", None),
-                    "type": "subpart",
-                }
-
-                # Include parent part/question info if available
-                part = getattr(sp, "part", None)
-                if part:
-                    context_item["part_type"] = getattr(part, "type", None)
-                    context_item["part_marks"] = getattr(part, "marks", None)
-                    question = getattr(part, "question", None)
-                    if question:
-                        context_item["question_type"] = getattr(question, "type", None)
-                        context_item["question_title"] = getattr(question, "title", None)
-
-                retrieval_context.append(context_item)
-                
-            except Exception as e:
-                logger.warning(f"Error processing subpart {getattr(sp, 'id', 'unknown')}: {e}")
-                continue
-                
-        return retrieval_context
-    def _normalize_constants_and_formulas(self, sections: List[Dict]) -> List[Dict]:
-        for section in sections:
-            for question in section.get("questions", []):
-                # question-level constants/formulas (if you store them there)
-                q_consts = question.get("constants_given")
-                if q_consts is not None:
-                    if isinstance(q_consts, dict):
-                        pass
-                    elif isinstance(q_consts, list):
-                        question["constants_given"] = {
-                            f"constant_{i+1}": str(v) for i, v in enumerate(q_consts)
-                        }
-                    else:
-                        question["constants_given"] = {"value": str(q_consts)}
-
-                q_forms = question.get("formula_given")
-                if q_forms is not None:
-                    if isinstance(q_forms, dict):
-                        pass
-                    elif isinstance(q_forms, list):
-                        question["formula_given"] = {
-                            f"formula_{i+1}": str(v) for i, v in enumerate(q_forms)
-                        }
-                    else:
-                        question["formula_given"] = {"value": str(q_forms)}
-
-                # part-level normalization
-                for part in question.get("parts", []):
-                    # constants_given
-                    consts = part.get("constants_given")
-                    if consts is not None:
-                        if isinstance(consts, dict):
-                            pass
-                        elif isinstance(consts, list):
-                            part["constants_given"] = {
-                                f"constant_{i+1}": str(v) for i, v in enumerate(consts)
-                            }
-                        else:
-                            part["constants_given"] = {"value": str(consts)}
-
-                    # formula_given
-                    forms = part.get("formula_given")
-                    if forms is not None:
-                        if isinstance(forms, dict):
-                            pass
-                        elif isinstance(forms, list):
-                            part["formula_given"] = {
-                                f"formula_{i+1}": str(v) for i, v in enumerate(forms)
-                            }
-                        else:
-                            part["formula_given"] = {"value": str(forms)}
-
-                    # also normalize inside sub_parts if they contain constants/formula
-                    for sub in part.get("sub_parts", []):
-                        s_consts = sub.get("constants_given")
-                        if s_consts is not None:
-                            if isinstance(s_consts, dict):
-                                pass
-                            elif isinstance(s_consts, list):
-                                sub["constants_given"] = {
-                                    f"constant_{i+1}": str(v) for i, v in enumerate(s_consts)
-                                }
-                            else:
-                                sub["constants_given"] = {"value": str(s_consts)}
-
-                        s_forms = sub.get("formula_given")
-                        if s_forms is not None:
-                            if isinstance(s_forms, dict):
-                                pass
-                            elif isinstance(s_forms, list):
-                                sub["formula_given"] = {
-                                    f"formula_{i+1}": str(v) for i, v in enumerate(s_forms)
-                                }
-                            else:
-                                sub["formula_given"] = {"value": str(s_forms)}
-
-        return sections
-
-    def _get_subparts_by_subject(self, subject: str, query_embedding: List[float]):
-        """Fetch subparts filtered by subject with embedding ranking."""
+    async def _generate_perfect_section(self, context_items: List[Dict], subject: str, board: str,
+                                       paper: str, code: str, year: int, is_section_a: bool = True) -> Dict:
+        """Generate section with perfect schema enforcement."""
+        template = PERFECT_SECTION_A if is_section_a else PERFECT_SECTION_B
+        prompt_template = ULTRA_STRICT_SECTION_A_PROMPT if is_section_a else ULTRA_STRICT_SECTION_B_PROMPT
+        
+        prompt = prompt_template.safe_substitute(
+            board=board,
+            subject=subject,
+            paper=paper,
+            code=code,
+            year=year,
+            perfect_schema=json.dumps(template, indent=2),
+            retrieval_context=json.dumps(context_items[:50], indent=2)
+        )
+        
+        llm_response = await self.llm_manager.safe_generate(prompt=prompt)
+        raw_output = getattr(llm_response, 'content', getattr(llm_response, 'text', str(llm_response)))
+        
         try:
-            subparts = (
-                self.db.query(SubPartModel)
-                .join(QuestionPartModel, SubPartModel.part_id == QuestionPartModel.id)
-                .join(QuestionModel, QuestionPartModel.question_id == QuestionModel.id)
-                .join(SectionModel, QuestionModel.section_id == SectionModel.id)
-                .join(ExamPaperModel, SectionModel.exam_id == ExamPaperModel.id)
-                .filter(
-                    SubPartModel.embedding.isnot(None),
-                    SubPartModel.question_text.isnot(None),
-                    SubPartModel.question_text != '',
-                    ExamPaperModel.subject.ilike(f"%{subject.lower()}%")
-                )
-                .order_by(SubPartModel.embedding.cosine_distance(query_embedding))
-                .limit(self.max_retrieval_limit)
-                .all()
-            )
-            return subparts
-        except Exception as e:
-            logger.error(f"Error retrieving subparts: {e}")
-            return []
-
-    async def _generate_section(self, context_items: List[Dict], subject: str, board: str,
-                                paper: str, code: str, year: int, section_template: Dict,
-                                prompt_template: str) -> Dict:
-        """Generic section generator for Section A/B with enhanced error handling."""
-        try:
-            prompt = prompt_template.safe_substitute(
-                board=board,
-                subject=subject,
-                paper=paper,
-                code=code,
-                year=year,
-                demo_json=json.dumps(section_template, indent=2),
-                retrieval_context=json.dumps(context_items[:50], indent=2)  # Limit context size
-            )
+            # Parse the raw JSON output
+            section_json = self.llm_manager.safe_json_parse(raw_output)
             
-            llm_response = await self.llm_manager.safe_generate(prompt=prompt)
-            raw_output = getattr(llm_response, 'content', getattr(llm_response, 'text', str(llm_response)))
-
-            try:
-                section_json = self.llm_manager.safe_json_parse(raw_output)
+            # The LLM is already returning the correct format, so use it directly
+            if isinstance(section_json, dict) and "name" in section_json and "questions" in section_json:
+                # Apply minimal schema enforcement to handle type mismatches
+                return self._enforce_perfect_schema(section_json, is_section_a)
+            else:
+                return self._enforce_perfect_schema(template, is_section_a)
                 
-                # Extract section from different possible structures
-                if "sections" in section_json and isinstance(section_json["sections"], list) and section_json["sections"]:
-                    section = section_json["sections"][0]
-                elif isinstance(section_json, dict) and "name" in section_json:
-                    section = section_json
-                else:
-                    logger.warning("Invalid JSON structure from LLM, using template")
-                    section = section_template
-                    
-            except Exception as json_error:
-                logger.error(f"JSON parsing error: {json_error}")
-                logger.error(f"Raw LLM output: {raw_output[:500]}...")
-                section = section_template
-
-            # Apply fixes and validation FIRST (before validation check)
-            validated_sections = self._validate_structure([section])
-            fixed_section = validated_sections[0]
-            
-            # Now validate the fixed structure for logging purposes only
-            validation_errors = self._validate_json_structure(fixed_section)
-            if validation_errors:
-                logger.warning(f"Remaining validation errors after fixing: {validation_errors}")
-            
-            return fixed_section
-            
         except Exception as e:
-            logger.error(f"Error in section generation: {e}")
-            return self._validate_structure([section_template])[0]
+            return self._enforce_perfect_schema(template, is_section_a)
 
     async def gen_new_exam_paper(self, subject: str, board: str, paper: str, code: str, year: int) -> ExamPaperCreate:
-        """Generate a full exam paper with validated sections and comprehensive error handling."""
-        try:
-            # Generate embedding for subject
-            query_embedding = self.model.encode(f"{subject} exam questions").tolist()
+        """Generate perfect exam paper with 100% schema compliance."""
+        query_embedding = self.model.encode(f"{subject} exam questions").tolist()
+        similar_subparts = self._get_subparts_by_subject(subject, query_embedding)
+        context_items = self._prepare_retrieval_context(similar_subparts)
+        
+        mid = min(self.context_per_section, len(context_items) // 2) if context_items else 0
+        sec_a_ctx = context_items[:mid] if context_items else []
+        sec_b_ctx = context_items[mid:mid+self.context_per_section] if context_items else []
+        
+        section_a_task = self._generate_perfect_section(sec_a_ctx, subject, board, paper, code, year, True)
+        section_b_task = self._generate_perfect_section(sec_b_ctx, subject, board, paper, code, year, False)
+        
+        section_a, section_b = await asyncio.gather(section_a_task, section_b_task)
+        
+        # Ensure we have valid dictionaries
+        if not isinstance(section_a, dict) or "questions" not in section_a:
+            section_a = self._enforce_perfect_schema(PERFECT_SECTION_A, True)
             
-            # Retrieve similar subparts
-            similar_subparts = self._get_subparts_by_subject(subject, query_embedding)
-            context_items = self._prepare_retrieval_context(similar_subparts)
-            
-            logger.info(f"Retrieved {len(context_items)} context items for {subject}")
-
-            # Split context between sections
-            mid = min(self.context_per_section, len(context_items) // 2) if context_items else 0
-            sec_a_ctx = context_items[:mid] if context_items else []
-            sec_b_ctx = context_items[mid:mid+self.context_per_section] if context_items else []
-
-            # Import prompts
-            from ...prompts.ICSE_questions import SECTION_A_PROMPT, SECTION_B_PROMPT
-            
-            # Create section templates
-            default_sections = self._create_default_sections()
-            sec_a_demo = default_sections[0]
-            sec_b_demo = default_sections[1]
-
-            # Generate sections concurrently
-            section_a_task = self._generate_section(
-                sec_a_ctx, subject, board, paper, code, year, sec_a_demo, SECTION_A_PROMPT
-            )
-            section_b_task = self._generate_section(
-                sec_b_ctx, subject, board, paper, code, year, sec_b_demo, SECTION_B_PROMPT
-            )
-            
-            section_a, section_b = await asyncio.gather(section_a_task, section_b_task)
-
-            # Combine and validate sections
-            sections = [section_a, section_b]
-            sections = self._validate_structure(sections)
-            sections = self._fix_options_format(sections)  # Additional fix for options
-            sections = self._normalize_constants_and_formulas(sections) 
-            # Renumber questions globally
-            q_num = 1
-            for sec in sections:
-                for q in sec["questions"]:
-                    q["number"] = q_num
+        if not isinstance(section_b, dict) or "questions" not in section_b:
+            section_b = self._enforce_perfect_schema(PERFECT_SECTION_B, False)
+        
+        # Final question renumbering
+        q_num = 1
+        for section in [section_a, section_b]:
+            if "questions" in section:
+                for question in section["questions"]:
+                    question["number"] = q_num
                     q_num += 1
-                    
-                    # Ensure proper part numbering
-                    for idx, part in enumerate(q.get("parts", [])):
-                        part["number"] = self._get_roman_numeral(idx + 1)
-                        
-                        # Ensure proper sub-part lettering
-                        for sidx, sub in enumerate(part.get("sub_parts", [])):
-                            sub["letter"] = f"({chr(97+sidx)})"
-
-            # Convert to Pydantic models with error handling
-            final_sections = []
-            for section in sections:
-                try:
-                    validated_section = Section.model_validate(section)
-                    final_sections.append(validated_section)
-                except Exception as validation_error:
-                    logger.error(f"Section validation error: {validation_error}")
-                    logger.error(f"Section data: {json.dumps(section, indent=2)}")
-                    # Use default section if validation fails
-                    default_section = Section.model_validate(self._create_default_sections()[len(final_sections)])
-                    final_sections.append(default_section)
-
-            return ExamPaperCreate(
-                exam=self._create_exam_info(subject, board, paper, code, year),
-                sections=final_sections
-            )
-
+        
+        # Convert to Pydantic with detailed error handling
+        try:
+            validated_section_a = Section.model_validate(section_a)
         except Exception as e:
-            logger.error(f"Critical error generating exam paper: {e}")
-            # Return safe fallback
-            default_sections = self._create_default_sections()
-            validated_defaults = self._validate_structure(default_sections)
-            safe_sections = [Section.model_validate(s) for s in validated_defaults]
+            # Use a minimal template as fallback
+            fallback_a = self._enforce_perfect_schema(PERFECT_SECTION_A, True)
+            validated_section_a = Section.model_validate(fallback_a)
+        
+        try:
+            validated_section_b = Section.model_validate(section_b)
             
-            return ExamPaperCreate(
-                exam=self._create_exam_info(subject, board, paper, code, year),
-                sections=safe_sections
-            )
+        except Exception as e:
+            # Use a minimal template as fallback
+            fallback_b = self._enforce_perfect_schema(PERFECT_SECTION_B, False)
+            validated_section_b = Section.model_validate(fallback_b)
+
+        # Add this right before the return statement in gen_new_exam_paper
+        exam_paper = ExamPaperCreate(
+            exam=self._create_exam_info(subject, board, paper, code, year),
+            sections=[validated_section_a, validated_section_b]
+        )
+
+        return exam_paper
+        
+        

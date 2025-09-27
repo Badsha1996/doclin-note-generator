@@ -1,115 +1,286 @@
 from string import Template
 
-SECTION_A_PROMPT = Template("""
-You are an expert exam paper generator for ${board} ${subject} examinations.
 
-Generate Section A (compulsory section) for ${board} ${subject} exam paper ${code} for year ${year}.
-
-RULE: For any list field (sub_parts, options, diagram.elements, labels, column_a, column_b, etc.),
-never return null. If empty, return [].
-                                                        
-CRITICAL REQUIREMENTS (FOLLOW SCHEMA EXACTLY):
-1. Follow the DEMO JSON structure exactly. No extra fields, no missing fields.
-2. Every "parts" object MUST include "number", "type", and "marks".
-3. Field names must match the demo JSON exactly.
-4. Question 1: 15 multiple choice parts (i–xv), each worth 1 mark, each with 4 options.
-5. Question 2: 5–7 parts (i–vii), 2–4 marks each, total = 15 marks.
-6. Question 3: 4–5 parts (i–v), 2–3 marks each, total = 10 marks.
-
-MULTIPLE CHOICE OPTIONS FORMAT (STRICT):
-Each option must be an object with these exact fields:
-{
-  "option_letter": "(a)",
-  "text": "Option text here"
+PERFECT_DIAGRAM = {
+    "type": "Others",
+    "description": "",
+    "elements": [],
+    "labels": [],
+    "measurements": {},
+    "angles": {},
+    "instructions": None
 }
 
-DIAGRAM RULES:
-- "diagram.elements" MUST be a list of plain strings only (no objects).
-  Example: ["Battery: 12 V", "Resistor: 4 Ω"]
-- "diagram.labels" MUST be a list of strings.
-- "diagram.type" must be one of:
-  "circuit_diagram", "ray_diagram", "force_diagram", "molecular_structure",
-  "apparatus_setup", "anatomical_diagram", "cell_diagram", "system_diagram",
-  "graph", "flowchart", "Others"
-
-FORMULA AND CONSTANTS:
-- If no formula is needed, either omit "formula_given" or set it to null.
-- "formula_given" must always be a plain string (e.g. "P = V * I").
-- "constants_given" must always be a dictionary with string key-value pairs:
-  Example: { "g": "10 m/s²", "c": "3×10^8 m/s" }
-- Do not wrap it in {"value": "..."}.
-
-
-PART/QUESTION LABELING:
-- Parts numbered in roman numerals ("i", "ii", "iii", ...).
-- Sub-parts lettered ("(a)", "(b)", "(c)", ...).
-
-DEMO JSON STRUCTURE (FOLLOW EXACTLY):
-${demo_json}
-
-AVAILABLE CONTEXT:
-${retrieval_context}
-
-INSTRUCTIONS:
-- Use the provided context to generate relevant ${subject} questions.
-- Ensure marks add up exactly as specified.
-- Provide only valid JSON — no explanations, no prose.
-- Validate that all fields conform strictly to the schema.
-""")
-
-SECTION_B_PROMPT = Template("""
-You are an expert exam paper generator for ${board} ${subject} examinations.
-
-Generate Section B (optional section) for ${board} ${subject} exam paper ${code} for year ${year}.
-
-RULE: For any list field (sub_parts, options, diagram.elements, labels, column_a, column_b, etc.),
-never return null. If empty, return [].
-                            
-CRITICAL REQUIREMENTS (FOLLOW SCHEMA EXACTLY):
-1. Follow the DEMO JSON structure exactly. No extra fields, no missing fields.
-2. Every "parts" object MUST include "number", "type", and "marks".
-3. Field names must match the demo JSON exactly.
-4. Generate 6 questions (numbers 4–9), each worth exactly 10 marks.
-5. Each question has 3 parts (i, ii, iii), marks distribution = 3+3+4 or 2+3+5.
-
-MULTIPLE CHOICE OPTIONS FORMAT (STRICT):
-Each option must be an object with these exact fields:
-{
-  "option_letter": "(a)",
-  "text": "Option text here"
+PERFECT_SUBPART = {
+    "letter": "(a)",
+    "question_text": "",
+    "marks": None,
+    "diagram": None,
+    "formula_given": None,
+    "constants_given": None,
+    "equation_template": None,
+    "choices_given": None
 }
 
-DIAGRAM RULES:
-- "diagram.elements" MUST be a list of plain strings only (no objects).
-- "diagram.labels" MUST be a list of strings.
-- "diagram.type" must be one of the allowed types:
-  "circuit_diagram", "ray_diagram", "force_diagram", "molecular_structure",
-  "apparatus_setup", "anatomical_diagram", "cell_diagram", "system_diagram",
-  "graph", "flowchart", "Others"
+PERFECT_MCQ_OPTION = {
+    "option_letter": "(a)",
+    "text": ""
+}
 
-FORMULA AND CONSTANTS:
-- If no formula is needed, either omit "formula_given" or set it to null.
-- "formula_given" must always be a plain string (e.g. "P = V * I").
-- "constants_given" must always be a dictionary with string key-value pairs:
-  Example: { "g": "10 m/s²", "c": "3×10^8 m/s" }
-- Do not wrap it in {"value": "..."}.
+PERFECT_QUESTION_PART = {
+    "number": "i",
+    "type": "short_answer",
+    "marks": 1,
+    "question_text": None,
+    "description": None,
+    "sub_parts": [],
+    "options": [],
+    "diagram": None,
+    "formula_given": None,
+    "constants_given": None,
+    "column_a": None,
+    "column_b": None,
+    "items_to_arrange": None,
+    "sequence_type": None,
+    "statement_with_blanks": None,
+    "choices_for_blanks": None,
+    "equation_template": None,
+    "missing_parts": None
+}
 
-LABELING RULES:
-- Parts use roman numerals ("i", "ii", "iii").
-- Sub-parts use letters ("(a)", "(b)", "(c)").
+PERFECT_QUESTION = {
+    "number": 1,
+    "title": None,
+    "type": "short_answer",
+    "total_marks": 1,
+    "instruction": None,
+    "parts": [],
+    "question_text": None,
+    "options": [],
+    "diagram": None
+}
 
-DEMO JSON STRUCTURE (FOLLOW EXACTLY):
-${demo_json}
+PERFECT_SECTION_A = {
+    "name": "Section A",
+    "marks": 40,
+    "instruction": "Attempt all questions from this Section",
+    "is_compulsory": True,
+    "questions": [
+        {
+            "number": 1,
+            "title": None,
+            "type": "multiple_choice",
+            "total_marks": 15,
+            "instruction": "Choose the correct answers to the questions from the given options. (Do not copy the questions, write the correct answers only.)",
+            "parts": [
+                {
+                    "number": "i",
+                    "type": "multiple_choice",
+                    "marks": 1,
+                    "question_text": "Sample MCQ question?",
+                    "description": None,
+                    "sub_parts": [],
+                    "options": [
+                        {"option_letter": "(a)", "text": "Option A"},
+                        {"option_letter": "(b)", "text": "Option B"},
+                        {"option_letter": "(c)", "text": "Option C"},
+                        {"option_letter": "(d)", "text": "Option D"}
+                    ],
+                    "diagram": None,
+                    "formula_given": None,
+                    "constants_given": None,
+                    "column_a": None,
+                    "column_b": None,
+                    "items_to_arrange": None,
+                    "sequence_type": None,
+                    "statement_with_blanks": None,
+                    "choices_for_blanks": None,
+                    "equation_template": None,
+                    "missing_parts": None
+                }
+            ],
+            "question_text": None,
+            "options": [],
+            "diagram": None
+        },
+        {
+            "number": 2,
+            "title": None,
+            "type": "short_answer",
+            "total_marks": 15,
+            "instruction": None,
+            "parts": [
+                {
+                    "number": "i",
+                    "type": "short_answer",
+                    "marks": 3,
+                    "question_text": "Sample question",
+                    "description": None,
+                    "sub_parts": [],
+                    "options": [],
+                    "diagram": None,
+                    "formula_given": None,
+                    "constants_given": None,
+                    "column_a": None,
+                    "column_b": None,
+                    "items_to_arrange": None,
+                    "sequence_type": None,
+                    "statement_with_blanks": None,
+                    "choices_for_blanks": None,
+                    "equation_template": None,
+                    "missing_parts": None
+                }
+            ],
+            "question_text": None,
+            "options": [],
+            "diagram": None
+        },
+        {
+            "number": 3,
+            "title": None,
+            "type": "short_answer",
+            "total_marks": 10,
+            "instruction": None,
+            "parts": [
+                {
+                    "number": "i",
+                    "type": "short_answer",
+                    "marks": 2,
+                    "question_text": "Sample question",
+                    "description": None,
+                    "sub_parts": [],
+                    "options": [],
+                    "diagram": None,
+                    "formula_given": None,
+                    "constants_given": None,
+                    "column_a": None,
+                    "column_b": None,
+                    "items_to_arrange": None,
+                    "sequence_type": None,
+                    "statement_with_blanks": None,
+                    "choices_for_blanks": None,
+                    "equation_template": None,
+                    "missing_parts": None
+                }
+            ],
+            "question_text": None,
+            "options": [],
+            "diagram": None
+        }
+    ]
+}
 
-AVAILABLE CONTEXT:
+PERFECT_SECTION_B = {
+    "name": "Section B",
+    "marks": 40,
+    "instruction": "Attempt any four questions from this Section",
+    "is_compulsory": False,
+    "questions": [
+        {
+            "number": 4,
+            "title": None,
+            "type": "long_answer",
+            "total_marks": 10,
+            "instruction": None,
+            "parts": [
+                {
+                    "number": "i",
+                    "type": "diagram_based",
+                    "marks": 3,
+                    "question_text": "Question with diagram",
+                    "description": "Description of diagram",
+                    "sub_parts": [
+                        {
+                            "letter": "(a)",
+                            "question_text": "Sub-question text",
+                            "marks": None,
+                            "diagram": None,
+                            "formula_given": None,
+                            "constants_given": None,
+                            "equation_template": None,
+                            "choices_given": None
+                        }
+                    ],
+                    "options": [],
+                    "diagram": {
+                        "type": "ray_diagram",
+                        "description": "Ray diagram description",
+                        "elements": ["element1", "element2"],
+                        "labels": ["A", "B"],
+                        "measurements": {},
+                        "angles": {},
+                        "instructions": None
+                    },
+                    "formula_given": None,
+                    "constants_given": None,
+                    "column_a": None,
+                    "column_b": None,
+                    "items_to_arrange": None,
+                    "sequence_type": None,
+                    "statement_with_blanks": None,
+                    "choices_for_blanks": None,
+                    "equation_template": None,
+                    "missing_parts": None
+                }
+            ],
+            "question_text": None,
+            "options": [],
+            "diagram": None
+        }
+    ]
+}
+
+ULTRA_STRICT_SECTION_A_PROMPT = Template("""CRITICAL: Generate EXACTLY matching JSON for ${board} ${subject} Section A, Year ${year}.
+
+MANDATORY STRUCTURE (NO DEVIATIONS ALLOWED):
+Q1: 15 MCQ parts (i-xv), 1 mark each = 15 total
+Q2: 5 parts, 3 marks each = 15 total  
+Q3: 5 parts, 2 marks each = 10 total
+
+SCHEMA ENFORCEMENT RULES:
+1. Every field in PERFECT_JSON must exist with correct type
+2. null values ONLY where specified in schema
+3. Empty arrays [] not null
+4. Empty objects {} not null
+5. String fields: "" or content, never null unless schema allows
+6. Boolean: true/false only
+7. MCQ options: exactly [{"option_letter": "(a)", "text": "..."}, ...]
+8. Roman numerals: i, ii, iii, iv, v, etc.
+9. Sub-part letters: (a), (b), (c), etc.
+10. missing_parts: MUST be object/dict, never array: {"key1": "value1"}
+11. constants_given: MUST be object/dict: {"constant_name": "value"}
+12. choices_for_blanks: MUST be array of arrays: [["choice1", "choice2"], ["choice3"]]
+13. choices_given: MUST be simple array: ["choice1", "choice2"]
+
+PERFECT JSON SCHEMA TO MATCH EXACTLY:
+${perfect_schema}
+
+CONTEXT REFERENCE:
 ${retrieval_context}
 
-INSTRUCTIONS:
-- Use context for realistic ${subject} questions.
-- Include variety: calculations, diagrams, reasoning.
-- Ensure scientific accuracy and difficulty level is appropriate.
-- Ensure all marks add up to exactly 10 per question.
-- Output ONLY valid JSON conforming to the schema.
-                            
+GENERATE: Return ONLY the JSON object matching the schema exactly. Zero tolerance for schema deviations.""")
 
-""")
+ULTRA_STRICT_SECTION_B_PROMPT = Template("""CRITICAL: Generate EXACTLY matching JSON for ${board} ${subject} Section B, Year ${year}.
+
+MANDATORY STRUCTURE (NO DEVIATIONS ALLOWED):
+6 questions (Q4-Q9), each 10 marks, 3 parts each (i, ii, iii)
+Mark distribution: 3+3+4 or 2+3+5 or 4+3+3
+
+SCHEMA ENFORCEMENT RULES:
+1. Every field in PERFECT_JSON must exist with correct type
+2. null values ONLY where specified in schema  
+3. Empty arrays [] not null
+4. Empty objects {} not null
+5. String fields: "" or content, never null unless schema allows
+6. Boolean: true/false only
+7. Roman numerals: i, ii, iii for parts
+8. Sub-part letters: (a), (b), (c), etc.
+9. Valid diagram types: ray_diagram, circuit_diagram, force_diagram, molecular_structure, apparatus_setup, anatomical_diagram, cell_diagram, system_diagram, graph, flowchart, Others
+
+PERFECT JSON SCHEMA TO MATCH EXACTLY:
+${perfect_schema}
+
+CONTEXT REFERENCE:
+${retrieval_context}
+
+GENERATE: Return ONLY the JSON object matching the schema exactly. Zero tolerance for schema deviations.""")
