@@ -5,6 +5,7 @@ export const FormSchema = z
   .object({
     username: z.string().min(2, "Username must be at least 2 characters."),
     email: z.email("Invalid email address."),
+    otp: z.string().optional(),
     password: z.string().min(6, "Password must be at least 6 characters."),
     confirmpassword: z.string().min(6, "Please confirm your password."),
   })
@@ -33,75 +34,96 @@ export const OptionSchema = z.object({
 export type Options = z.infer<typeof OptionSchema>;
 
 // exam  file upload  types
-
-/* --- Subparts --- */
-const SubpartWithOptions = z
-  .object({
-    sub_id: z.string(),
-    question_text: z.string(),
-    options: z.array(z.string()).min(1),
-    // allow additional optional fields in future
-  })
-  .strict();
-
-// subpart that may include tikz and optional options (for diagram questions)
-const SubpartWithMaybeTikz = z
-  .object({
-    sub_id: z.string(),
-    question_text: z.string(),
-    options: z.array(z.string()).optional(),
-    tikz: z.string().optional(),
-  })
-  .strict();
-
-/* --- Base question fields --- */
-const QuestionBase = z.object({
-  number: z.number().int().nonnegative(),
-  marks: z.number().nonnegative(),
-  instruction: z.string().optional(), // optional based on sample (you had it present; make optional to be flexible)
+const DiagramSchema = z.object({
+  type: z.string(),
+  description: z.string(),
+  elements: z.array(z.string()),
+  labels: z.array(z.string()),
+  measurements: z.record(z.any(), z.any()), // allows dynamic keys
+  angles: z.object({
+    additionalProp1: z.string().optional(),
+    additionalProp2: z.string().optional(),
+    additionalProp3: z.string().optional(),
+  }),
+  instructions: z.string(),
 });
 
-/* --- Specific question variants (discriminated by `type`) --- */
-const MCQQuestion = QuestionBase.extend({
-  type: z.literal("MCQ"),
-  subparts: z.array(SubpartWithOptions).min(1),
+const SubPartSchema = z.object({
+  letter: z.string(),
+  question_text: z.string(),
+  marks: z.number(),
+  diagram: DiagramSchema,
+  formula_given: z.string(),
+  constants_given: z.record(z.any(), z.any()),
+  equation_template: z.string(),
+  choices_given: z.array(z.string()),
 });
 
-const FillReasoningQuestion = QuestionBase.extend({
-  type: z.literal("Fill in the blanks + reasoning"),
-  subparts: z.array(SubpartWithOptions).min(1),
+const PartSchema = z.object({
+  number: z.string(),
+  type: z.string(),
+  marks: z.number(),
+  question_text: z.string(),
+  description: z.string(),
+  sub_parts: z.array(SubPartSchema),
+  options: z.array(
+    z.object({
+      option_letter: z.string(),
+      text: z.string(),
+    })
+  ),
+  diagram: DiagramSchema,
+  formula_given: z.string(),
+  constants_given: z.record(z.any(), z.any()),
+  column_a: z.array(z.string()),
+  column_b: z.array(z.string()),
+  items_to_arrange: z.array(z.string()),
+  sequence_type: z.string(),
+  statement_with_blanks: z.string(),
+  choices_for_blanks: z.array(z.array(z.string())),
+  equation_template: z.string(),
+  missing_parts: z.object({
+    additionalProp1: z.string().optional(),
+    additionalProp2: z.string().optional(),
+    additionalProp3: z.string().optional(),
+  }),
 });
 
-const DiagramNumericalQuestion = QuestionBase.extend({
-  type: z.literal("Diagram-based + Numericals"),
-  tikz: z.string().optional(),
-  subparts: z.array(SubpartWithMaybeTikz).min(1),
+const Question = z.object({
+  number: z.number(),
+  title: z.string(),
+  type: z.string(),
+  total_marks: z.number(),
+  instruction: z.string(),
+  parts: z.array(PartSchema),
+  question_text: z.string(),
+  options: z.array(
+    z.object({
+      option_letter: z.string(),
+      text: z.string(),
+    })
+  ),
+  diagram: DiagramSchema,
 });
 
-const Question = z.discriminatedUnion("type", [
-  MCQQuestion,
-  FillReasoningQuestion,
-  DiagramNumericalQuestion,
-]);
-
-/* --- Section --- */
 const Section = z.object({
   name: z.string(),
-  marks: z.number().nonnegative(),
+  marks: z.number(),
+  instruction: z.string(),
+  is_compulsory: z.boolean(),
   questions: z.array(Question).min(1),
 });
 
-/* --- Exam meta --- */
 const ExamMeta = z.object({
-  board: z.string(),
+  paper_code: z.string(),
   subject: z.string(),
-  paper: z.string(),
-  code: z.string(),
+  paper_name: z.string(),
   year: z.number().int(),
-  max_marks: z.number().nonnegative(),
+  board: z.string(),
+  maximum_marks: z.number().nonnegative(),
   time_allowed: z.string(),
-  instructions: z.array(z.string()),
-  ai_generated: z.boolean(),
+  reading_time: z.string(),
+  additional_instructions: z.array(z.string()),
 });
 
 export const ExamDocumentSchema = z
@@ -119,3 +141,22 @@ export type ExamDocument = z.infer<typeof ExamDocumentSchema>;
 export type QuestionType = z.infer<typeof Question>;
 export type SectionType = z.infer<typeof Section>;
 export type JsonInputForm = z.infer<typeof JsonInputSchema>;
+
+export const otpFormSchema = z.object({
+  email: z.email("Please enter a valid email"),
+  username: z.string().optional(),
+});
+
+export type OtpFormType = z.infer<typeof otpFormSchema>;
+
+export const otpVerifySchema = z.object({
+  email: z.email("Please enter a valid email"),
+  otp: z.string().length(6, "OTP must be 6 characters"),
+});
+
+export type OtpVerifyType = z.infer<typeof otpVerifySchema>;
+
+export const verifyUserSchema = z.object({
+  id: z.uuid(),
+});
+export type VerifyUserType = z.infer<typeof verifyUserSchema>;

@@ -1,4 +1,9 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  useRouter,
+  redirect,
+} from "@tanstack/react-router";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +27,11 @@ import { fadeInUp, scaleIn, transition } from "@/lib/motion";
 // import { setAuthTokens } from "@/lib/auth";
 
 export const Route = createFileRoute("/login/")({
+  beforeLoad: () => {
+    // if (authStore.getState().isLoggedIn) {
+    throw redirect({ to: "/" });
+    // }
+  },
   component: Login,
 });
 
