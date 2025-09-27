@@ -1,9 +1,77 @@
 from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
+from datetime import datetime, timedelta,timezone
+from jose import jwt, JWTError, ExpiredSignatureError
 from starlette.middleware.sessions import SessionMiddleware
 
 from ..config.config import settings
+from ..utils.security import SecurityManager
+from ..infrastructure.providers.auth_provider import get_security_manager
+
+
+class TokenRefreshMiddleware(BaseHTTPMiddleware):
+    def __init__(self, app, excluded_paths: list[str] = None):
+        super().__init__(app)
+        self.excluded_paths = excluded_paths or []
+
+    async def dispatch(self, request, call_next):
+        if request.url.path in self.excluded_paths:
+            return await call_next(request)
+
+        security: SecurityManager = get_security_manager()
+
+        access_token = request.cookies.get("access_token")
+        refresh_token = request.cookies.get("refresh_token")
+
+        if not access_token:
+            return JSONResponse({"detail": "kulukulu"}, status_code=401)
+
+        try:
+            payload = security.verify_token(access_token)
+            exp = payload.exp
+
+            if exp:
+                exp_datetime = datetime.fromtimestamp(exp, tz=timezone.utc)
+
+                if exp_datetime - datetime.now(timezone.utc) < timedelta(minutes=5):
+                    if not refresh_token:
+                        return JSONResponse({"detail": "No refreshtoken found"}, status_code=401)
+
+                    refresh_payload = security.verify_token(refresh_token)
+                    refresh_exp = refresh_payload.exp
+                    refresh_exp_datetime = datetime.fromtimestamp(refresh_exp, tz=timezone.utc)
+
+                    if refresh_exp_datetime > datetime.now(timezone.utc):
+                        # issue new access token
+                        new_access_token = security.create_access_token(
+                            data={
+                                "user_id": payload.user_id,
+                                "email": payload.email,
+                                "role": payload.role,
+                            },
+                            expires_delta=timedelta(hours=1),
+                        )
+
+                        response = await call_next(request)
+                        print("new access token issued")
+                        response.set_cookie(
+                            key="access_token",
+                            value=new_access_token, 
+                            httponly=True,
+                            secure=True,
+                            samesite="None",
+                            domain=settings.BACKEND_DOMAIN,
+                            max_age=3600,
+                        )
+                        return response
+
+            return await call_next(request)
+
+        except Exception as e:
+            return JSONResponse({"detail": f"""{str(e)}"""}, status_code=401)
 
 def setup_middleware(app: FastAPI):
     # CORS
@@ -25,4 +93,18 @@ def setup_middleware(app: FastAPI):
     app.add_middleware(
         TrustedHostMiddleware,
         allowed_hosts=["localhost", "127.0.0.1", "*.yourdomain.com"]
+    )
+    app.add_middleware(
+        TokenRefreshMiddleware,
+        excluded_paths=[
+            "/api/auth/login",
+            "/api/auth/register",
+            "/docs",
+            "/api/otp/verify",
+            "/api/auth/oauth/login",
+            "/health",
+            "/api/auth/verify",
+            "/api/otp/generate",
+            "/openapi.json"
+            ] 
     )

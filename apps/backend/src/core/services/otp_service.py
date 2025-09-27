@@ -39,6 +39,7 @@ class OTPService:
     async def verify_otp(self,email:str,otp:str)->bool:
 
         otp_data = await self.get_otp_entry(email)
+        
         if not otp_data:
             raise NotFoundExceptionError()
         expires_at = otp_data.expires_at.replace(tzinfo=timezone.utc)

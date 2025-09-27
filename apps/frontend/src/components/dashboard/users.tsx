@@ -111,14 +111,11 @@ function Users() {
     <>
       <div className="flex py-3">
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger>
-            <Button
-              variant="standOut"
-              className="relative overflow-hidden group shadow-lg ml-auto"
-            >
-              <motion.div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <span className="relative z-10">Add New User</span>
-            </Button>
+          <DialogTrigger className="  backdrop-blur-md bg-[#e4558d]/70 border border-[#e4558d]/40 text-white hover:bg-[#e4558d]/80 shadow-lg transition-all duration-300 rounded-sm">
+            <div className="rounded-sm h-9 px-4 py-1 has-[>svg]:px-3 relative overflow-hidden group shadow-lg ml-auto">
+              <motion.div className=""></motion.div>
+              <span className="relative z-10 text-white">Add New User</span>
+            </div>
           </DialogTrigger>
           <DialogContent className="bg-white border-none">
             <DialogHeader>
@@ -222,8 +219,7 @@ function Users() {
                     >
                       <Button
                         type="submit"
-                        variant="standOut"
-                        className="w-full max-w-xs py-2 rounded-md font-semibold"
+                        className="w-full max-w-xs py-2 rounded-md font-semibold  bg-[#e4558d]/70 border border-[#e4558d]/40 text-white hover:bg-[#e4558d]/80 shadow-lg transition-all duration-300"
                         disabled={mutation.isPending}
                       >
                         {mutation.isPending ? "Creating..." : "Create"}
