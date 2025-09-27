@@ -29,7 +29,7 @@ import { fadeInUp, scaleIn, transition } from "@/lib/motion";
 export const Route = createFileRoute("/login/")({
   beforeLoad: () => {
     // if (authStore.getState().isLoggedIn) {
-    throw redirect({ to: "/" });
+    // throw redirect({ to: "/" });
     // }
   },
   component: Login,
