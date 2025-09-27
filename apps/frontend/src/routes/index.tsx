@@ -12,6 +12,8 @@ import {
   Star,
   Play,
 } from "lucide-react";
+import { getUserInfo, setUserInfo } from "@/lib/auth";
+import type { ApiError } from "@/types/api";
 
 const productFeatures = [
   {
@@ -102,8 +104,16 @@ const features = [
   "Study Material Creation",
   "Progress Tracking",
 ];
-
+export const Route = createFileRoute("/")({
+  validateSearch: (search?: Record<string, unknown>) => {
+    return {
+      oauth: search?.oauth?.toString() || undefined,
+    };
+  },
+  component: Home,
+});
 function Home() {
+  const { oauth } = Route.useSearch();
   const [currentFeature, setCurrentFeature] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [typewriterText, setTypewriterText] = useState("");
@@ -140,6 +150,46 @@ function Home() {
       clearTimeout(statsTimer);
     };
   }, []);
+
+  useEffect(() => {
+    if (!oauth || getUserInfo()) return;
+    const fetchUser = async () => {
+      try {
+        const url = `${import.meta.env.VITE_API_BASE_URL}/auth/me`;
+        const response = await fetch(url, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        });
+
+        if (!response.ok) {
+          const error: ApiError = {
+            message: `Request failed with status ${response.status}`,
+            status: response.status,
+          };
+
+          try {
+            error.details = await response.json();
+          } catch {
+            console.error("Failed to parse error details");
+          }
+          throw error;
+        }
+
+        const data = await response.json();
+        console.log("OAuth user data:", data);
+        setUserInfo({
+          email: data.data.email,
+          role: data.data.role,
+          username: data.data.username,
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchUser();
+  }, [oauth]);
 
   const AnimatedCounter: React.FC<{
     end: number;
@@ -412,7 +462,3 @@ function Home() {
     </div>
   );
 }
-
-export const Route = createFileRoute("/")({
-  component: Home,
-});

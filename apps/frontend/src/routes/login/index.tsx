@@ -24,13 +24,13 @@ import { BsMeta } from "react-icons/bs";
 import { motion } from "framer-motion";
 
 import { fadeInUp, scaleIn, transition } from "@/lib/motion";
-// import { setAuthTokens } from "@/lib/auth";
+import { setUserInfo, getUserInfo } from "@/lib/auth";
 
 export const Route = createFileRoute("/login/")({
   beforeLoad: () => {
-    // if (authStore.getState().isLoggedIn) {
-    // throw redirect({ to: "/" });
-    // }
+    if (getUserInfo()) {
+      throw redirect({ to: "/", search: { oauth: undefined } });
+    }
   },
   component: Login,
 });
@@ -59,10 +59,14 @@ function Login() {
     },
     {
       onSuccess: (data) => {
-        // const { access_token, refresh_token } = data.data;
-        // setAuthTokens(access_token, refresh_token);
+        const { user } = data.data;
+        setUserInfo({
+          email: user.email,
+          role: user.role,
+          username: user.username,
+        });
         toast.success(data.message || "Login successful!");
-        router.navigate({ to: "/" });
+        router.navigate({ to: "/", search: { oauth: undefined } });
       },
       onError: (error: ApiError) => {
         toast.error(error.message || "Login failed. Please try again.");

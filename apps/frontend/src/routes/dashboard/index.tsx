@@ -3,16 +3,22 @@ import Model from "@/components/dashboard/ModelManagement";
 import UserManagement from "@/components/dashboard/UserManagement";
 import PageHeader from "@/components/common/PageHeader";
 import GlassLayout from "@/layouts/GlassLayout";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import {
   // BrainCircuit,
   // LayoutDashboard,
   FileText,
   UserRound,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Syllabus from "@/components/dashboard/SyllabusManagement";
+import { getUserInfo } from "@/lib/auth";
 export const Route = createFileRoute("/dashboard/")({
+  beforeLoad: () => {
+    if (getUserInfo()?.role === "user") {
+      throw redirect({ to: "/", search: { oauth: undefined } });
+    }
+  },
   component: Dashboard,
 });
 

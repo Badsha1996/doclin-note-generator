@@ -46,6 +46,7 @@ class OTPService:
         if datetime.now(timezone.utc) > expires_at:
             raise ValidationExceptionError(error="OTP has expired")
         verified=self.security.verify_password(otp_data.otp_hash,otp)
+        # print(otp_data.otp_hash,otp,verified)
         if not verified:
             raise ValidationExceptionError(error="Invalid OTP")
         await self.otp_repo.delete_otp(email)

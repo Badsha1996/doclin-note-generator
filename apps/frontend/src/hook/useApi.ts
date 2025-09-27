@@ -64,7 +64,9 @@ export const fetchApi = async <TResponse, TPayload = undefined>(
 
     try {
       error.details = await response.json();
-    } catch {}
+    } catch {
+      console.error("Failed to parse error response as JSON");
+    }
     throw error;
   }
 

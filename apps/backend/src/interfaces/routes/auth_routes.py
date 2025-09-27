@@ -174,3 +174,23 @@ async def get_current_user_info(
         )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+    
+
+@auth_router.post('/logout')
+async def logout_user(response:Response):
+    try:
+        response.delete_cookie(
+            key="access_token",
+            domain=settings.BACKEND_DOMAIN
+        )
+        response.delete_cookie(
+            key="refresh_token",
+            domain=settings.BACKEND_DOMAIN
+        )
+        return APIResponseSchema(
+            success=True,
+            data=None,
+            message="User logged out successfully"
+        )
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))

@@ -140,3 +140,6 @@ export type VerifyUserResponse = z.infer<typeof VerifyUserResponseSchema>;
 
 export const examPaperUploadSchema = apiResponseSchema(z.null());
 export type ExamPaperUploadResponse = z.infer<typeof examPaperUploadSchema>;
+
+export const logoutSchema = apiResponseSchema(z.null());
+export type LogoutResponse = z.infer<typeof logoutSchema>;
