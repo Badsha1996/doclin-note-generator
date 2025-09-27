@@ -54,7 +54,8 @@ function Sidebar({
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
 
   //Dropdown
-  const [open, setOpen] = useState<boolean>(false);
+  const [openYear, setOpenYear] = useState<boolean>(false);
+  const [openGenerated, setOpenGenerated] = useState<boolean>(false);
   const [isCustom, setIsCustom] = useState<boolean>(false);
 
   // ***************** API Hook Calls *****************
@@ -301,21 +302,20 @@ function Sidebar({
               <div className="mt-8">
                 <h3
                   className="text-gray-200 font-medium mb-3 flex items-center cursor-pointer select-none"
-                  onClick={() => setOpen(!open)}
+                  onClick={() => setOpenYear((prev) => !prev)}
                 >
                   <BookOpen className="h-4 w-4 mr-2 text-indigo-400" />
                   Previous Year Questions
                   <motion.span
-                    animate={{ rotate: open ? 180 : 0 }}
+                    animate={{ rotate: openYear ? 180 : 0 }}
                     transition={{ duration: 0.3 }}
                     className="ml-2"
                   >
                     <ChevronDown className="h-4 w-4 text-gray-400" />
                   </motion.span>
                 </h3>
-
                 <AnimatePresence>
-                  {open && (
+                  {openYear && (
                     <motion.ul
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: "auto", opacity: 1 }}
@@ -323,50 +323,20 @@ function Sidebar({
                       transition={{ duration: 0.3 }}
                       className="space-y-2 overflow-hidden"
                     >
-                      {availableYears.length > 0 && (
-                        <GlassDropdown
-                          label="Year"
-                          value={selectedYear ?? ""}
-                          onChange={(value) => setSelectedYear(Number(value))}
-                          options={availableYears.map((y) => ({
-                            value: y,
-                            label: y.toString(),
-                          }))}
-                          placeholder="Select Year"
-                        />
-                      )}
-
-                      {isLoadingPrevPaper ? (
-                        <>
-                          <Skeleton className="h-6 w-full" />
-                          <Skeleton className="h-6 w-3/4" />
-                        </>
-                      ) : isPrevPaperError ? (
-                        <p className="px-3 py-2 text-red-400 text-sm">
-                          Failed to load paper
-                        </p>
-                      ) : prevPaper ? (
-                        <motion.li
-                          whileHover={{ x: 5 }}
-                          className="px-3 py-2 rounded-lg bg-white/5 text-gray-300 hover:text-white hover:bg-indigo-600/40 cursor-pointer transition"
-                        >
-                          <a
-                            href={prevPaper.file_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="block"
+                      {availableYears.length > 0 ? (
+                        availableYears.map((year) => (
+                          <li
+                            key={year}
+                            className="px-3 py-2 rounded-lg bg-white/5 text-gray-300 hover:text-white hover:bg-indigo-600/40 cursor-pointer transition"
+                            onClick={() => setSelectedYear(year)}
                           >
-                            {prevPaper.year} Paper → View / Download
-                          </a>
-                        </motion.li>
-                      ) : selectedYear ? (
-                        <p className="px-3 py-2 text-gray-400 text-sm">
-                          No paper found for {selectedYear}
-                        </p>
+                            {year} Question Paper
+                          </li>
+                        ))
                       ) : (
-                        <p className="px-3 py-2 text-gray-400 text-sm">
-                          Select a year to view papers
-                        </p>
+                        <li className="px-3 py-2 text-gray-400 text-sm">
+                          No previous years found
+                        </li>
                       )}
                     </motion.ul>
                   )}
@@ -375,20 +345,40 @@ function Sidebar({
 
               {/* Previous Generated Questions */}
               <div className="mt-8">
-                <h3 className="text-gray-200 font-medium mb-3 flex items-center">
+                <h3
+                  className="text-gray-200 font-medium mb-3 flex items-center cursor-pointer select-none"
+                  onClick={() => setOpenGenerated((prev) => !prev)}
+                >
                   <RiFileHistoryLine className="h-4 w-4 mr-2 text-indigo-400" />
                   Previous Generated Questions
+                  <motion.span
+                    animate={{ rotate: openGenerated ? 180 : 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="ml-2"
+                  >
+                    <ChevronDown className="h-4 w-4 text-gray-400" />
+                  </motion.span>
                 </h3>
-                <ul className="space-y-2">
-                  {["2021", "2020", "2019", "2018"].map((year) => (
-                    <li
-                      key={year}
-                      className="px-3 py-2 rounded-lg bg-white/5 text-gray-300 hover:text-white hover:bg-indigo-600/40 cursor-pointer transition"
+                <AnimatePresence>
+                  {openGenerated && (
+                    <motion.ul
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="space-y-2 overflow-hidden"
                     >
-                      {year} Question Paper
-                    </li>
-                  ))}
-                </ul>
+                      {["2021", "2020", "2019", "2018"].map((year) => (
+                        <li
+                          key={year}
+                          className="px-3 py-2 rounded-lg bg-white/5 text-gray-300 hover:text-white hover:bg-indigo-600/40 cursor-pointer transition"
+                        >
+                          {year} Question Paper
+                        </li>
+                      ))}
+                    </motion.ul>
+                  )}
+                </AnimatePresence>
               </div>
             </nav>
           </motion.div>
