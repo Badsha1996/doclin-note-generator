@@ -61,17 +61,6 @@ export const loginDataSchema = z.object({
 export const loginResponseSchema = apiResponseSchema(loginDataSchema);
 
 export type LoginResponse = z.infer<typeof loginResponseSchema>;
-//all use end point
-export const allUserDataSchema = z.object({
-  users: z.array(userSchema),
-});
-
-export const allUserResponseSchema = apiResponseSchema(allUserDataSchema);
-
-export type AllUserResponse = z.infer<typeof allUserResponseSchema>;
-
-export const examPaperUploadSchema = apiResponseSchema(z.null());
-export type ExamPaperUploadResponse = z.infer<typeof examPaperUploadSchema>;
 
 // Subject EndPoint Schema
 export const subjectBoardSchema = z.object({
@@ -95,18 +84,28 @@ export const boardResponseSchema = apiResponseSchema(
 
 export type boardResponse = z.infer<typeof boardResponseSchema>;
 
-// KPI end point
-export const userKpiDataSchema = z.object({
-  totalUsers: z.number(),
-  blockedUsers: z.number(),
-  paidUsers: z.number(),
-  newUsers: z.number(),
-  trend: z.array(z.record(z.string(), z.number())),
+// prev years
+export const prevYearsResponseSchema = apiResponseSchema(
+  z.object({
+    prev_years: z.array(z.number()), // array of years
+  })
+);
+export type PrevYearsResponse = z.infer<typeof prevYearsResponseSchema>;
+
+// prev exam paper
+export const prevExamPaperSchema = z.object({
+  id: z.number(),
+  subject: z.string(),
+  year: z.number(),
+  file_url: z.url(),
 });
 
-export const userKpiResponseSchema = apiResponseSchema(userKpiDataSchema);
-
-export type UserKPIResponse = z.infer<typeof userKpiResponseSchema>;
+export const prevExamPaperResponseSchema = apiResponseSchema(
+  z.object({
+    exam_paper: prevExamPaperSchema.nullable(),
+  })
+);
+export type PrevExamPaperResponse = z.infer<typeof prevExamPaperResponseSchema>;
 
 export const OTPSchema = z.object({
   id: z.uuid(),
@@ -138,3 +137,6 @@ export const verifyUserSchema = z.object({
 });
 export const VerifyUserResponseSchema = apiResponseSchema(verifyUserSchema);
 export type VerifyUserResponse = z.infer<typeof VerifyUserResponseSchema>;
+
+export const examPaperUploadSchema = apiResponseSchema(z.null());
+export type ExamPaperUploadResponse = z.infer<typeof examPaperUploadSchema>;
