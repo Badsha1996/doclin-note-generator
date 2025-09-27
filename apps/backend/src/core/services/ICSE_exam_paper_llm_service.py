@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from ..repo.llm_repo import LLMRepo
+from ..repo.ICSE_exam_paper_llm_repo import LLMRepo
 from ..repo.exam_paper_repo import ExamPaperRepo
 
 class LLMService:
@@ -18,12 +18,13 @@ class LLMService:
                 code=code,
                 year=year
             )
+            return exam_paper_create
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Invalid Exam Paper JSON: {e}")
 
-        saved = await self.exam_paper_repo.create_exam_paper(exam_paper_create)
-        if not saved:
-            raise HTTPException(status_code=500, detail="Failed to save exam paper")
+        # saved = await self.exam_paper_repo.create_exam_paper(exam_paper_create)
+        # if not saved:
+        #     raise HTTPException(status_code=500, detail="Failed to save exam paper")
 
-        exam_paper = await self.exam_paper_repo.get_exam_paper_json(subject=subject, year=year)
-        return exam_paper.model_dump()
+        # exam_paper = await self.exam_paper_repo.get_exam_paper_json(subject=subject, year=year)
+        # return exam_paper
