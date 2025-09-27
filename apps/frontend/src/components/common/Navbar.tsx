@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -15,6 +15,8 @@ function Navbar() {
   // *********** All States ***********
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const router = useRouter();
+  const currentPath = router.state.location.pathname;
 
   // *********** Effects ***********
   useEffect(() => {
@@ -77,42 +79,53 @@ function Navbar() {
 
           {/***************** Desktop Navigation *****************/}
           <NavigationMenuList className="hidden lg:flex flex-1 justify-center gap-8">
-            {NAVBAR_MENU.map((item, index) => (
-              <NavigationMenuItem key={item.href}>
-                <NavigationMenuLink asChild>
-                  <motion.div
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    whileHover={{ y: -2 }}
-                  >
-                    <Link
-                      to={item.href}
-                      className="relative text-white/90 hover:text-white transition-all duration-300 px-4 py-2 rounded-lg group"
+            {NAVBAR_MENU.map((item, index) => {
+              const isActive =
+                item.href === currentPath ||
+                (item.href === "" && currentPath === "/");
+              return (
+                <NavigationMenuItem key={item.href}>
+                  <NavigationMenuLink asChild>
+                    <motion.div
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      whileHover={{ y: -2 }}
                     >
-                      <span className="relative z-10">{item.title}</span>
-                      <motion.div
-                        className="absolute inset-0 bg-white/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                        whileHover={{ scale: 1.05 }}
-                      />
-                      <motion.div className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-purple-400 to-pink-400 group-hover:w-full group-hover:left-0 transition-all duration-300" />
-                    </Link>
-                  </motion.div>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-            ))}
+                      <Link
+                        to={item.href}
+                        className={`relative text-white/90 hover:text-white transition-all duration-300 px-4 py-2 rounded-lg group ${
+                          isActive ? "bg-white/20 font-bold shadow" : ""
+                        }`}
+                      >
+                        <span className="relative z-10">{item.title}</span>
+                        <motion.div
+                          className="absolute inset-0 bg-white/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                          whileHover={{ scale: 1.05 }}
+                        />
+                        <motion.div className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-purple-400 to-pink-400 group-hover:w-full group-hover:left-0 transition-all duration-300" />
+                      </Link>
+                    </motion.div>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+              );
+            })}
           </NavigationMenuList>
 
           <div className="hidden lg:flex items-center gap-3">
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button className="relative overflow-hidden group backdrop-blur-md bg-white/20 border border-white/30 text-white hover:bg-white/30 transition-all duration-300">
-                <span className="relative z-10">Login</span>
-              </Button>
+              <Link to="/login">
+                <Button className="relative overflow-hidden group backdrop-blur-md bg-white/20 border border-white/30 text-white hover:bg-white/30 transition-all duration-300">
+                  <span className="relative z-10">Login</span>
+                </Button>
+              </Link>
             </motion.div>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button className="relative overflow-hidden group backdrop-blur-md bg-[#e4558d]/70 border border-[#e4558d]/40 text-white hover:bg-[#e4558d]/80 shadow-lg transition-all duration-300">
-                <span className="relative z-10">Sign Up</span>
-              </Button>
+              <Link to="/register">
+                <Button className="relative overflow-hidden group backdrop-blur-md bg-[#e4558d]/70 border border-[#e4558d]/40 text-white hover:bg-[#e4558d]/80 shadow-lg transition-all duration-300">
+                  <span className="relative z-10">Sign Up</span>
+                </Button>
+              </Link>
             </motion.div>
           </div>
 
@@ -184,19 +197,17 @@ function Navbar() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
                 >
-                  <Button
-                    className="w-full relative overflow-hidden group backdrop-blur-md bg-white/20 border border-white/30 text-white hover:bg-white/30 transition-all duration-300"
-                    onClick={closeMobileMenu}
-                  >
-                    Login
-                  </Button>
+                  <Link to="/login" onClick={closeMobileMenu}>
+                    <Button className="w-full relative overflow-hidden group backdrop-blur-md bg-white/20 border border-white/30 text-white hover:bg-white/30 transition-all duration-300">
+                      Login
+                    </Button>
+                  </Link>
 
-                  <Button
-                    className="w-full shadow-lg relative overflow-hidden group backdrop-blur-md bg-[#e4558d]/70 border border-[#e4558d]/40 text-white hover:bg-[#e4558d]/80 transition-all duration-300"
-                    onClick={closeMobileMenu}
-                  >
-                    Sign Up
-                  </Button>
+                  <Link to="/register" onClick={closeMobileMenu}>
+                    <Button className="w-full shadow-lg relative overflow-hidden group backdrop-blur-md bg-[#e4558d]/70 border border-[#e4558d]/40 text-white hover:bg-[#e4558d]/80 transition-all duration-300">
+                      Sign Up
+                    </Button>
+                  </Link>
                 </motion.div>
               </div>
             </motion.div>

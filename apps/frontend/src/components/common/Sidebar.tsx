@@ -7,7 +7,12 @@ import type { Dispatch, SetStateAction } from "react";
 
 import GlassDropdown from "./GlassDropdown";
 import { useApi } from "@/hook/useApi";
-import { boardResponseSchema, subjectResponseSchema } from "@/types/api";
+import {
+  boardResponseSchema,
+  prevExamPaperResponseSchema,
+  prevYearsResponseSchema,
+  subjectResponseSchema,
+} from "@/types/api";
 
 // ************** Props ********************
 interface SidebarProps {
@@ -45,9 +50,12 @@ function Sidebar({
   // ****************** All states ********************
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [availableYears, setAvailableYears] = useState<number[]>([]);
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
 
   //Dropdown
-  const [open, setOpen] = useState<boolean>(false);
+  const [openYear, setOpenYear] = useState<boolean>(false);
+  const [openGenerated, setOpenGenerated] = useState<boolean>(false);
   const [isCustom, setIsCustom] = useState<boolean>(false);
 
   // ***************** API Hook Calls *****************
@@ -76,16 +84,42 @@ function Sidebar({
   });
 
   const boardOptions = boardData?.data.exam_boards ?? [];
+  useEffect(() => {
+    if (!selectedSubject) return;
 
+    const fetchYears = async () => {
+      const { data } = await useApi({
+        endpoint: "/exam-paper/get/prev-years",
+        method: "GET",
+        queryParams: { subject: selectedSubject },
+        responseSchema: prevYearsResponseSchema,
+      }).refetch();
+
+      setAvailableYears(data?.data.prev_years ?? []);
+    };
+
+    fetchYears();
+  }, [selectedSubject]);
   const {
-    data: previousPapers = [],
-    isLoading: isLoadingPapers,
-    isError: isPapersError,
-    error: papersError,
-  } = useApi<{ year: string; title: string }[]>({
-    endpoint: "/papers/previous",
-    method: "GET",
-  });
+    data: prevPaperData,
+    isLoading: isLoadingPrevPaper,
+    isError: isPrevPaperError,
+  } = useApi(
+    {
+      endpoint: "/exam-paper/get/prev-exam-paper",
+      method: "GET",
+      queryParams: {
+        subject: selectedSubject,
+        ...(selectedYear !== null ? { year: selectedYear } : {}),
+      },
+      responseSchema: prevExamPaperResponseSchema,
+    },
+    {
+      enabled: !!selectedSubject && !!selectedYear,
+    }
+  );
+
+  const prevPaper = prevPaperData?.data.exam_paper;
 
   // ******** Functions ***************
   const checkIsMobile = () => {
@@ -226,6 +260,7 @@ function Sidebar({
                     value={selectedMarks}
                     onChange={(e) => setSelectedMarks(e.target.value)}
                     placeholder="Enter total marks"
+                    disabled
                     className="w-full bg-white/10 backdrop-blur-md text-gray-100 p-2 rounded-lg border border-white/20 
                     focus:ring-2 focus:ring-indigo-400/40 hover:bg-white/20 transition-colors
                     placeholder:text-white
@@ -244,6 +279,7 @@ function Sidebar({
                       value={selectedDuration}
                       onChange={(e) => setSelectedDuration(e.target.value)}
                       placeholder="Enter total duration"
+                      disabled
                       className="flex-1 bg-white/10 backdrop-blur-md text-white p-5 rounded-lg border border-white/20 
                       focus:ring-2 focus:ring-indigo-400/40 hover:bg-white/20 transition-colors
                       placeholder:text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
@@ -255,6 +291,7 @@ function Sidebar({
                         onChange={(value) => setSelectedUnit(String(value))}
                         options={timeUnit}
                         placeholder="Unit"
+                        disabled
                       />
                     </div>
                   </div>
@@ -265,21 +302,20 @@ function Sidebar({
               <div className="mt-8">
                 <h3
                   className="text-gray-200 font-medium mb-3 flex items-center cursor-pointer select-none"
-                  onClick={() => setOpen(!open)}
+                  onClick={() => setOpenYear((prev) => !prev)}
                 >
                   <BookOpen className="h-4 w-4 mr-2 text-indigo-400" />
                   Previous Year Questions
                   <motion.span
-                    animate={{ rotate: open ? 180 : 0 }}
+                    animate={{ rotate: openYear ? 180 : 0 }}
                     transition={{ duration: 0.3 }}
                     className="ml-2"
                   >
                     <ChevronDown className="h-4 w-4 text-gray-400" />
                   </motion.span>
                 </h3>
-
                 <AnimatePresence>
-                  {open && (
+                  {openYear && (
                     <motion.ul
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: "auto", opacity: 1 }}
@@ -287,26 +323,20 @@ function Sidebar({
                       transition={{ duration: 0.3 }}
                       className="space-y-2 overflow-hidden"
                     >
-                      {isLoadingPapers ? (
-                        <>
-                          <Skeleton className="h-6 w-full" />
-                          <Skeleton className="h-6 w-3/4" />
-                        </>
-                      ) : isPapersError ? (
-                        <p className="px-3 py-2 text-red-400 text-sm">
-                          {papersError?.message ||
-                            "Failed to load previous papers"}
-                        </p>
-                      ) : (
-                        previousPapers.map((paper) => (
-                          <motion.li
-                            key={paper.year}
-                            whileHover={{ x: 5 }}
+                      {availableYears.length > 0 ? (
+                        availableYears.map((year) => (
+                          <li
+                            key={year}
                             className="px-3 py-2 rounded-lg bg-white/5 text-gray-300 hover:text-white hover:bg-indigo-600/40 cursor-pointer transition"
+                            onClick={() => setSelectedYear(year)}
                           >
-                            {paper.title || `${paper.year} Question Paper`}
-                          </motion.li>
+                            {year} Question Paper
+                          </li>
                         ))
+                      ) : (
+                        <li className="px-3 py-2 text-gray-400 text-sm">
+                          No previous years found
+                        </li>
                       )}
                     </motion.ul>
                   )}
@@ -315,20 +345,40 @@ function Sidebar({
 
               {/* Previous Generated Questions */}
               <div className="mt-8">
-                <h3 className="text-gray-200 font-medium mb-3 flex items-center">
+                <h3
+                  className="text-gray-200 font-medium mb-3 flex items-center cursor-pointer select-none"
+                  onClick={() => setOpenGenerated((prev) => !prev)}
+                >
                   <RiFileHistoryLine className="h-4 w-4 mr-2 text-indigo-400" />
                   Previous Generated Questions
+                  <motion.span
+                    animate={{ rotate: openGenerated ? 180 : 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="ml-2"
+                  >
+                    <ChevronDown className="h-4 w-4 text-gray-400" />
+                  </motion.span>
                 </h3>
-                <ul className="space-y-2">
-                  {["2021", "2020", "2019", "2018"].map((year) => (
-                    <li
-                      key={year}
-                      className="px-3 py-2 rounded-lg bg-white/5 text-gray-300 hover:text-white hover:bg-indigo-600/40 cursor-pointer transition"
+                <AnimatePresence>
+                  {openGenerated && (
+                    <motion.ul
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="space-y-2 overflow-hidden"
                     >
-                      {year} Question Paper
-                    </li>
-                  ))}
-                </ul>
+                      {["2021", "2020", "2019", "2018"].map((year) => (
+                        <li
+                          key={year}
+                          className="px-3 py-2 rounded-lg bg-white/5 text-gray-300 hover:text-white hover:bg-indigo-600/40 cursor-pointer transition"
+                        >
+                          {year} Question Paper
+                        </li>
+                      ))}
+                    </motion.ul>
+                  )}
+                </AnimatePresence>
               </div>
             </nav>
           </motion.div>

@@ -1,3 +1,4 @@
+import { getAccessToken } from "@/lib/auth";
 import type { ApiConfig, ApiError } from "../types/api";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "");

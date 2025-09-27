@@ -6,7 +6,6 @@ import PageHeader from "@/components/common/PageHeader";
 import Sidebar from "@/components/common/Sidebar";
 import GlassLayout from "@/layouts/GlassLayout";
 
-
 export const Route = createFileRoute("/config/")({
   component: ConfigComponent,
 });
@@ -14,9 +13,10 @@ export const Route = createFileRoute("/config/")({
 function ConfigComponent() {
   const [selectedBoard, setSelectedBoard] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("");
-  const [selectedMarks, setSelectedMarks] = useState("");
-  const [selectedDuration, setSelectedDuration] = useState("");
-  const [selectedUnit, setSelectedUnit] = useState("")
+  const [selectedMarks, setSelectedMarks] = useState<string>("80");
+  const [selectedDuration, setSelectedDuration] = useState<string>("2");
+  const [selectedUnit, setSelectedUnit] = useState<string>("hrs");
+
   return (
     <div className="space-y-8 mt-24">
       {/*************************** Header ***************************/}
@@ -37,10 +37,10 @@ function ConfigComponent() {
             selectedMarks={selectedMarks}
             setSelectedMarks={setSelectedMarks}
             selectedDuration={selectedDuration}
-            setSelectedDuration={setSelectedDuration} 
-            selectedUnit={selectedUnit} 
+            setSelectedDuration={setSelectedDuration}
+            selectedUnit={selectedUnit}
             setSelectedUnit={setSelectedUnit}
-            />
+          />
           <ConfigContent
             selectedBoard={selectedBoard}
             selectedSubject={selectedSubject}
