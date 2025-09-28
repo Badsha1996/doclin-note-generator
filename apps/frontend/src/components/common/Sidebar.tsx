@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { X, BookOpen, Menu, ChevronDown } from "lucide-react";
 import { useState, useEffect } from "react";
-import { RiFileHistoryLine } from "react-icons/ri";
+
 import { Input } from "../ui/input";
 import type { Dispatch, SetStateAction } from "react";
 
@@ -13,6 +13,7 @@ import {
   prevYearsResponseSchema,
   subjectResponseSchema,
 } from "@/types/api";
+import { useLocation, useNavigate } from "@tanstack/react-router";
 
 // ************** Props ********************
 interface SidebarProps {
@@ -29,11 +30,6 @@ interface SidebarProps {
 }
 
 // *************** Dummy Data *********************
-const timeUnit = [
-  { value: "", label: "unit" },
-  { value: "hrs", label: "hrs" },
-  { value: "mins", label: "mins" },
-];
 
 function Sidebar({
   selectedBoard,
@@ -45,7 +41,6 @@ function Sidebar({
   selectedDuration,
   setSelectedDuration,
   selectedUnit,
-  setSelectedUnit,
 }: SidebarProps) {
   // ****************** All states ********************
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -55,10 +50,12 @@ function Sidebar({
 
   //Dropdown
   const [openYear, setOpenYear] = useState<boolean>(false);
-  const [openGenerated, setOpenGenerated] = useState<boolean>(false);
   const [isCustom, setIsCustom] = useState<boolean>(false);
 
+  const navigate = useNavigate();
+
   // ***************** API Hook Calls *****************
+
   const {
     data: subjectData,
     isLoading: isSubjectsLoading,
@@ -69,8 +66,6 @@ function Sidebar({
     method: "GET",
     responseSchema: subjectResponseSchema,
   });
-
-  const subjectOptions = subjectData?.data.exam_subjects ?? [];
 
   const {
     data: boardData,
@@ -83,35 +78,58 @@ function Sidebar({
     responseSchema: boardResponseSchema,
   });
 
-  const boardOptions = boardData?.data.exam_boards ?? [];
+  const boardOptions = (boardData?.data.exam_boards ?? []).map((b) => ({
+    label: b,
+    value: b,
+  }));
+
+  const subjectOptions = (subjectData?.data.exam_subjects ?? []).map((s) => ({
+    label: s,
+    value: s,
+  }));
+
+  const { refetch: refetchPrevYears } = useApi(
+    {
+      endpoint: "/exam-paper/get/prev-years",
+      method: "POST",
+      payload: {
+        subject: selectedSubject, // Use payload for request body
+      },
+      responseSchema: prevYearsResponseSchema,
+    },
+    {
+      enabled: false, // Disable automatic fetching, we'll control it manually
+    }
+  );
+
+  // Replace the existing useEffect for years with:
   useEffect(() => {
-    if (!selectedSubject) return;
+    if (selectedSubject) {
+      refetchPrevYears()
+        .then((response) => {
+          // The response.data should contain your API response directly
+          const yearsData = response.data?.data?.prev_years ?? [];
+          setAvailableYears(yearsData);
+        })
+        .catch(() => {
+          setAvailableYears([]);
+        });
+    } else {
+      setAvailableYears([]);
+      setSelectedYear(null);
+    }
+  }, [selectedSubject, refetchPrevYears]);
 
-    const fetchYears = async () => {
-      const { data } = await useApi({
-        endpoint: "/exam-paper/get/prev-years",
-        method: "GET",
-        queryParams: { subject: selectedSubject },
-        responseSchema: prevYearsResponseSchema,
-      }).refetch();
-
-      setAvailableYears(data?.data.prev_years ?? []);
-    };
-
-    fetchYears();
+  // Also add this effect to reset year when subject changes:
+  useEffect(() => {
+    setSelectedYear(null);
   }, [selectedSubject]);
-  const {
-    data: prevPaperData,
-    isLoading: isLoadingPrevPaper,
-    isError: isPrevPaperError,
-  } = useApi(
+
+  useApi(
     {
       endpoint: "/exam-paper/get/prev-exam-paper",
-      method: "GET",
-      queryParams: {
-        subject: selectedSubject,
-        ...(selectedYear !== null ? { year: selectedYear } : {}),
-      },
+      method: "POST",
+      payload: { subject: selectedSubject, year: selectedYear },
       responseSchema: prevExamPaperResponseSchema,
     },
     {
@@ -119,13 +137,24 @@ function Sidebar({
     }
   );
 
-  const prevPaper = prevPaperData?.data.exam_paper;
-
   // ******** Functions ***************
   const checkIsMobile = () => {
     const mobile = window.innerWidth < 768;
     setIsMobile(mobile);
     if (!mobile) setIsOpen(true);
+  };
+
+  const HandlePrevYearRoute = (year : number) => {
+    const payload = {
+      subject: selectedSubject || "",
+      year: year || "",
+      prev: true,
+    };
+
+    navigate({
+      to: "/examPaper",
+      search: payload,
+    });
   };
 
   // *********** Effects ***************
@@ -243,7 +272,9 @@ function Sidebar({
                     <GlassDropdown
                       label="Subject"
                       value={selectedSubject}
-                      onChange={(value) => setSelectedSubject(String(value))}
+                      onChange={(value) => {
+                        setSelectedSubject(String(value));
+                      }}
                       options={subjectOptions}
                       placeholder="Select Subject"
                     />
@@ -285,14 +316,17 @@ function Sidebar({
                       placeholder:text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                     <div className="flex-1">
-                      <GlassDropdown
+                      {/* <GlassDropdown
                         label=""
                         value={selectedUnit}
                         onChange={(value) => setSelectedUnit(String(value))}
                         options={timeUnit}
                         placeholder="Unit"
                         disabled
-                      />
+                      /> */}
+                      <span className="text-white font-semibold text-lg">
+                        {selectedUnit}
+                      </span>
                     </div>
                   </div>
                 </li>
@@ -328,7 +362,7 @@ function Sidebar({
                           <li
                             key={year}
                             className="px-3 py-2 rounded-lg bg-white/5 text-gray-300 hover:text-white hover:bg-indigo-600/40 cursor-pointer transition"
-                            onClick={() => setSelectedYear(year)}
+                            onClick={() => HandlePrevYearRoute(year)}
                           >
                             {year} Question Paper
                           </li>
@@ -343,8 +377,8 @@ function Sidebar({
                 </AnimatePresence>
               </div>
 
-              {/* Previous Generated Questions */}
-              <div className="mt-8">
+              {/************** Previous Generated Questions ***************/}
+              {/* <div className="mt-8">
                 <h3
                   className="text-gray-200 font-medium mb-3 flex items-center cursor-pointer select-none"
                   onClick={() => setOpenGenerated((prev) => !prev)}
@@ -379,7 +413,7 @@ function Sidebar({
                     </motion.ul>
                   )}
                 </AnimatePresence>
-              </div>
+              </div> */}
             </nav>
           </motion.div>
         )}
