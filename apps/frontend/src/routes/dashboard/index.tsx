@@ -15,7 +15,8 @@ import Syllabus from "@/components/dashboard/SyllabusManagement";
 import { getUserInfo } from "@/lib/auth";
 export const Route = createFileRoute("/dashboard/")({
   beforeLoad: () => {
-    if (getUserInfo()?.role === "user") {
+    const user = getUserInfo();
+    if (!user || user?.role === "user") {
       throw redirect({ to: "/", search: { oauth: undefined } });
     }
   },
