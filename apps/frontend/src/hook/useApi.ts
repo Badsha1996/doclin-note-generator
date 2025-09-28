@@ -1,4 +1,10 @@
 import type { ApiConfig, ApiError } from "../types/api";
+import {
+  useQuery,
+  useMutation,
+  type UseQueryOptions,
+  type UseMutationOptions,
+} from "@tanstack/react-query";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "");
 
@@ -42,7 +48,6 @@ export const fetchApi = async <TResponse, TPayload = undefined>(
     ? endpoint
     : `/${endpoint}`;
   const url = buildUrl(`${API_BASE_URL}${normalizedEndpoint}`, queryParams);
-  console.log("url", url);
 
   const defaultHeaders = {
     "Content-Type": "application/json",
@@ -72,21 +77,13 @@ export const fetchApi = async <TResponse, TPayload = undefined>(
 
   const data = await response.json();
 
-  // Validate response before returning (if schema provided)
   if (responseSchema) {
     return responseSchema.parse(data);
   }
   return data;
 };
-// hooks/useApi.ts
-import {
-  useQuery,
-  useMutation,
-  type UseQueryOptions,
-  type UseMutationOptions,
-} from "@tanstack/react-query";
 
-// For GET
+// For GET / Query-based APIs
 export const useApi = <TResponse, TPayload = undefined>(
   config: ApiConfig<TResponse, TPayload>,
   options?: Omit<UseQueryOptions<TResponse, ApiError>, "queryKey" | "queryFn">
@@ -94,9 +91,10 @@ export const useApi = <TResponse, TPayload = undefined>(
   const queryKey = [
     config.endpoint,
     config.method,
-    config.queryParams,
-    config.payload,
+    config.queryParams ? JSON.stringify(config.queryParams) : null,
+    config.payload ? JSON.stringify(config.payload) : null,
   ];
+
   return useQuery<TResponse, ApiError>({
     queryKey,
     queryFn: () => fetchApi<TResponse, TPayload>(config),
@@ -104,7 +102,6 @@ export const useApi = <TResponse, TPayload = undefined>(
   });
 };
 
-// For POST/PUT/PATCH/DELETE
 export const useApiMutation = <TResponse, TPayload = undefined>(
   config: Omit<ApiConfig<TResponse, TPayload>, "payload">,
   options?: UseMutationOptions<TResponse, ApiError, TPayload>
