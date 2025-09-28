@@ -49,7 +49,7 @@ function Navbar() {
       onSuccess: (data) => {
         clearUserInfo();
         toast.success(data.message || "Loggedout successfully.");
-        router.navigate({ to: "/", search: { oauth: undefined } });
+        router.navigate({ to: "/" });
       },
       onError: (error: ApiError) => {
         toast.error(error.message || "failed to logout.");

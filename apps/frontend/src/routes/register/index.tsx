@@ -65,7 +65,7 @@ import { getUserInfo } from "@/lib/auth";
 export const Route = createFileRoute("/register/")({
   beforeLoad: () => {
     if (getUserInfo()) {
-      throw redirect({ to: "/", search: { oauth: undefined } });
+      throw redirect({ to: "/" });
     }
   },
   component: Register,

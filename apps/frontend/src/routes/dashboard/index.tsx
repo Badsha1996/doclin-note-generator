@@ -17,7 +17,7 @@ export const Route = createFileRoute("/dashboard/")({
   beforeLoad: () => {
     const user = getUserInfo();
     if (!user || user?.role === "user") {
-      throw redirect({ to: "/", search: { oauth: undefined } });
+      throw redirect({ to: "/" });
     }
   },
   component: Dashboard,

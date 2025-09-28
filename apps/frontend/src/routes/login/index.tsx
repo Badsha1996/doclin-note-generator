@@ -29,7 +29,7 @@ import { setUserInfo, getUserInfo } from "@/lib/auth";
 export const Route = createFileRoute("/login/")({
   beforeLoad: () => {
     if (getUserInfo()) {
-      throw redirect({ to: "/", search: { oauth: undefined } });
+      throw redirect({ to: "/" });
     }
   },
   component: Login,
@@ -66,7 +66,7 @@ function Login() {
           username: user.username,
         });
         toast.success(data.message || "Login successful!");
-        router.navigate({ to: "/", search: { oauth: undefined } });
+        router.navigate({ to: "/" });
       },
       onError: (error: ApiError) => {
         toast.error(error.message || "Login failed. Please try again.");
