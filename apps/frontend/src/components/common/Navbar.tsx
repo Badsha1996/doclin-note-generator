@@ -157,8 +157,8 @@ function Navbar() {
                       <AvatarFallback>CN</AvatarFallback>
                     </Avatar>
                   </MenubarTrigger>
-                  <MenubarContent className="text-white/90 hover:text-white bg-white/50 backdrop-blur-md border border-white/20 shadow-lg">
-                    <MenubarItem inset>{user.email}</MenubarItem>
+                  <MenubarContent className="mr-4 text-white/90 hover:text-white bg-white/50 backdrop-blur-md border border-white/20 shadow-lg">
+                    <MenubarItem inset>{user.username}</MenubarItem>
                     <MenubarSeparator />
                     <MenubarItem
                       inset
@@ -167,7 +167,7 @@ function Navbar() {
                     >
                       <div className="flex justify-between items-center w-full">
                         <span>Logout</span>
-                        <LogOut color="red" />
+                        <LogOut color="white" />
                       </div>
                     </MenubarItem>
                   </MenubarContent>
