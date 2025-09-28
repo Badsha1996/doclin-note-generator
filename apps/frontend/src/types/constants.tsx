@@ -1,5 +1,6 @@
-export interface NavbarMenuData{
-    title:string;
-    href:string;
-    desc:string;
+export interface NavbarMenuData {
+  title: string;
+  href: string;
+  desc: string;
+  enabled?: boolean;
 }

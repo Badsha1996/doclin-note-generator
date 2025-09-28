@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Suspense, useState, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
 import { Scene } from "@/components/models/PulseModel";
@@ -7,7 +7,8 @@ import {
   Brain,
   FileText,
   Users,
-  Award,
+  Speech,
+  University,
   ChevronRight,
   Star,
   Play,
@@ -39,11 +40,11 @@ const productFeatures = [
     color: "from-green-500 to-teal-500",
   },
   {
-    icon: <Award className="w-6 h-6" />,
-    title: "Progress Analytics",
+    icon: <Speech className="w-6 h-6" />,
+    title: "Peer Discussions",
     description:
-      "Track your learning journey with detailed analytics and insights",
-    highlight: "Real-time Performance Data",
+      "Connect with fellow learners, share ideas, ask questions, and collaborate on articles and insights.",
+    highlight: "Collaborative Space",
     color: "from-orange-500 to-red-500",
   },
 ];
@@ -78,7 +79,7 @@ const useCases = [
     description:
       "Generate practice questions, create study notes, and track your learning progress",
     icon: <Users className="w-8 h-8" />,
-    benefits: ["Practice Questions", "Study Guides", "Progress Tracking"],
+    benefits: ["Practice Questions", "Study Guides", "Peer Discussions"],
   },
   {
     title: "Teachers",
@@ -88,19 +89,19 @@ const useCases = [
     benefits: ["Question Banks", "Curriculum Materials", "Assessment Tools"],
   },
   {
-    title: "Professionals",
+    title: "Institutions",
     description:
-      "Prepare for certifications and continuing education with AI-powered tools",
-    icon: <Award className="w-8 h-8" />,
-    benefits: ["Certification Prep", "Skill Assessment", "Knowledge Gaps"],
+      "Create curriculum resources, evaluate skills, and bridge learning gaps across large groups of students.",
+    icon: <University className="w-8 h-8" />,
+    benefits: ["Curriculum Support", "Skill Assessment", "Knowledge Gaps"],
   },
 ];
 
 const features = [
   "AI-Generated Questions",
-  "Smart Note Taking",
-  "Study Material Creation",
-  "Progress Tracking",
+  "Board Based Questions",
+  "Previous Year Questions",
+  "Sample Question Papers",
 ];
 
 function Home() {
@@ -108,12 +109,13 @@ function Home() {
   const [isVisible, setIsVisible] = useState(false);
   const [typewriterText, setTypewriterText] = useState("");
   const [stats, setStats] = useState({ users: 0, questions: 0, notes: 0 });
-
+  const navigate = useNavigate();
   useEffect(() => {
     setIsVisible(true);
 
     // Typewriter effect
-    const text = "Your one stop for QUESTIONS, NOTES and STUDY MATERIAL";
+    const text =
+      "A single AI-driven platform that transforms the way students and teachers prepare effective study materials";
     let index = 0;
     const timer = setInterval(() => {
       if (index <= text.length) {
@@ -241,11 +243,17 @@ function Home() {
               className={`flex flex-row xs:flex-row gap-3 sm:gap-4 justify-center lg:justify-start mb-12 transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
               style={{ transitionDelay: "0.8s" }}
             >
-              <button className="group px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl text-sm sm:text-base transform hover:scale-105 hover:shadow-2xl transition-all duration-300 backdrop-blur-sm border border-white/20 shadow-lg flex items-center gap-2">
+              <button
+                className="group px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl text-sm sm:text-base transform hover:scale-105 hover:shadow-2xl transition-all duration-300 backdrop-blur-sm border border-white/20 shadow-lg flex items-center gap-2"
+                onClick={() => navigate({ to: "/config" })}
+              >
                 <Play className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 Generate Questions
               </button>
-              <button className="group px-6 sm:px-8 py-3 sm:py-4 bg-white/10 text-white font-semibold rounded-xl text-sm sm:text-base transform hover:scale-105 hover:shadow-2xl transition-all duration-300 backdrop-blur-sm border border-white/10 shadow-lg flex items-center gap-2">
+              <button
+                className="group px-6 sm:px-8 py-3 sm:py-4 bg-white/10 text-white font-semibold rounded-xl text-sm sm:text-base transform hover:scale-105 hover:shadow-2xl transition-all duration-300 backdrop-blur-sm border border-white/10 shadow-lg flex items-center gap-2"
+                onClick={() => navigate({ to: "/about" })}
+              >
                 Learn About us
                 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
@@ -269,7 +277,7 @@ function Home() {
               </div>
               <div className="text-center">
                 <div className="text-2xl sm:text-3xl font-bold text-pink-400">
-                  <AnimatedCounter end={stats.notes} suffix="+" />
+                  {/* <AnimatedCounter end={stats.notes} suffix="+" /> */}0
                 </div>
                 <div className="text-white/60 text-sm">Notes Created</div>
               </div>
@@ -364,7 +372,7 @@ function Home() {
         </div>
 
         {/* **************************************** Testimonials *********************************** */}
-        <div className="px-6 sm:px-8 md:px-12 lg:px-16 xl:px-24 py-16 bg-black/20 backdrop-blur-sm">
+        {/* <div className="px-6 sm:px-8 md:px-12 lg:px-16 xl:px-24 py-16 bg-black/20 backdrop-blur-sm">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-4xl sm:text-5xl font-bold text-white mb-4">
@@ -407,7 +415,7 @@ function Home() {
               ))}
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

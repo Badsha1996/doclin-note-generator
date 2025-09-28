@@ -83,6 +83,7 @@ function Navbar() {
               const isActive =
                 item.href === currentPath ||
                 (item.href === "" && currentPath === "/");
+              const isDisabled = item.enabled === false;
               return (
                 <NavigationMenuItem key={item.href}>
                   <NavigationMenuLink asChild>
@@ -90,20 +91,24 @@ function Navbar() {
                       initial={{ opacity: 0, y: -20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1 }}
-                      whileHover={{ y: -2 }}
+                      whileHover={{ y: isDisabled ? 0 : -2 }}
                     >
                       <Link
-                        to={item.href}
-                        className={`relative text-white/90 hover:text-white transition-all duration-300 px-4 py-2 rounded-lg group ${
-                          isActive ? "bg-white/20 font-bold shadow" : ""
-                        }`}
+                        to={isDisabled ? undefined : item.href}
+                        className={`relative px-4 py-2 rounded-lg transition-all duration-300 ${isActive ? "bg-white/20 font-bold shadow" : ""} ${isDisabled ? "pointer-events-none text-gray-400" : "text-white/90 hover:text-white"}`}
+                        tabIndex={isDisabled ? -1 : 0}
+                        aria-disabled={isDisabled}
                       >
                         <span className="relative z-10">{item.title}</span>
-                        <motion.div
-                          className="absolute inset-0 bg-white/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                          whileHover={{ scale: 1.05 }}
-                        />
-                        <motion.div className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-purple-400 to-pink-400 group-hover:w-full group-hover:left-0 transition-all duration-300" />
+                        {!isDisabled && (
+                          <motion.div
+                            className="absolute inset-0 bg-white/20 rounded-lg opacity-0 hover:opacity-100 transition-opacity duration-300"
+                            whileHover={{ scale: 1.05 }}
+                          />
+                        )}
+                        {!isDisabled && (
+                          <motion.div className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-purple-400 to-pink-400 group-hover:w-full group-hover:left-0 transition-all duration-300" />
+                        )}
                       </Link>
                     </motion.div>
                   </NavigationMenuLink>
@@ -174,22 +179,27 @@ function Navbar() {
             >
               <div className="flex flex-col h-full pt-24 px-6">
                 <nav className="flex flex-col gap-2 mb-8">
-                  {NAVBAR_MENU.map((item, index) => (
-                    <motion.div
-                      key={item.href}
-                      initial={{ opacity: 0, x: 50 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                    >
-                      <Link
-                        to={item.href}
-                        onClick={closeMobileMenu}
-                        className="block text-white text-lg font-medium py-3 px-4 rounded-xl hover:bg-white/10 transition-all duration-300 border border-transparent hover:border-white/20"
+                  {NAVBAR_MENU.map((item, index) => {
+                    const isDisabled = item.enabled === false;
+                    return (
+                      <motion.div
+                        key={item.href}
+                        initial={{ opacity: 0, x: 50 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.1 }}
                       >
-                        {item.title}
-                      </Link>
-                    </motion.div>
-                  ))}
+                        <Link
+                          to={isDisabled ? undefined : item.href}
+                          onClick={isDisabled ? undefined : closeMobileMenu}
+                          className={`block py-3 px-4 rounded-xl font-medium transition-all duration-300 border border-transparent ${isDisabled ? "pointer-events-none text-gray-400 bg-gray-200/30" : "text-white text-lg hover:bg-white/10 hover:border-white/20"}`}
+                          tabIndex={isDisabled ? -1 : 0}
+                          aria-disabled={isDisabled}
+                        >
+                          {item.title}
+                        </Link>
+                      </motion.div>
+                    );
+                  })}
                 </nav>
                 <motion.div
                   className="flex flex-col gap-3 mt-auto mb-8"
