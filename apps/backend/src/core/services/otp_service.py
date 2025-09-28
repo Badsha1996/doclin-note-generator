@@ -39,12 +39,14 @@ class OTPService:
     async def verify_otp(self,email:str,otp:str)->bool:
 
         otp_data = await self.get_otp_entry(email)
+        
         if not otp_data:
             raise NotFoundExceptionError()
         expires_at = otp_data.expires_at.replace(tzinfo=timezone.utc)
         if datetime.now(timezone.utc) > expires_at:
             raise ValidationExceptionError(error="OTP has expired")
         verified=self.security.verify_password(otp_data.otp_hash,otp)
+        # print(otp_data.otp_hash,otp,verified)
         if not verified:
             raise ValidationExceptionError(error="Invalid OTP")
         await self.otp_repo.delete_otp(email)

@@ -1,10 +1,35 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  useNavigate,
+  redirect,
+} from "@tanstack/react-router";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FormSchema, type registerTypes } from "@/types/type";
-import type { ApiError, RegisterResponse } from "@/types/api";
-import { registerResponseSchema } from "@/types/api";
+import {
+  FormSchema,
+  otpFormSchema,
+  otpVerifySchema,
+  verifyUserSchema,
+  type OtpFormType,
+  type OtpVerifyType,
+  type registerTypes,
+  type VerifyUserType,
+} from "@/types/type";
+import type {
+  ApiError,
+  GenerateOTPResponse,
+  RegisterResponse,
+  VerifyOTPResponse,
+  VerifyUserResponse,
+} from "@/types/api";
+import {
+  generateOTPResponseSchema,
+  registerResponseSchema,
+  verifyOTPResponseSchema,
+  VerifyUserResponseSchema,
+} from "@/types/api";
 import { useForm } from "react-hook-form";
 import {
   Form,
@@ -27,10 +52,22 @@ import {
 } from "@/lib/motion";
 import { useApiMutation } from "@/hook/useApi";
 
-import { EyeClosed, Eye } from "lucide-react";
+import { EyeClosed, Eye, Loader2 } from "lucide-react";
 import { useState } from "react";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSeparator,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
+import { getUserInfo } from "@/lib/auth";
 
 export const Route = createFileRoute("/register/")({
+  beforeLoad: () => {
+    if (getUserInfo()) {
+      throw redirect({ to: "/" });
+    }
+  },
   component: Register,
 });
 
@@ -44,26 +81,50 @@ export function Register() {
       username: "",
       password: "",
       confirmpassword: "",
+      otp: "",
     },
   });
   const [showPassword, setShowPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
 
   const navigate = useNavigate();
+
+  const profileMutation = useApiMutation<VerifyUserResponse, VerifyUserType>(
+    {
+      endpoint: "/auth/verify",
+      method: "POST",
+      payloadSchema: verifyUserSchema,
+      responseSchema: VerifyUserResponseSchema,
+    },
+    {
+      onSuccess: (data) => {
+        toast.success(data.message || "User verified successfully!");
+        navigate({ to: "/login" });
+      },
+
+      onError: (error: ApiError) => {
+        toast.error(error.message || "Profile setup failed.");
+      },
+    }
+  );
   const mutation = useApiMutation<
     ApiResponse,
-    Omit<registerTypes, "confirmpassword">
+    Omit<registerTypes, "confirmpassword" | "otp">
   >(
     {
       endpoint: "/auth/register",
       method: "POST",
-      payloadSchema: FormSchema.omit({ confirmpassword: true }),
+      payloadSchema: FormSchema.omit({ confirmpassword: true, otp: true }),
       responseSchema: registerResponseSchema,
     },
     {
       onSuccess: (data) => {
         toast.success(data.message || "Registration successful!");
-        navigate({ to: "/login" });
+        profileMutation.mutate({
+          id: data.data.user.id,
+        });
       },
       onError: (error: ApiError) => {
         toast.error(error.message || "Registration failed. Please try again.");
@@ -71,9 +132,51 @@ export function Register() {
     }
   );
 
+  const sendOtpMutation = useApiMutation<GenerateOTPResponse, OtpFormType>(
+    {
+      endpoint: "/otp/generate",
+      method: "POST",
+      payloadSchema: otpFormSchema,
+      responseSchema: generateOTPResponseSchema,
+    },
+    {
+      onSuccess: (data) => {
+        toast.success(data.message || "OTP sent successfully!");
+        setOtpSent(true);
+      },
+      onError: (error: ApiError) => {
+        toast.error(error.message || "Failed to send OTP");
+      },
+    }
+  );
+  const verifyOtpMutation = useApiMutation<VerifyOTPResponse, OtpVerifyType>(
+    {
+      endpoint: "/otp/verify",
+      method: "POST",
+      payloadSchema: otpVerifySchema,
+      responseSchema: verifyOTPResponseSchema,
+    },
+    {
+      onSuccess: (data) => {
+        toast.success(data.message || "OTP verified!");
+        setOtpVerified(true);
+        setOtpSent(false);
+        form.setValue("otp", "");
+      },
+      onError: (error: ApiError) => {
+        toast.error(error.message || "Invalid OTP, please try again.");
+      },
+    }
+  );
   function onSubmit(data: registerTypes) {
-    const { confirmpassword, ...payload } = data;
-    mutation.mutate(payload);
+    const { username, email, password } = data;
+    mutation.mutate({ username, email, password });
+  }
+  function handleEditEmail() {
+    setOtpSent(false);
+    setOtpVerified(false);
+    form.setValue("otp", "");
+    form.setValue("email", "");
   }
 
   function showHidePassword() {
@@ -143,7 +246,9 @@ export function Register() {
             </h2>
             <Form {...form}>
               <form
-                onSubmit={form.handleSubmit(onSubmit)}
+                onSubmit={form.handleSubmit(onSubmit, (errors) => {
+                  console.log("❌ Validation errors:", errors);
+                })}
                 className="space-y-4"
               >
                 <FormField
@@ -164,25 +269,122 @@ export function Register() {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-white">Email</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="email"
-                          placeholder="your@email.com"
-                          variant="custom"
-                          {...field}
-                          className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {!otpSent && (
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-white">Email</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Input
+                              type="email"
+                              placeholder="your@email.com"
+                              variant="custom"
+                              {...field}
+                              className="bg-white/20 border-white/30 text-white placeholder:text-white/50 pr-10"
+                              readOnly={otpVerified}
+                              onBlur={() => {
+                                if (otpVerified || !field.value || otpSent)
+                                  return;
+                                sendOtpMutation.mutate({
+                                  email: field.value,
+                                  username: form.getValues("username"),
+                                });
+                              }}
+                            />
+                            {sendOtpMutation.isPending && (
+                              <div className="absolute inset-y-0 right-3 flex items-center">
+                                <Loader2 className="w-4 h-4 animate-spin text-white" />
+                              </div>
+                            )}
+                            {otpVerified && (
+                              <span
+                                className="text-primary hover:underline font-medium text-sm cursor-pointer inline-block"
+                                onClick={handleEditEmail}
+                              >
+                                Edit Email?
+                              </span>
+                            )}
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+
+                {otpSent && !otpVerified && (
+                  <FormField
+                    control={form.control}
+                    name="otp"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-white">Enter OTP</FormLabel>
+                        <FormControl>
+                          <div className="">
+                            <InputOTP
+                              maxLength={6}
+                              {...field}
+                              className="w-full"
+                              onChange={(val) => {
+                                field.onChange(val);
+                                if (val.length === 6) {
+                                  verifyOtpMutation.mutate({
+                                    email: form.getValues("email"),
+                                    otp: val,
+                                  });
+                                }
+                              }}
+                            >
+                              <InputOTPGroup>
+                                <InputOTPSlot
+                                  index={0}
+                                  className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
+                                />
+                                <InputOTPSlot
+                                  index={1}
+                                  className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
+                                />
+                              </InputOTPGroup>
+                              <InputOTPSeparator />
+                              <InputOTPGroup>
+                                <InputOTPSlot
+                                  index={2}
+                                  className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
+                                />
+
+                                <InputOTPSlot
+                                  index={3}
+                                  className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
+                                />
+                              </InputOTPGroup>
+                              <InputOTPSeparator />
+                              <InputOTPGroup>
+                                <InputOTPSlot
+                                  index={4}
+                                  className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
+                                />
+                                <InputOTPSlot
+                                  index={5}
+                                  className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
+                                />
+                              </InputOTPGroup>
+                            </InputOTP>
+                            <span
+                              className="text-primary hover:underline font-medium text-sm cursor-pointer inline-block"
+                              onClick={handleEditEmail}
+                            >
+                              Edit Email?
+                            </span>
+                          </div>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                )}
+
                 <FormField
                   control={form.control}
                   name="password"
@@ -263,7 +465,7 @@ export function Register() {
                     type="submit"
                     variant="standOut"
                     className="w-full max-w py-2 rounded-md font-semibold cursor-pointer"
-                    disabled={mutation.isPending}
+                    disabled={!otpVerified}
                   >
                     {mutation.isPending ? "Registering..." : "Register"}
                   </Button>

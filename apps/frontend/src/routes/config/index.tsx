@@ -1,12 +1,18 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState, type SetStateAction } from "react";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { useState } from "react";
 
 import ConfigContent from "@/components/common/ConfigContent";
 import PageHeader from "@/components/common/PageHeader";
 import Sidebar from "@/components/common/Sidebar";
 import GlassLayout from "@/layouts/GlassLayout";
+import { getUserInfo } from "@/lib/auth";
 
 export const Route = createFileRoute("/config/")({
+  beforeLoad: () => {
+    if (!getUserInfo()) {
+      throw redirect({ to: "/" });
+    }
+  },
   component: ConfigComponent,
 });
 

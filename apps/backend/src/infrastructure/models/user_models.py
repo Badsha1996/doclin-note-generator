@@ -32,7 +32,6 @@ class UserModel(Base):
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     oauth_accounts = relationship("OAuthModel", back_populates="user")
-    files = relationship("FileModel", back_populates="user", cascade="all, delete-orphan")
     feedbacks = relationship("FeedbackModel", back_populates="user", cascade="all, delete-orphan")
 
 

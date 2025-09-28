@@ -1,5 +1,6 @@
 import PageHeader from "@/components/common/PageHeader";
-import { createFileRoute } from "@tanstack/react-router";
+import { getUserInfo } from "@/lib/auth";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 const dummyAPIRes = {
   success: true,
@@ -495,6 +496,11 @@ const ExamPaperComponent = () => {
   );
 };
 export const Route = createFileRoute("/examPaper/")({
+  beforeLoad: () => {
+    if (!getUserInfo()) {
+      throw redirect({ to: "/" });
+    }
+  },
   component: ExamPaperComponent,
 });
 

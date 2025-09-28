@@ -18,10 +18,6 @@ services:
       - CHOKIDAR_USEPOLLING=true
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/mydatabase
       - PYTHONPATH=/app/apps/backend/src
-      - S3_ENDPOINT=http://minio:9000
-      - S3_ACCESS_KEY=minio
-      - S3_SECRET_KEY=minio123
-      - S3_BUCKET=doclin-storage
       - LLM_PROVIDER=ollama
       - OLLAMA_URL=http://ollama:11434
       - OLLAMA_MODEL=llama3:8b
@@ -31,8 +27,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      minio:
-        condition: service_started
       ollama:
         condition: service_started
     restart: unless-stopped
@@ -62,43 +56,6 @@ services:
     networks:
       - app-network
 
-  minio:
-    image: minio/minio:latest
-    command: server /data --console-address ":9001"
-    ports:
-      - "9000:9000" # S3 API
-      - "9001:9001" # MinIO Web UI
-    environment:
-      MINIO_ROOT_USER: minio
-      MINIO_ROOT_PASSWORD: minio123
-      MINIO_BROWSER_REDIRECT_URL: http://localhost:9001
-    volumes:
-      - minio_data:/data
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 30s
-      timeout: 20s
-      retries: 3
-    networks:
-      - app-network
-
-  # MinIO bucket initialization
-  # minio-init:
-  #   image: minio/mc:latest
-  #   depends_on:
-  #     - minio
-  #   entrypoint: >
-  #     /bin/sh -c "
-  #     until /usr/bin/mc alias set myminio http://minio:9000 minio minio123; do
-  #       echo '...waiting for minio'
-  #       sleep 1
-  #     done;
-  #     /usr/bin/mc mb myminio/my-bucket --ignore-existing;
-  #     /usr/bin/mc policy set public myminio/my-bucket;
-  #     exit 0;
-  #     "
-  #   networks:
-  #     - app-network
 
   ollama:
     image: ollama/ollama:latest
@@ -129,38 +86,10 @@ services:
     networks:
       - app-network
 
-  # Uncomment for GPU support
-  # deploy:
-  #   resources:
-  #     reservations:
-  #       devices:
-  #         - driver: nvidia
-  #           count: 1
-  #           capabilities: [gpu]
-
-  # Optional: Model initialization for Ollama
-
-  # Optional: Redis for caching/sessions
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 3s
-      retries: 3
-    networks:
-      - app-network
 
 volumes:
   pgdata:
-  minio_data:
   ollama_data:
-  redis_data:
   node_modules:
   frontend_node_modules:
   huggingface_cache:

@@ -1,4 +1,3 @@
-import { getAccessToken } from "@/lib/auth";
 import type { ApiConfig, ApiError } from "../types/api";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "");
@@ -65,7 +64,9 @@ export const fetchApi = async <TResponse, TPayload = undefined>(
 
     try {
       error.details = await response.json();
-    } catch {}
+    } catch {
+      console.error("Failed to parse error response as JSON");
+    }
     throw error;
   }
 

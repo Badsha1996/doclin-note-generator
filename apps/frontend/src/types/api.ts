@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { email, z } from "zod";
 
 export interface ApiConfig<TResponse, TPayload = undefined> {
   endpoint: string;
@@ -29,7 +29,7 @@ export const userSchema = z.object({
   created_at: z.coerce.date(),
   updated_at: z.coerce.date(),
 });
-
+export type User = z.infer<typeof userSchema>;
 //  Generic API response wrapper
 export const apiResponseSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
   z.object({
@@ -106,3 +106,40 @@ export const prevExamPaperResponseSchema = apiResponseSchema(
   })
 );
 export type PrevExamPaperResponse = z.infer<typeof prevExamPaperResponseSchema>;
+
+export const OTPSchema = z.object({
+  id: z.uuid(),
+  email: email(),
+  otp_hash: z.string(),
+  created_at: z.coerce.date(),
+  expires_at: z.coerce.date(),
+});
+
+export const generateOTPDataSchema = z.object({
+  otp: OTPSchema,
+});
+
+export const generateOTPResponseSchema = apiResponseSchema(
+  generateOTPDataSchema
+);
+
+export type GenerateOTPResponse = z.infer<typeof generateOTPResponseSchema>;
+export const verifyOTPDataSchema = z.object({
+  verified: z.boolean(),
+  email: z.email(),
+});
+export const verifyOTPResponseSchema = apiResponseSchema(verifyOTPDataSchema);
+
+export type VerifyOTPResponse = z.infer<typeof verifyOTPResponseSchema>;
+
+export const verifyUserSchema = z.object({
+  id: z.uuid(),
+});
+export const VerifyUserResponseSchema = apiResponseSchema(verifyUserSchema);
+export type VerifyUserResponse = z.infer<typeof VerifyUserResponseSchema>;
+
+export const examPaperUploadSchema = apiResponseSchema(z.null());
+export type ExamPaperUploadResponse = z.infer<typeof examPaperUploadSchema>;
+
+export const logoutSchema = apiResponseSchema(z.null());
+export type LogoutResponse = z.infer<typeof logoutSchema>;

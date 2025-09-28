@@ -19,7 +19,6 @@ import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as ContactIndexRouteImport } from './routes/contact/index'
 import { Route as ConfigIndexRouteImport } from './routes/config/index'
 import { Route as AboutIndexRouteImport } from './routes/about/index'
-import { Route as AuthenticatedTestRouteImport } from './routes/_authenticated/test'
 
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
@@ -70,16 +69,10 @@ const AboutIndexRoute = AboutIndexRouteImport.update({
   path: '/about/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedTestRoute = AuthenticatedTestRouteImport.update({
-  id: '/test',
-  path: '/test',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
-  '/test': typeof AuthenticatedTestRoute
   '/about': typeof AboutIndexRoute
   '/config': typeof ConfigIndexRoute
   '/contact': typeof ContactIndexRoute
@@ -91,7 +84,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
-  '/test': typeof AuthenticatedTestRoute
   '/about': typeof AboutIndexRoute
   '/config': typeof ConfigIndexRoute
   '/contact': typeof ContactIndexRoute
@@ -104,8 +96,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
-  '/_authenticated': typeof AuthenticatedRouteWithChildren
-  '/_authenticated/test': typeof AuthenticatedTestRoute
+  '/_authenticated': typeof AuthenticatedRoute
   '/about/': typeof AboutIndexRoute
   '/config/': typeof ConfigIndexRoute
   '/contact/': typeof ContactIndexRoute
@@ -119,7 +110,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/$'
-    | '/test'
     | '/about'
     | '/config'
     | '/contact'
@@ -131,7 +121,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/$'
-    | '/test'
     | '/about'
     | '/config'
     | '/contact'
@@ -144,7 +133,6 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/_authenticated'
-    | '/_authenticated/test'
     | '/about/'
     | '/config/'
     | '/contact/'
@@ -157,7 +145,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SplatRoute: typeof SplatRoute
-  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  AuthenticatedRoute: typeof AuthenticatedRoute
   AboutIndexRoute: typeof AboutIndexRoute
   ConfigIndexRoute: typeof ConfigIndexRoute
   ContactIndexRoute: typeof ContactIndexRoute
@@ -239,32 +227,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/test': {
-      id: '/_authenticated/test'
-      path: '/test'
-      fullPath: '/test'
-      preLoaderRoute: typeof AuthenticatedTestRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
   }
 }
-
-interface AuthenticatedRouteChildren {
-  AuthenticatedTestRoute: typeof AuthenticatedTestRoute
-}
-
-const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
-  AuthenticatedTestRoute: AuthenticatedTestRoute,
-}
-
-const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
-  AuthenticatedRouteChildren,
-)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
-  AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  AuthenticatedRoute: AuthenticatedRoute,
   AboutIndexRoute: AboutIndexRoute,
   ConfigIndexRoute: ConfigIndexRoute,
   ContactIndexRoute: ContactIndexRoute,

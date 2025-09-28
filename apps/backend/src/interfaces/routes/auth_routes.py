@@ -4,7 +4,9 @@ from sqlalchemy.orm import Session
 
 from ..schemas.auth_schemas import RegisterSchema, LoginSchema, VerifySchema
 from ..schemas.response_schemas import APIResponseSchema
+from ...core.entities.user_entities import User
 from ...config.config import settings
+from ...interfaces.dependencies.dependencies import get_current_user
 from ...utils.security import SecurityManager
 from ...infrastructure.providers.auth_provider import get_oauth_manager, get_security_manager
 from ...database.database import get_DB
@@ -115,7 +117,7 @@ async def oauthLogin(
         )
         access_token, refresh_token, user = await auth_service.oauth_login(oauth_user)
 
-        response = RedirectResponse(url=settings.FRONTEND_URL)
+        response = RedirectResponse(url=f"""{settings.FRONTEND_URL}?oauth=success""")
 
 
         response.set_cookie(
@@ -156,5 +158,39 @@ async def verify_user(
             return APIResponseSchema(success=True,
                 data = {"id":user_data.id},
                 message="User verified succesfully")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
+
+@auth_router.get('/me')
+async def get_current_user_info(
+    current_user : User= Depends(get_current_user)
+):
+    try:
+        return APIResponseSchema(
+            success=True,
+            data={"username": current_user.username, "role": current_user.role,"email":current_user.email},
+            message="Current user fetched successfully"
+        )
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
+
+@auth_router.post('/logout')
+async def logout_user(response:Response):
+    try:
+        response.delete_cookie(
+            key="access_token",
+            domain=settings.BACKEND_DOMAIN
+        )
+        response.delete_cookie(
+            key="refresh_token",
+            domain=settings.BACKEND_DOMAIN
+        )
+        return APIResponseSchema(
+            success=True,
+            data=None,
+            message="User logged out successfully"
+        )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
