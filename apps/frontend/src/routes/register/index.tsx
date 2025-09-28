@@ -60,14 +60,13 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { getUserInfo } from "@/lib/auth";
 
 export const Route = createFileRoute("/register/")({
-  beforeLoad: ({ context }) => {
-    console.log("Selection context in register:", context);
-    const { user } = context;
-    // if (!user) {
-    //   throw redirect({ to: "/login" });
-    // }
+  beforeLoad: () => {
+    if (getUserInfo()) {
+      throw redirect({ to: "/" });
+    }
   },
   component: Register,
 });
@@ -170,9 +169,8 @@ export function Register() {
     }
   );
   function onSubmit(data: registerTypes) {
-    console.log(data);
-    const { confirmpassword, otp, ...payload } = data;
-    mutation.mutate(payload);
+    const { username, email, password } = data;
+    mutation.mutate({ username, email, password });
   }
   function handleEditEmail() {
     setOtpSent(false);

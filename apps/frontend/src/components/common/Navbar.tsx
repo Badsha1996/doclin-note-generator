@@ -9,14 +9,27 @@ import { NAVBAR_MENU } from "@/utils/Constants";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
-import { Menu, X } from "lucide-react";
-
+import { LogOut, Menu, X } from "lucide-react";
+import { clearUserInfo, getUserInfo } from "@/lib/auth";
+import {
+  Menubar,
+  MenubarContent,
+  MenubarItem,
+  MenubarMenu,
+  MenubarSeparator,
+  MenubarTrigger,
+} from "../ui/menubar";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { useApiMutation } from "@/hook/useApi";
+import { logoutSchema, type ApiError, type LogoutResponse } from "@/types/api";
+import { toast } from "sonner";
 function Navbar() {
   // *********** All States ***********
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const router = useRouter();
   const currentPath = router.state.location.pathname;
+  const user = getUserInfo();
 
   // *********** Effects ***********
   useEffect(() => {
@@ -26,9 +39,28 @@ function Navbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
+  const mutation = useApiMutation<LogoutResponse>(
+    {
+      endpoint: "/auth/logout",
+      method: "POST",
+      responseSchema: logoutSchema,
+    },
+    {
+      onSuccess: (data) => {
+        clearUserInfo();
+        toast.success(data.message || "Loggedout successfully.");
+        router.navigate({ to: "/" });
+      },
+      onError: (error: ApiError) => {
+        toast.error(error.message || "failed to logout.");
+        console.log(error);
+      },
+    }
+  );
   const closeMobileMenu = () => setIsOpen(false);
-
+  function handleLogout() {
+    mutation.mutate(undefined);
+  }
   return (
     <>
       <AnimatePresence>
@@ -113,20 +145,58 @@ function Navbar() {
           </NavigationMenuList>
 
           <div className="hidden lg:flex items-center gap-3">
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Link to="/login">
-                <Button className="relative overflow-hidden group backdrop-blur-md bg-white/20 border border-white/30 text-white hover:bg-white/30 transition-all duration-300">
-                  <span className="relative z-10">Login</span>
-                </Button>
-              </Link>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Link to="/register">
-                <Button className="relative overflow-hidden group backdrop-blur-md bg-[#e4558d]/70 border border-[#e4558d]/40 text-white hover:bg-[#e4558d]/80 shadow-lg transition-all duration-300">
-                  <span className="relative z-10">Sign Up</span>
-                </Button>
-              </Link>
-            </motion.div>
+            {user ? (
+              <Menubar className="bg-transparent border-none">
+                <MenubarMenu>
+                  <MenubarTrigger className="bg-transparent">
+                    <Avatar className="rounded-full">
+                      <AvatarImage
+                        src="https://github.com/shadcn.png"
+                        alt="@shadcn"
+                      />
+                      <AvatarFallback>CN</AvatarFallback>
+                    </Avatar>
+                  </MenubarTrigger>
+                  <MenubarContent className="mr-4 text-white/90 hover:text-white bg-white/50 backdrop-blur-md border border-white/20 shadow-lg">
+                    <MenubarItem inset>{user.username}</MenubarItem>
+                    <MenubarSeparator />
+                    <MenubarItem
+                      inset
+                      onClick={handleLogout}
+                      className="cursor-pointer"
+                    >
+                      <div className="flex justify-between items-center w-full">
+                        <span>Logout</span>
+                        <LogOut color="white" />
+                      </div>
+                    </MenubarItem>
+                  </MenubarContent>
+                </MenubarMenu>
+              </Menubar>
+            ) : (
+              <>
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Link to="/login">
+                    <Button className="relative overflow-hidden group backdrop-blur-md bg-white/20 border border-white/30 text-white hover:bg-white/30 transition-all duration-300">
+                      <span className="relative z-10">Login</span>
+                    </Button>
+                  </Link>
+                </motion.div>
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Link to="/register">
+                    <Button className="relative overflow-hidden group backdrop-blur-md bg-[#e4558d]/70 border border-[#e4558d]/40 text-white hover:bg-[#e4558d]/80 shadow-lg transition-all duration-300">
+                      <span className="relative z-10">Sign Up</span>
+                    </Button>
+                  </Link>
+                </motion.div>
+              </>
+            )}
           </div>
 
           {/************** Mobile Menu Button **************/}
@@ -197,17 +267,39 @@ function Navbar() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
                 >
-                  <Link to="/login" onClick={closeMobileMenu}>
-                    <Button className="w-full relative overflow-hidden group backdrop-blur-md bg-white/20 border border-white/30 text-white hover:bg-white/30 transition-all duration-300">
-                      Login
-                    </Button>
-                  </Link>
+                  {user ? (
+                    <div className="text-white/90 hover:text-white bg-white/20 backdrop-blur-md border border-white/20 shadow-lg p-4 rounded-xl">
+                      <div className="flex justify-between items-center mb-2">
+                        <Avatar className="rounded-full">
+                          <AvatarImage
+                            src="https://github.com/shadcn.png"
+                            alt="@shadcn"
+                          />
+                          <AvatarFallback>CN</AvatarFallback>
+                        </Avatar>
+                        <LogOut
+                          onClick={handleLogout}
+                          className="cursor-pointer"
+                        />
+                      </div>
+                      <p className=" text-white/80">{user.username}</p>
+                      <p className="font-medium text-sm">{user.email}</p>
+                    </div>
+                  ) : (
+                    <>
+                      <Link to="/login" onClick={closeMobileMenu}>
+                        <Button className="w-full relative overflow-hidden group backdrop-blur-md bg-white/20 border border-white/30 text-white hover:bg-white/30 transition-all duration-300">
+                          Login
+                        </Button>
+                      </Link>
 
-                  <Link to="/register" onClick={closeMobileMenu}>
-                    <Button className="w-full shadow-lg relative overflow-hidden group backdrop-blur-md bg-[#e4558d]/70 border border-[#e4558d]/40 text-white hover:bg-[#e4558d]/80 transition-all duration-300">
-                      Sign Up
-                    </Button>
-                  </Link>
+                      <Link to="/register" onClick={closeMobileMenu}>
+                        <Button className="w-full shadow-lg relative overflow-hidden group backdrop-blur-md bg-[#e4558d]/70 border border-[#e4558d]/40 text-white hover:bg-[#e4558d]/80 transition-all duration-300">
+                          Sign Up
+                        </Button>
+                      </Link>
+                    </>
+                  )}
                 </motion.div>
               </div>
             </motion.div>
