@@ -13,7 +13,7 @@ import {
   prevYearsResponseSchema,
   subjectResponseSchema,
 } from "@/types/api";
-import { useLocation, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 
 // ************** Props ********************
 interface SidebarProps {
