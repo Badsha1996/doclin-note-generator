@@ -23,14 +23,9 @@ class Settings(BaseSettings):
     META_TOKEN_URL:str
     META_USER_URL:str
 
-    S3_ENDPOINT : str
-    S3_ACCESS_KEY : str
-    S3_SECRET_KEY : str
-    S3_BUCKET : str
-
     EMAIL:str
     GOOGLE_APP_PASSWORD:str
-
+    SUPER_ADMIN_EMAIL:str
     MAX_COUNT_FOR_PREVILEGED:int
     MAX_COUNT_FOR_USER:int 
     

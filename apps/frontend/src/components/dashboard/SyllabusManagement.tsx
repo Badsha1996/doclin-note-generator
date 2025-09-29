@@ -77,20 +77,17 @@ function Syllabus() {
             )}
           />
 
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="flex justify-end mt-2"
-          >
-            <Button
-              type="submit"
-              variant="standOut"
-              className="w-full max-w-xs py-2 rounded-md font-semibold"
-              disabled={mutation.isPending}
-            >
-              {mutation.isPending ? "Creating..." : "Submit"}
-            </Button>
-          </motion.div>
+          <div className="flex justify-end mt-2">
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button
+                type="submit"
+                className="w-full max-w-xs py-2 rounded-md font-semibold backdrop-blur-md bg-[#e4558d]/70 border border-[#e4558d]/40 text-white hover:bg-[#e4558d]/80 shadow-lg transition-all duration-300"
+                disabled={mutation.isPending}
+              >
+                {mutation.isPending ? "Creating..." : "Submit"}
+              </Button>
+            </motion.div>
+          </div>
         </form>
       </Form>
       {/* I’m so sleepy…Nyan🐈🐈” 😵‍💫🍵 */}

@@ -1,12 +1,9 @@
+import type { User } from "@/types/api";
 import { createContext, useContext, useState, type ReactNode } from "react";
 
 type SelectionContextType = {
-  selectedBoard: string;
-  setSelectedBoard: (value: string) => void;
-  selectedSubject: string;
-  setSelectedSubject: (value: string) => void;
-  selectedMarks: string;
-  setSelectedMarks: (value: string) => void;
+  user: User | null;
+  setUser: (user: User | null) => void;
 };
 
 const SelectionContext = createContext<SelectionContextType | undefined>(
@@ -14,19 +11,13 @@ const SelectionContext = createContext<SelectionContextType | undefined>(
 );
 
 export function SelectionProvider({ children }: { children: ReactNode }) {
-  const [selectedBoard, setSelectedBoard] = useState("");
-  const [selectedSubject, setSelectedSubject] = useState("");
-  const [selectedMarks, setSelectedMarks] = useState("");
+  const [user, setUser] = useState<User | null>(null);
 
   return (
     <SelectionContext.Provider
       value={{
-        selectedBoard,
-        setSelectedBoard,
-        selectedSubject,
-        setSelectedSubject,
-        selectedMarks,
-        setSelectedMarks,
+        user,
+        setUser,
       }}
     >
       {children}
