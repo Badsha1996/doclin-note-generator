@@ -8,3 +8,9 @@ SELECT cron.schedule(
   '*/15 * * * *',
   $$ DELETE FROM otp_lookup WHERE expires_at < now();$$
 );
+
+SELECT cron.schedule(
+  'reset_model_hit_count',
+  '0 0 * * *',  
+  $$ UPDATE users SET model_hit_count = 0; $$
+);

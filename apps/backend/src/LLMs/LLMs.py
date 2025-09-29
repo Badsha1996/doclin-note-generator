@@ -1,54 +1,77 @@
+import re
+import json
 from fastapi import HTTPException
+from json_repair import repair_json
+
 from langchain_ollama import OllamaLLM
 from langchain_google_genai import ChatGoogleGenerativeAI
-from json_repair import repair_json  
-import json
-import re
-import aiohttp
+from langchain_openai import ChatOpenAI  
+from langchain_huggingface import HuggingFaceEndpoint
 
 from ..config.config import settings
 
 
 class LLMProviderManager:
     def __init__(self):
+        # ---------------- Config ---------------- #
         self.provider = settings.LLM_PROVIDER
-        self.ollama_url = settings.OLLAMA_URL
-        self.ollama_model = settings.OLLAMA_MODEL
-        self.gemini_api_key = settings.LLM_API_KEY
-        self.gemini_models = settings.LLM_MODELS
+
+        # Gemini
+        self.gemini_models = settings.LLM_MODELS or []
+        self.gemini_keys = getattr(settings, "GEMINI_KEYS", []) or [settings.LLM_API_KEY]
         self.current_model_index = 0
+        self.current_key_index = 0
+        self.gemini_api_key = self.gemini_keys[0]
 
-    async def stream_ollama(self, prompt: str):
-            """Stream output from Ollama in chunks."""
-            url = f"{self.ollama_url}/api/generate"
-            headers = {"Content-Type": "application/json"}
-            payload = {
-                "model": self.ollama_model,
-                "prompt": prompt,
-                "stream": True
-            }
+        # OpenRouter
+        self.openrouter_key = getattr(settings, "OPENROUTER_KEY", None)
+        self.openrouter_base_url = "https://openrouter.ai/api/v1"
+        self.free_openrouter_models = [
+            "google/gemma-7b-it:free",
+            "mistralai/mistral-7b-instruct:free",
+            "huggingfaceh4/zephyr-7b-beta:free",
+            "meta-llama/llama-2-13b-chat:free",
+            "gryphe/mythomax-l2-13b:free",
+            "nousresearch/nous-hermes-llama2-13b:free",
+            "deepseek/deepseek-chat-v3.1:free",
+            "x-ai/grok-4-fast:free"
+        ]
+        self.current_openrouter_index = 0
+        self.openrouter_model = self.free_openrouter_models[self.current_openrouter_index]
 
-            async with aiohttp.ClientSession() as session:
-                async with session.post(url, headers=headers, json=payload) as resp:
-                    async for line in resp.content:
-                        if not line:
-                            continue
-                        try:
-                            data = json.loads(line.decode("utf-8"))
-                            if "response" in data:
-                                yield data["response"]  # stream token chunk
-                            if data.get("done", False):
-                                break
-                        except Exception:
-                            continue      
+        # Ollama local
+        self.ollama_model = getattr(settings, "OLLAMA_MODEL", "mistral:7b-instruct")
+        self.ollama_url = getattr(settings, "OLLAMA_URL", "http://localhost:11434")
 
+        # HuggingFace GPU
+        self.hf_model = getattr(settings, "HF_MODEL", None)
+        self.hf_key = getattr(settings, "HF_API_KEY", None)
+
+        # Google Colab endpoint
+        self.colab_mistral_url = getattr(settings, "COLAB_MISTRAL_URL", "http://localhost:5000/generate")
+
+    # ---------------- JSON Helpers ---------------- #
     def _clean_json_output(self, raw_output: str) -> str:
-        """Remove markdown fences and trim whitespace."""
         raw_output = raw_output.strip()
         raw_output = re.sub(r"^```(json)?", "", raw_output, flags=re.IGNORECASE).strip()
         raw_output = re.sub(r"```$", "", raw_output).strip()
         return raw_output
-    
+
+    def safe_json_parse(self, raw_output):
+        if hasattr(raw_output, "content"):
+            raw_output = raw_output.content
+        if not isinstance(raw_output, str):
+            raise HTTPException(status_code=500, detail=f"Expected string output, got {type(raw_output)}")
+        cleaned = self._clean_json_output(raw_output)
+        try:
+            return json.loads(cleaned)
+        except Exception:
+            try:
+                fixed = repair_json(cleaned)
+                return json.loads(fixed)
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=f"Failed to parse JSON: {e}")
+
     def normalize_exam_json(self, data: dict) -> dict:
         for section in data.get("sections", []):
             for q in section.get("questions", []):
@@ -57,89 +80,108 @@ class LLMProviderManager:
                         sp["question_text"] = sp.pop("text")
         return data
 
+    # ---------------- Rotation ---------------- #
+    def rotate_gemini_model(self):
+        self.current_model_index = (self.current_model_index + 1) % len(self.gemini_models)
 
-    def safe_json_parse(self, raw_output):
-        # Handle LangChain AIMessage objects
-        if hasattr(raw_output, "content"):
-            raw_output = raw_output.content
+    def rotate_gemini_key(self):
+        self.current_key_index = (self.current_key_index + 1) % len(self.gemini_keys)
+        self.gemini_api_key = self.gemini_keys[self.current_key_index]
 
-        if not isinstance(raw_output, str):
-            raise HTTPException(status_code=500, detail=f"Expected string output, got {type(raw_output)}")
+    def rotate_openrouter_model(self):
+        self.current_openrouter_index = (self.current_openrouter_index + 1) % len(self.free_openrouter_models)
+        self.openrouter_model = self.free_openrouter_models[self.current_openrouter_index]
 
-        cleaned = self._clean_json_output(raw_output)
-
-        try:
-            return json.loads(cleaned)
-        except Exception:
-            try:
-                fixed = repair_json(cleaned)
-                return json.loads(fixed)
-            except Exception as e:
-                raise HTTPException(status_code=500, detail=f"Failed to parse JSON from LLM: {e}")
-
-    def get_ollama(self):
-        try:
-            return OllamaLLM(
-                base_url=self.ollama_url,
-                model=self.ollama_model,
-            )
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Ollama error: {str(e)}")
-
-
+    # ---------------- LLM Getters ---------------- #
     def get_gemini(self):
         if not self.gemini_models:
             raise HTTPException(status_code=500, detail="No Gemini models configured")
+        model = self.gemini_models[self.current_model_index]
+        return ChatGoogleGenerativeAI(model=model, google_api_key=self.gemini_api_key)
 
-        attempts = len(self.gemini_models)
-        for _ in range(attempts):
-            model = self.gemini_models[self.current_model_index]
+    def get_openrouter(self):
+        return ChatOpenAI(
+            model=self.openrouter_model,
+            api_key=self.openrouter_key,
+            base_url=self.openrouter_base_url
+        )
+
+    def get_ollama(self):
+        return OllamaLLM(base_url=self.ollama_url, model=self.ollama_model)
+
+    def get_colab_mistral(self):
+        import requests
+        class ColabMistralLLM:
+            def __init__(self, endpoint):
+                self.endpoint = endpoint
+            def invoke(self, prompt):
+                resp = requests.post(self.endpoint, json={"prompt": prompt, "max_tokens": 4000})
+                if resp.status_code != 200:
+                    raise HTTPException(status_code=500, detail=f"Colab Mistral error: {resp.text}")
+                return resp.json().get("output")
+            async def ainvoke(self, prompt):
+                import asyncio
+                return await asyncio.to_thread(self.invoke, prompt)
+        return ColabMistralLLM(self.colab_mistral_url)
+
+    def get_hf(self):
+        if not self.hf_model:
+            raise HTTPException(status_code=500, detail="No HuggingFace model configured")
+        return HuggingFaceEndpoint(
+            repo_id=self.hf_model,
+            huggingfacehub_api_token=self.hf_key,
+            task="text-generation"
+        )
+
+    # ---------------- Fallback Chain ---------------- #
+    def get_llm_chain(self):
+        chain = [
+            ("gemini", self.get_gemini),
+            ("openrouter", self.get_openrouter),
+            ("colab_mistral", self.get_colab_mistral),  # Colab Mistral
+            ("huggingface", self.get_hf),                # HF borrowed GPU
+            ("ollama", self.get_ollama),
+        ]
+        if getattr(settings, "ALLOW_PAID_MODELS", False):
+            chain.append(("gemini_paid", lambda: ChatGoogleGenerativeAI(
+                model="gemini-2.5-pro", google_api_key=self.gemini_api_key)))
+            chain.append(("openrouter_paid", lambda: ChatOpenAI(
+                model="paid-model", api_key=self.openrouter_key, base_url=self.openrouter_base_url)))
+        return chain
+
+    # ---------------- Safe Async Generation ---------------- #
+    async def safe_generate(self, prompt: str, **kwargs):
+        for name, llm_func in self.get_llm_chain():
             try:
-                return ChatGoogleGenerativeAI(
-                    model=model,
-                    google_api_key=self.gemini_api_key
-                )
-            except Exception:
-                self.rotate_model()
-
-        return self.get_ollama()
-
-    def rotate_model(self):
-        """Move to next Gemini model when quota/free tier is exceeded"""
-        self.current_model_index = (self.current_model_index + 1) % len(self.gemini_models)
-
-    def get_llm(self):
-        if self.provider == "ollama":
-            return self.get_ollama()
-        elif self.provider == "gemini":
-            return self.get_gemini()
-        elif self.provider == "auto":
-            try:
-                return self.get_gemini()
-            except Exception:
-                return self.get_ollama()
-        else:
-            raise HTTPException(status_code=500, detail="Invalid LLM provider")
-        
-    async def safe_generate(self, llm, **kwargs):
-        """
-        Try to call LLM. If quota exceeded or other provider error, 
-        auto-rotate Gemini model or fallback to Ollama.
-        """
-        try:
-            return await llm.ainvoke(kwargs["prompt"])
-        except Exception as e:
-            err = str(e)
-            # Gemini quota / 429 error
-            if "429" in err or "quota" in err.lower():
-                self.rotate_model()
-                if self.provider in ["gemini", "auto"]:
-                    new_llm = self.get_gemini()
-                    return await new_llm.ainvoke(kwargs["prompt"])
+                llm = llm_func()
+                if hasattr(llm, "ainvoke"):
+                    return await llm.ainvoke(prompt)
                 else:
-                    return await self.get_ollama().ainvoke(kwargs["prompt"])
-            # fallback to Ollama on any other Gemini errors
-            if self.provider in ["gemini", "auto"]:
-                return await self.get_ollama().ainvoke(kwargs["prompt"])
-            raise
+                    return llm.invoke(prompt)
+            except Exception as e:
+                err = str(e).lower()
+                if name.startswith("gemini") and ("429" in err or "quota" in err):
+                    self.rotate_gemini_model()
+                    self.rotate_gemini_key()
+                    continue
+                if name.startswith("openrouter") and ("429" in err or "rate" in err or "limit" in err):
+                    self.rotate_openrouter_model()
+                    continue
+                continue
+        raise HTTPException(status_code=500, detail="All LLM providers failed")
+    
+    def get_llm(self):
+        """Return the default LLM based on configured provider"""
+        if self.provider == "gemini":
+            return self.get_gemini()
+        elif self.provider == "openrouter":
+            return self.get_openrouter()
+        elif self.provider == "ollama":
+            return self.get_ollama()
+        elif self.provider == "colab_mistral":
+            return self.get_colab_mistral()
+        elif self.provider == "huggingface":
+            return self.get_hf()
+        else:
+            raise HTTPException(status_code=500, detail=f"Unknown provider: {self.provider}")
 

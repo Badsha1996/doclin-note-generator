@@ -1,4 +1,4 @@
-import { Outlet, createRootRoute, useRouter } from "@tanstack/react-router";
+import { Outlet, createRootRoute, useMatches } from "@tanstack/react-router";
 import BackgroundLayout from "@/layouts/BackgroundLayout";
 import Navbar from "@/components/common/Navbar";
 
@@ -7,13 +7,15 @@ export const Route = createRootRoute({
 });
 
 function RootComponent() {
-  const router = useRouter();
-  const pathname = router.state.location.pathname;
+  const matches = useMatches();
+
+  const isAuthRoute = matches.some(
+    (m) => m.routeId === "/login/" || m.routeId === "/register/"
+  );
+
   return (
     <div>
-      {!pathname.startsWith("/login") && !pathname.startsWith("/register") && (
-        <Navbar />
-      )}
+      {!isAuthRoute && <Navbar />}
       <BackgroundLayout>
         <Outlet />
       </BackgroundLayout>

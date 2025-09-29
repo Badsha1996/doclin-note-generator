@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends,HTTPException
 from sqlalchemy.orm import Session
 
 from ...utils.exceptions import AuthExceptionError
-from ...interfaces.schemas.base_schemas import APIResponseSchema
+from ...interfaces.schemas.response_schemas import APIResponseSchema
 from ...core.services.email_service import EmailService
 from ...core.services.otp_service import OTPService
 from ...infrastructure.repo.otp_repo import SQLOTPRepo
@@ -51,7 +51,7 @@ async def verify_otp(
         verified=await otp_service.verify_otp(email=user_credentials.email,otp=user_credentials.otp)
         if verified:
             return APIResponseSchema(success=True,
-                data = {"email":user_credentials.email},
+                data = {"email":user_credentials.email,"verified":verified},
                 message="OTP verified succesfully")
         else: raise AuthExceptionError(detail="Invalid OTP")
     except Exception as e:

@@ -1,31 +1,15 @@
-import ConfigContent from "@/components/common/ConfigContent";
-import PageHeader from "@/components/common/PageHeader";
-import Sidebar from "@/components/common/Sidebar";
-import GlassLayout from "@/layouts/GlassLayout";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
-import { createFileRoute } from "@tanstack/react-router";
+import { getUserInfo } from "@/lib/auth";
+import ConfigPage from "@/components/pages/ConfigPage";
 
 export const Route = createFileRoute("/config/")({
-  component: ConfigComponent,
+  beforeLoad: () => {
+    if (!getUserInfo()) {
+      throw redirect({ to: "/" });
+    }
+  },
+  component: ConfigPage,
 });
 
-function ConfigComponent() {
-  return (
-    <div className="space-y-8 mt-24">
-      {/*************************** Header ***************************/}
-      <PageHeader
-        title="Select Configuration"
-        subTitle="Select configuration details to generate accurate exam papers or study
-          notes"
-      />
 
-      {/*************************** Main Layout ***************************/}
-      <GlassLayout>
-        <div className="flex gap-6">
-          <Sidebar />
-          <ConfigContent />
-        </div>
-      </GlassLayout>
-    </div>
-  );
-}

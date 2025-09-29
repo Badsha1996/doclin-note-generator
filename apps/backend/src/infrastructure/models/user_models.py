@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Boolean, DateTime, Enum, ForeignKey
+from sqlalchemy import Column, String, Boolean, DateTime, Enum, ForeignKey,Integer,Float
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
@@ -10,6 +10,10 @@ from ...database.database import Base
 class UserRole(str, enum.Enum):
     user = "user"
     admin = "admin"
+    super_admin="superAdmin"
+
+class UserPlan(str,enum.Enum):
+    free="free"
 
 class UserModel(Base):
     __tablename__ = 'users'
@@ -19,13 +23,16 @@ class UserModel(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     hash_password = Column(String, nullable=False)
     role = Column(Enum(UserRole, name="user_role",), default="user")
-    is_active = Column(Boolean, default=True)
     is_verified = Column(Boolean, default=False)
+    plan = Column(Enum(UserPlan,name="user_plan"),default="free")
+    blocked = Column(Boolean,default=False)
+    model_hit_count=Column(Integer,default=0)
+
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     oauth_accounts = relationship("OAuthModel", back_populates="user")
-    files = relationship("FileModel", back_populates="user", cascade="all, delete-orphan")
+    feedbacks = relationship("FeedbackModel", back_populates="user", cascade="all, delete-orphan")
 
 
 class OAuthModel(Base):
@@ -38,3 +45,15 @@ class OAuthModel(Base):
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     user = relationship("UserModel", back_populates="oauth_accounts")
+# class FeedbackModel(Base):
+#     __tablename__ = "feedbacks"
+
+#     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+#     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+#     rating = Column(Float, nullable=False)
+#     feedback_text = Column(String, nullable=True)
+
+#     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+
+#     user = relationship("UserModel", back_populates="feedbacks")

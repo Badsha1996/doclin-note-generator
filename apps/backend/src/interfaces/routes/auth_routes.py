@@ -1,8 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import Response,RedirectResponse
 from sqlalchemy.orm import Session
 
 from ..schemas.auth_schemas import RegisterSchema, LoginSchema, VerifySchema
 from ..schemas.response_schemas import APIResponseSchema
+from ...core.entities.user_entities import User
+from ...config.config import settings
+from ...interfaces.dependencies.dependencies import get_current_user
 from ...utils.security import SecurityManager
 from ...infrastructure.providers.auth_provider import get_oauth_manager, get_security_manager
 from ...database.database import get_DB
@@ -41,12 +45,14 @@ async def register_user(
 
 @auth_router.post("/login")
 async def login_user(
+    response:Response,
     user_data : LoginSchema,
     db : Session = Depends(get_DB),
-    security_manager: SecurityManager = Depends(get_security_manager)
+    security_manager: SecurityManager = Depends(get_security_manager),
 ):
     try:
         ''' LOG IN POINT'''
+        
         user_repo = SQLUserRepo(db)
         auth_service = AuthService(user_repo=user_repo,
                                    security=security_manager)
@@ -57,11 +63,34 @@ async def login_user(
             password=user_data.password,
         )
 
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            httponly=True,
+            secure=True,   
+            samesite="None", 
+            domain=settings.BACKEND_DOMAIN, 
+            max_age=3600
+        )
+        response.set_cookie(
+            key="refresh_token",
+            value=refresh_token,
+            httponly=True,
+            secure=True,
+            samesite="None",
+            domain=settings.BACKEND_DOMAIN,
+            max_age=60*60*24*7
+        )
+
         return APIResponseSchema(
             success=True,
-            data = {"user":user,"access_token":access_token, "refresh_token":refresh_token},
-            message="User logged in succesfully"
-        )
+                data={
+                    "user": user,
+                    "access_token": access_token,
+                    "refresh_token": refresh_token
+                },
+                message="User logged in successfully"
+            )
         
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -87,11 +116,30 @@ async def oauthLogin(
             redirect_uri='http://localhost:8000/api/auth/oauth/login'
         )
         access_token, refresh_token, user = await auth_service.oauth_login(oauth_user)
-        return APIResponseSchema(
-            success=True,
-            data = {"user":user,"access_token":access_token, "refresh_token":refresh_token},
-            message="User logged in succesfully"
+
+        response = RedirectResponse(url=f"""{settings.FRONTEND_URL}?oauth=success""")
+
+
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            httponly=True,
+            secure=True,   
+            samesite="None", 
+            domain=settings.BACKEND_DOMAIN, 
+            max_age=3600
         )
+        response.set_cookie(
+            key="refresh_token",
+            value=refresh_token,
+            httponly=True,
+            secure=True,
+            samesite="None",
+            domain=settings.BACKEND_DOMAIN,
+            max_age=60*60*24*7
+        )
+
+        return response
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))   
 
@@ -110,5 +158,39 @@ async def verify_user(
             return APIResponseSchema(success=True,
                 data = {"id":user_data.id},
                 message="User verified succesfully")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
+
+@auth_router.get('/me')
+async def get_current_user_info(
+    current_user : User= Depends(get_current_user)
+):
+    try:
+        return APIResponseSchema(
+            success=True,
+            data={"username": current_user.username, "role": current_user.role,"email":current_user.email},
+            message="Current user fetched successfully"
+        )
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
+
+@auth_router.post('/logout')
+async def logout_user(response:Response):
+    try:
+        response.delete_cookie(
+            key="access_token",
+            domain=settings.BACKEND_DOMAIN
+        )
+        response.delete_cookie(
+            key="refresh_token",
+            domain=settings.BACKEND_DOMAIN
+        )
+        return APIResponseSchema(
+            success=True,
+            data=None,
+            message="User logged out successfully"
+        )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

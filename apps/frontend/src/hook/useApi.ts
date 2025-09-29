@@ -1,8 +1,17 @@
 import type { ApiConfig, ApiError } from "../types/api";
+import {
+  useQuery,
+  useMutation,
+  type UseQueryOptions,
+  type UseMutationOptions,
+} from "@tanstack/react-query";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "");
 
-const buildUrl = (endpoint: string, queryParams?: Record<string, string | number | boolean>) => {
+const buildUrl = (
+  endpoint: string,
+  queryParams?: Record<string, string | number | boolean>
+) => {
   if (!queryParams) return endpoint;
   const params = new URLSearchParams();
   Object.entries(queryParams).forEach(([key, value]) => {
@@ -16,23 +25,32 @@ const buildUrl = (endpoint: string, queryParams?: Record<string, string | number
 export const fetchApi = async <TResponse, TPayload = undefined>(
   config: ApiConfig<TResponse, TPayload>
 ): Promise<TResponse> => {
-  const { endpoint, method = "GET", headers = {}, payload, queryParams, responseSchema, payloadSchema } = config;
+  const {
+    endpoint,
+    method = "GET",
+    headers = {},
+    payload,
+    queryParams,
+    responseSchema,
+    payloadSchema,
+  } = config;
 
   // Validate payload before sending (if schema provided)
   if (payload && payloadSchema) {
     payloadSchema.parse(payload);
   }
   if (!API_BASE_URL) {
-    throw new Error("API_BASE_URL is not defined. Check your .env and Vite config.");
+    throw new Error(
+      "API_BASE_URL is not defined. Check your .env and Vite config."
+    );
   }
-  const normalizedEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+  const normalizedEndpoint = endpoint.startsWith("/")
+    ? endpoint
+    : `/${endpoint}`;
   const url = buildUrl(`${API_BASE_URL}${normalizedEndpoint}`, queryParams);
-  console.log("url", url);
-  const token = localStorage.getItem("token");
 
   const defaultHeaders = {
     "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...headers,
   };
 
@@ -40,6 +58,7 @@ export const fetchApi = async <TResponse, TPayload = undefined>(
     method,
     headers: defaultHeaders,
     body: payload ? JSON.stringify(payload) : undefined,
+    credentials: "include",
   });
 
   if (!response.ok) {
@@ -50,28 +69,32 @@ export const fetchApi = async <TResponse, TPayload = undefined>(
 
     try {
       error.details = await response.json();
-    } catch {}
+    } catch {
+      console.error("Failed to parse error response as JSON");
+    }
     throw error;
   }
 
   const data = await response.json();
 
-  // Validate response before returning (if schema provided)
   if (responseSchema) {
     return responseSchema.parse(data);
   }
   return data;
 };
-// hooks/useApi.ts
-import { useQuery, useMutation, type UseQueryOptions, type UseMutationOptions } from "@tanstack/react-query";
 
-
-// For GET
+// For GET / Query-based APIs
 export const useApi = <TResponse, TPayload = undefined>(
   config: ApiConfig<TResponse, TPayload>,
   options?: Omit<UseQueryOptions<TResponse, ApiError>, "queryKey" | "queryFn">
 ) => {
-  const queryKey = [config.endpoint, config.method, config.queryParams, config.payload];
+  const queryKey = [
+    config.endpoint,
+    config.method,
+    config.queryParams ? JSON.stringify(config.queryParams) : null,
+    config.payload ? JSON.stringify(config.payload) : null,
+  ];
+
   return useQuery<TResponse, ApiError>({
     queryKey,
     queryFn: () => fetchApi<TResponse, TPayload>(config),
@@ -79,7 +102,6 @@ export const useApi = <TResponse, TPayload = undefined>(
   });
 };
 
-// For POST/PUT/PATCH/DELETE
 export const useApiMutation = <TResponse, TPayload = undefined>(
   config: Omit<ApiConfig<TResponse, TPayload>, "payload">,
   options?: UseMutationOptions<TResponse, ApiError, TPayload>
