@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-
 from ..entities.exam_paper_entities import ExamPaperCreate, ExamPaper
 
 class ExamPaperRepo(ABC):

@@ -39,7 +39,6 @@ class ExamPaperModel(Base):
         cascade="all, delete-orphan"
     )
 
-
 class SectionModel(Base):
     __tablename__ = "sections"
 
