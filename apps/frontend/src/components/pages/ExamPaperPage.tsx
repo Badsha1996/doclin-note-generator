@@ -63,7 +63,18 @@ const ExamPaperPage = () => {
     isError: isExamPaperError,
     error: examPaperError,
     isSuccess,
-  } = useApi(
+  } = useApi<
+    {
+      data?: {
+        exam_paper?: {
+          exam?: any;
+          sections?: any[];
+        };
+      };
+    },
+    | { subject: string; year: number }
+    | { subject: string; board: string; paper: string; code: string; year: number }
+  >(
     {
       endpoint,
       method: "POST",
