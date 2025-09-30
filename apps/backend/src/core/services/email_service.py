@@ -27,7 +27,7 @@ class EmailService:
             ):
         try:
             templates = {
-                "verify": (lambda d: get_verify_email_template(d["username"], d["otp"]), "Your One-Time Secret Code ⚔️"),
+                "verify": (lambda d: get_verify_email_template(d["username"], d["otp"]), "Your verification OTP"),
                 "report": (lambda d: get_report_email_template(d["username"], d["email"], d["description"]), "New Issue Reported"),
                 "ack":    (lambda d: get_acknowledge_template(d["username"]), "We’ve received your issue report ✅"),
             }

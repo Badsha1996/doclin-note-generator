@@ -144,7 +144,7 @@ function Sidebar({
     if (!mobile) setIsOpen(true);
   };
 
-  const HandlePrevYearRoute = (year : number) => {
+  const HandlePrevYearRoute = (year: number) => {
     const payload = {
       subject: selectedSubject || "",
       year: year || "",

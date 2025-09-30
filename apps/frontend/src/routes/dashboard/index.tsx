@@ -1,6 +1,6 @@
-
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { getUserInfo } from "@/lib/auth";
+import DashboardPage from "@/components/pages/DashboardPage";
 export const Route = createFileRoute("/dashboard/")({
   beforeLoad: () => {
     const user = getUserInfo();
@@ -8,7 +8,5 @@ export const Route = createFileRoute("/dashboard/")({
       throw redirect({ to: "/" });
     }
   },
-  component: Dashboard,
+  component: DashboardPage,
 });
-
-

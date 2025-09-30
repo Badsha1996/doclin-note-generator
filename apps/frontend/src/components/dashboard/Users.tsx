@@ -44,7 +44,12 @@ function Users() {
       confirmpassword: "",
     },
   });
-  const { data, isLoading, isError, refetch } = useApi<AllUserResponse>({
+  const {
+    data,
+    isLoading,
+    isError: _,
+    refetch,
+  } = useApi<AllUserResponse>({
     endpoint: "/user/all",
     method: "GET",
     queryParams: {
