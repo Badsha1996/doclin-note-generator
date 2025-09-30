@@ -33,26 +33,30 @@ export const fetchApi = async <TResponse, TPayload = undefined>(
   if (payload && payloadSchema) {
     payloadSchema.parse(payload);
   }
+
   if (!API_BASE_URL) {
     throw new Error(
       "API_BASE_URL is not defined. Check your .env and Vite config."
     );
   }
+
   const normalizedEndpoint = endpoint.startsWith("/")
     ? endpoint
     : `/${endpoint}`;
   const url = buildUrl(`${API_BASE_URL}${normalizedEndpoint}`, queryParams);
   console.log("url", url);
 
-  const defaultHeaders = {
-    "Content-Type": "application/json",
+  const isFormData = payload instanceof FormData;
+
+  const finalHeaders = {
+    ...(isFormData ? {} : { "Content-Type": "application/json" }),
     ...headers,
   };
 
   const response = await fetch(url, {
     method,
-    headers: defaultHeaders,
-    body: payload ? JSON.stringify(payload) : undefined,
+    headers: finalHeaders,
+    body: isFormData ? payload : payload ? JSON.stringify(payload) : undefined,
     credentials: "include",
   });
 
@@ -72,7 +76,6 @@ export const fetchApi = async <TResponse, TPayload = undefined>(
 
   const data = await response.json();
 
-  // Validate response before returning (if schema provided)
   if (responseSchema) {
     return responseSchema.parse(data);
   }

@@ -1,6 +1,5 @@
 import PageHeader from "@/components/common/PageHeader";
 import { Button } from "@/components/ui/button";
-import GlassLayout from "@/layouts/GlassLayout";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -20,44 +19,30 @@ import { Rating } from "@/components/common/Rating";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
+import { useApiMutation } from "@/hook/useApi";
+import { feedbackApiSchema, reportDescriptionSchema } from "@/types/api";
+import {
+  reportFormSchema,
+  type FeedbackFormValues,
+  type ReportFormValues,
+} from "@/types/type";
 
 export const Route = createFileRoute("/contact/")({
   component: RouteComponent,
 });
 
-const formSchema = z.object({
-  rating: z.number().min(0.5).max(5),
-  feedback: z.string().optional(),
-});
-
-// -- Validation schemas ----------------------------------------------------
-const feedbackSchema = z.object({
-  rating: z.number().min(0.5, "Please provide a rating"),
-  feedback: z.string().max(1000).optional(),
-});
-
-const reportSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Enter a valid email"),
-  description: z.string().min(10, "Please describe the issue in more detail"),
-  // attachment is handled manually as FileList in the form; keep the schema simple
-  attachment: z.any().optional(),
-});
-
-type FeedbackValues = z.infer<typeof feedbackSchema>;
-type ReportValues = z.infer<typeof reportSchema>;
 function RouteComponent() {
+  // *************** All States ***************
   const [activeTab, setActiveTab] = useState<"feedback" | "report">("feedback");
   const [isFlying, setIsFlying] = useState(false);
-  // Feedback form (rating + optional text)
-  const feedbackForm = useForm<FeedbackValues>({
-    resolver: zodResolver(feedbackSchema),
+
+  const feedbackForm = useForm<FeedbackFormValues>({
+    resolver: zodResolver(feedbackApiSchema),
     defaultValues: { rating: 3, feedback: "" },
   });
 
-  // Report issue form (name, email, description, optional file)
-  const reportForm = useForm<ReportValues>({
-    resolver: zodResolver(reportSchema),
+  const reportForm = useForm<ReportFormValues>({
+    resolver: zodResolver(reportFormSchema),
     defaultValues: {
       name: "",
       email: "",
@@ -66,66 +51,85 @@ function RouteComponent() {
     },
   });
 
-  // Submit handlers use fetch to POST to endpoints. Replace endpoints with your real ones.
-  async function onSubmitFeedback(values: FeedbackValues) {
-    try {
-      feedbackForm.setValue("rating", values.rating);
-      // Placeholder endpoint - replace with real endpoint you will provide
-      const res = await fetch("/api/feedback", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      });
-
-      if (!res.ok) throw new Error("Network error");
-
-      toast.success("Feedback submitted — thank you!");
-      feedbackForm.reset();
-      setIsFlying(true);
-      setTimeout(() => setIsFlying(false), 1500); // reset after animation
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to submit feedback. Please try again.");
-      feedbackForm.reset();
-      setIsFlying(true);
-      setTimeout(() => setIsFlying(false), 1500); // reset after animation
+  //*************** Hook API Calls ***************
+  const feedbackMutation = useApiMutation<
+    { message: string },
+    z.infer<typeof feedbackApiSchema>
+  >(
+    {
+      endpoint: "/feedback/add",
+      method: "POST",
+      payloadSchema: feedbackApiSchema,
+    },
+    {
+      onSuccess: () => {
+        toast.success("Feedback submitted — thank you!");
+        feedbackForm.reset();
+        setIsFlying(true);
+        setTimeout(() => setIsFlying(false), 1500);
+      },
+      onError: (error) => {
+        console.error(error);
+        toast.error("Failed to submit feedback. Please try again.");
+        setIsFlying(true);
+        setTimeout(() => setIsFlying(false), 1500);
+      },
     }
+  );
+
+  const reportMutation = useApiMutation<{ message: string }, FormData>(
+    {
+      endpoint: "/issue/report",
+      method: "POST",
+    },
+    {
+      onSuccess: () => {
+        toast.success("Issue reported. We'll look into it.");
+        reportForm.reset();
+      },
+      onError: (error) => {
+        console.error(error);
+        toast.error("Failed to submit the report. Please try again.");
+      },
+    }
+  );
+
+  // ***************  Functions ***************
+  function onSubmitFeedback(data: FeedbackFormValues) {
+    feedbackMutation.mutate({
+      rating: data.rating,
+      feedback_text: data.feedback || undefined,
+    });
   }
 
-  async function onSubmitReport(values: ReportValues) {
-    try {
-      // Basic client-side attachment size check (optional)
-      const files = values.attachment as FileList | undefined;
-      if (files && files.length > 0) {
-        const maxSizeBytes = 10 * 1024 * 1024; // 10MB
-        if (files[0].size > maxSizeBytes) {
-          toast.error("Attachment is too large (max 10MB)");
-          return;
-        }
-      }
-
-      // Use FormData because there may be a file
-      const fd = new FormData();
-      fd.append("name", values.name);
-      fd.append("email", values.email);
-      fd.append("description", values.description);
-      if (values.attachment && (values.attachment as FileList).length > 0) {
-        fd.append("attachment", (values.attachment as FileList)[0]);
-      }
-
-      const res = await fetch("/api/report-issue", {
-        method: "POST",
-        body: fd,
+  function onSubmitReport(data: ReportFormValues) {
+    const descResult = reportDescriptionSchema.safeParse(data.description);
+    if (!descResult.success) {
+      reportForm.setError("description", {
+        message: "Please describe the issue in more detail",
       });
-
-      if (!res.ok) throw new Error("Network error");
-
-      toast.success("Issue reported. We'll look into it.");
-      reportForm.reset();
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to submit the report. Please try again.");
+      return;
     }
+
+    const files = data.attachment as FileList | undefined;
+    if (files?.length) {
+      const maxSize = 10 * 1024 * 1024;
+      if (files[0].size > maxSize) {
+        toast.error("Attachment is too large (max 10MB)");
+        return;
+      }
+    }
+
+    const fd = new FormData();
+    fd.append("description", data.description);
+    if (files?.length) {
+      fd.append("file", files[0]);
+    }
+    for (const [key, value] of fd.entries()) {
+      console.log(key, value);
+    }
+
+    reportMutation.mutate(fd);
   }
 
   return (
@@ -169,19 +173,17 @@ function RouteComponent() {
               </svg>
             </motion.div>
           </div>
-
-          {/* Right side form */}
-          <div className="bg-white  p-8">
-            <div className="mb-6 flex gap-2 text-xs text-slate-500 justify-end">
+          <div className="bg-white p-8">
+            <div className="mb-4 flex gap-2 text-xs text-slate-500 justify-end">
               {activeTab === "feedback" ? (
                 <>
-                  <span>💬</span>
-                  <span>Share quick feedback</span>
+                  <span className="text-lg ">💬</span>
+                  <span className="mt-1">Share quick feedback</span>
                 </>
               ) : (
                 <>
-                  <span>🐞</span>
-                  <span>Report a bug or request</span>
+                  <span className="text-lg ">🐞</span>
+                  <span className="mt-1">Report a bug or request</span>
                 </>
               )}
             </div>
@@ -191,7 +193,7 @@ function RouteComponent() {
                 <button
                   role="tab"
                   onClick={() => setActiveTab("feedback")}
-                  className={`px-4 py-2 rounded-md font-medium transition ${
+                  className={`px-3 py-1 rounded-md font-normal text-sm transition ${
                     activeTab === "feedback"
                       ? "bg-violet-600 text-white"
                       : "text-slate-600 hover:bg-slate-100"
@@ -202,7 +204,7 @@ function RouteComponent() {
                 <button
                   role="tab"
                   onClick={() => setActiveTab("report")}
-                  className={`px-4 py-2 rounded-md font-medium transition ${
+                  className={`px-3 py-1 rounded-md font-normal text-sm transition ${
                     activeTab === "report"
                       ? "bg-violet-600 text-white"
                       : "text-slate-600 hover:bg-slate-100"
@@ -331,7 +333,6 @@ function RouteComponent() {
                         </FormItem>
                       )}
                     />
-
                     <FormItem>
                       <FormLabel>Attachment (optional)</FormLabel>
                       <FormControl>
@@ -348,16 +349,6 @@ function RouteComponent() {
                         Screenshots or logs help us debug faster. Max 10MB.
                       </FormDescription>
                     </FormItem>
-
-                    {reportForm.watch("attachment") &&
-                      (reportForm.watch("attachment") as FileList).length >
-                        0 && (
-                        <div className="text-sm text-slate-600">
-                          Selected file:{" "}
-                          {(reportForm.watch("attachment") as FileList)[0].name}
-                        </div>
-                      )}
-
                     <div className="flex items-center">
                       <Button
                         type="submit"

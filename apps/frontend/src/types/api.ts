@@ -143,3 +143,10 @@ export type ExamPaperUploadResponse = z.infer<typeof examPaperUploadSchema>;
 
 export const logoutSchema = apiResponseSchema(z.null());
 export type LogoutResponse = z.infer<typeof logoutSchema>;
+
+// ******Contact Us Types ********
+export const feedbackApiSchema = z.object({
+  rating: z.number(),
+  feedback_text: z.string().optional(),
+});
+export const reportDescriptionSchema = z.string().min(10);

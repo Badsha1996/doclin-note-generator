@@ -160,3 +160,19 @@ export const verifyUserSchema = z.object({
   id: z.uuid(),
 });
 export type VerifyUserType = z.infer<typeof verifyUserSchema>;
+
+// **************** Contact File Types ****************
+const feedbackFormSchema = z.object({
+  rating: z.number().min(0.5, "Please provide a rating"),
+  feedback: z.string().max(1000).optional(),
+});
+
+export const reportFormSchema = z.object({
+  name: z.string().optional(),
+  email: z.email().optional(),
+  description: z.string().min(10, "Please describe the issue in more detail"),
+  attachment: z.any().optional(),
+});
+
+export type FeedbackFormValues = z.infer<typeof feedbackFormSchema>;
+export type ReportFormValues = z.infer<typeof reportFormSchema>;
