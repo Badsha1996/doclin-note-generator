@@ -18,7 +18,7 @@ class LLMProviderManager:
 
         # Gemini
         self.gemini_models = settings.LLM_MODELS or []
-        self.gemini_keys = getattr(settings, "GEMINI_KEYS", []) or [settings.LLM_API_KEY]
+        self.gemini_keys = getattr(settings, "GEMINI_KEYS", []) 
         self.current_model_index = 0
         self.current_key_index = 0
         self.gemini_api_key = self.gemini_keys[0]
