@@ -13,7 +13,7 @@ import {
   prevYearsResponseSchema,
   subjectResponseSchema,
 } from "@/types/api";
-import { useLocation, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 
 // ************** Props ********************
 interface SidebarProps {
@@ -144,7 +144,7 @@ function Sidebar({
     if (!mobile) setIsOpen(true);
   };
 
-  const HandlePrevYearRoute = (year : number) => {
+  const HandlePrevYearRoute = (year: number) => {
     const payload = {
       subject: selectedSubject || "",
       year: year || "",

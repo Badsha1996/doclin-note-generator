@@ -19,7 +19,7 @@ import { BsMeta } from "react-icons/bs";
 import { motion } from "framer-motion";
 
 import { fadeInUp, scaleIn, transition } from "@/lib/motion";
-import { setUserInfo, getUserInfo } from "@/lib/auth";
+import { setUserInfo } from "@/lib/auth";
 
 function LoginPage() {
   const router = useRouter();

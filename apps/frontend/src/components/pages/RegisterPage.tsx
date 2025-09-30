@@ -1,9 +1,4 @@
-import {
-  createFileRoute,
-  Link,
-  useNavigate,
-  redirect,
-} from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -318,7 +313,7 @@ function RegisterPage() {
                               maxLength={6}
                               {...field}
                               className="w-full"
-                              onChange={(val) => {
+                              onChange={(val: string) => {
                                 field.onChange(val);
                                 if (val.length === 6) {
                                   verifyOtpMutation.mutate({

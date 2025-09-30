@@ -1,6 +1,5 @@
 import PageHeader from "@/components/common/PageHeader";
 import { useApi } from "@/hook/useApi";
-import { examPaperResponseSchema, type ExamPaper } from "@/types/api";
 import { useLocation } from "@tanstack/react-router";
 import { useMemo, useRef } from "react";
 
@@ -73,7 +72,13 @@ const ExamPaperPage = () => {
       };
     },
     | { subject: string; year: number }
-    | { subject: string; board: string; paper: string; code: string; year: number }
+    | {
+        subject: string;
+        board: string;
+        paper: string;
+        code: string;
+        year: number;
+      }
   >(
     {
       endpoint,
@@ -106,19 +111,19 @@ const ExamPaperPage = () => {
   // Helper function to extract question text from any nested structure
   const getQuestionText = (questionPart: any): string => {
     if (!questionPart) return "";
-    
+
     // Check main question field first
     if (questionPart.question) return questionPart.question;
-    
+
     // Check description field
     if (questionPart.description) return questionPart.description;
-    
+
     // Check if there are sub_parts with questions
     if (questionPart.sub_parts && questionPart.sub_parts.length > 0) {
       const firstSubPart = questionPart.sub_parts[0];
       if (firstSubPart.question) return firstSubPart.question;
     }
-    
+
     return "";
   };
 
@@ -127,9 +132,12 @@ const ExamPaperPage = () => {
     return parts.map((part, index) => {
       const questionText = getQuestionText(part);
       const hasSubParts = part.sub_parts && part.sub_parts.length > 0;
-      
+
       return (
-        <div key={part.number || part.letter || index} className={`mb-4 ${level > 0 ? 'ml-6' : ''}`}>
+        <div
+          key={part.number || part.letter || index}
+          className={`mb-4 ${level > 0 ? "ml-6" : ""}`}
+        >
           {/* Question header with number/letter */}
           {(part.number || part.letter) && questionText && (
             <div className="mb-2">
@@ -163,16 +171,17 @@ const ExamPaperPage = () => {
           )}
 
           {/* Constants given */}
-          {part.constants_given && Object.keys(part.constants_given).length > 0 && (
-            <div className="mt-2 p-3 border border-gray-300 bg-gray-50 text-sm">
-              <div className="font-medium mb-1">Given:</div>
-              {Object.entries(part.constants_given).map(([key, value]) => (
-                <div key={key}>
-                  {key} = {String(value)}
-                </div>
-              ))}
-            </div>
-          )}
+          {part.constants_given &&
+            Object.keys(part.constants_given).length > 0 && (
+              <div className="mt-2 p-3 border border-gray-300 bg-gray-50 text-sm">
+                <div className="font-medium mb-1">Given:</div>
+                {Object.entries(part.constants_given).map(([key, value]) => (
+                  <div key={key}>
+                    {key} = {String(value)}
+                  </div>
+                ))}
+              </div>
+            )}
 
           {/* Equation template */}
           {part.equation_template && (
@@ -321,14 +330,18 @@ const ExamPaperPage = () => {
       <div className="font-bold text-base mb-3">
         Question {question.number}.
         {question.instruction && (
-          <span className="font-normal italic ml-2">{question.instruction}</span>
+          <span className="font-normal italic ml-2">
+            {question.instruction}
+          </span>
         )}
         <span className="float-right">[{question.total_marks} marks]</span>
       </div>
 
       {/* Main question text if exists */}
       {question.question_text && (
-        <div className="mb-4 italic text-gray-700">{question.question_text}</div>
+        <div className="mb-4 italic text-gray-700">
+          {question.question_text}
+        </div>
       )}
 
       {renderQuestionParts(question.parts || [])}
@@ -340,14 +353,18 @@ const ExamPaperPage = () => {
       <div className="font-bold text-base mb-3">
         Question {question.number}.
         {question.instruction && (
-          <span className="font-normal italic ml-2">{question.instruction}</span>
+          <span className="font-normal italic ml-2">
+            {question.instruction}
+          </span>
         )}
         <span className="float-right">[{question.total_marks} marks]</span>
       </div>
 
       {/* Main question text if exists */}
       {question.question_text && (
-        <div className="mb-4 italic text-gray-700">{question.question_text}</div>
+        <div className="mb-4 italic text-gray-700">
+          {question.question_text}
+        </div>
       )}
 
       {renderQuestionParts(question.parts || [])}
@@ -519,7 +536,7 @@ const ExamPaperPage = () => {
                   • This paper consists of {sections.length} section
                   {sections.length > 1 ? "s" : ""}.
                 </div>
-                {sections.map((section: any, index: number) => (
+                {sections.map((section: any) => (
                   <div key={section.name}>
                     • {section.name}{" "}
                     {section.is_compulsory
@@ -547,7 +564,7 @@ const ExamPaperPage = () => {
           </div>
 
           {/* Question Sections - ICSE Style */}
-          {sections.map((section: any, sectionIndex: number) => (
+          {sections.map((section: any) => (
             <div key={section.name} className="exam-page p-12 text-black">
               <div className=" p-8">
                 {/* Section Header */}

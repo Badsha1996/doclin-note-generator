@@ -62,6 +62,7 @@ export const fetchApi = async <TResponse, TPayload = undefined>(
   });
 
   if (!response.ok) {
+    console.log("Response not OK:", response);
     const error: ApiError = {
       message: `Request failed with status ${response.status}`,
       status: response.status,
