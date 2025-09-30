@@ -19,12 +19,14 @@ import { BsMeta } from "react-icons/bs";
 import { motion } from "framer-motion";
 
 import { fadeInUp, scaleIn, transition } from "@/lib/motion";
-import { setUserInfo, getUserInfo } from "@/lib/auth";
+import { setUserInfo } from "@/lib/auth";
+import { Eye, EyeClosed } from "lucide-react";
 
 function LoginPage() {
   const router = useRouter();
   // *************** All States **************
   const [showEmailInput, setShowEmailInput] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // ********** Hooks *************
   const form = useForm<loginTypes>({
@@ -64,6 +66,9 @@ function LoginPage() {
   // ********** Functions ***********
   function onSubmit(data: loginTypes) {
     mutation.mutate(data);
+  }
+  function showHidePassword() {
+    setShowPassword(!showPassword);
   }
 
   const handleOAuth = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -174,13 +179,23 @@ function LoginPage() {
                     {...form.register("email")}
                     className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
                   />
-                  <Input
-                    type="password"
-                    variant="custom"
-                    placeholder="Enter your password"
-                    {...form.register("password")}
-                    className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
-                  />
+
+                  <div>
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      variant="custom"
+                      placeholder="••••••••"
+                      {...form.register("password")}
+                      className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
+                    />
+                    <div className=" relative bottom-8 left-11/12 h-1 cursor-pointer">
+                      {showPassword ? (
+                        <Eye className=" w-3" onClick={showHidePassword} />
+                      ) : (
+                        <EyeClosed className="w-3" onClick={showHidePassword} />
+                      )}
+                    </div>
+                  </div>
                   <Button
                     type="submit"
                     className="w-full"

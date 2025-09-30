@@ -264,3 +264,24 @@ export const examPaperResponseSchema = apiResponseSchema(
 
 export type ExamPaper = z.infer<typeof examPaperSchema>;
 export type ExamPaperResponse = z.infer<typeof examPaperResponseSchema>;
+
+export const userKpiDataSchema = z.object({
+  totalUsers: z.number(),
+  blockedUsers: z.number(),
+  paidUsers: z.number(),
+  newUsers: z.number(),
+  trend: z.array(z.record(z.string(), z.number())),
+});
+
+export const userKpiResponseSchema = apiResponseSchema(userKpiDataSchema);
+
+export type UserKPIResponse = z.infer<typeof userKpiResponseSchema>;
+
+//all use end point
+export const allUserDataSchema = z.object({
+  users: z.array(userSchema),
+});
+
+export const allUserResponseSchema = apiResponseSchema(allUserDataSchema);
+
+export type AllUserResponse = z.infer<typeof allUserResponseSchema>;

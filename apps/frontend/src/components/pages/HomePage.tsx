@@ -240,8 +240,8 @@ function HomePage() {
             {/***************************** Background: 3D MODEL ************************* */}
             <div className="absolute left-[400px] top-[-200px] inset-0 w-full h-[40%] ">
               <Canvas
-                className="w-full  h-full"
-                style={{ pointerEvents: "none" }}
+                // className="w-full  h-full"
+                style={{ pointerEvents: "none", width: "100%", height: "100%" }}
               >
                 <Suspense fallback={null}>
                   <Scene />
@@ -287,7 +287,12 @@ function HomePage() {
               className={`flex flex-row xs:flex-row gap-3 sm:gap-4 justify-center lg:justify-start mb-12 transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
               style={{ transitionDelay: "0.8s" }}
             >
-              <button onClick={()=>{navigate({to: "/config"})}} className="group px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl text-sm sm:text-base transform hover:scale-105 hover:shadow-2xl transition-all duration-300 backdrop-blur-sm border border-white/20 shadow-lg flex items-center gap-2">
+              <button
+                onClick={() => {
+                  navigate({ to: "/config" });
+                }}
+                className="group px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl text-sm sm:text-base transform hover:scale-105 hover:shadow-2xl transition-all duration-300 backdrop-blur-sm border border-white/20 shadow-lg flex items-center gap-2"
+              >
                 <Play className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 Generate Questions
               </button>

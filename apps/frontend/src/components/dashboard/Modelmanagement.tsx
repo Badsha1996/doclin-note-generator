@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/card";
 
 function Model() {
-  const [timeRange, setTimeRange] = useState("90d");
+  const [timeRange, _setTimeRange] = useState("90d");
   const filteredData = chartData.filter((item) => {
     const date = new Date(item.date);
     const referenceDate = new Date("2024-06-30");
@@ -141,7 +141,7 @@ function Model() {
                     axisLine={false}
                     tickMargin={8}
                     minTickGap={32}
-                    tickFormatter={(value) => {
+                    tickFormatter={(value: string) => {
                       const date = new Date(value);
                       return date.toLocaleDateString("en-US", {
                         month: "short",
