@@ -12,6 +12,7 @@ from .interfaces.routes.otp_routes import otp_router
 from .interfaces.routes.user_routes import user_router
 from .interfaces.routes.feedback_routes import feedback_router
 from .interfaces.routes.issues_routes import issue_router
+from .config.config import settings
 
 
 # main APP initiation 🎌
@@ -47,8 +48,8 @@ async def root():
 async def health_check():
     return {"status": "healthy"}
 
-# --- Uvicorn entrypoint for production ---
+# --- Only enable for PRODUCTION 😄 ---
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8000))  
+    port = int(settings.PORT) or 8000
     import uvicorn
-    uvicorn.run("doclin_backend.main:app", host="0.0.0.0", port=port, reload=True)
+    uvicorn.run("src.main:app", host="0.0.0.0", port=port, reload=True)

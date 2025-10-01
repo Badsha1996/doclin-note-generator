@@ -63,7 +63,7 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=".env")
 
-    port: int = 8000  # default for local dev
+    PORT: int = 8000  
 
     model_config = ConfigDict(extra="ignore")
 
