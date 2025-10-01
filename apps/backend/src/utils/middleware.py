@@ -1,9 +1,9 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.middleware.sessions import SessionMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from datetime import datetime, timedelta, timezone
 
 from ..config.config import settings
@@ -16,8 +16,7 @@ class TokenRefreshMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
         self.excluded_paths = excluded_paths or []
 
-    async def dispatch(self, request, call_next):
-        # Skip auth for excluded paths or OPTIONS requests
+    async def dispatch(self, request: Request, call_next):
         if request.url.path in self.excluded_paths or request.method == "OPTIONS":
             return await call_next(request)
 
@@ -28,6 +27,7 @@ class TokenRefreshMiddleware(BaseHTTPMiddleware):
 
         if not access_token and not refresh_token:
             return JSONResponse({"detail": "Unauthorized"}, status_code=401)
+
         if not access_token and refresh_token:
             try:
                 refresh_payload = security.verify_token(refresh_token)
@@ -44,6 +44,7 @@ class TokenRefreshMiddleware(BaseHTTPMiddleware):
                     )
             except Exception as e:
                 return JSONResponse({"detail": str(e)}, status_code=401)
+
         elif access_token:
             try:
                 payload = security.verify_token(access_token)
@@ -68,14 +69,15 @@ class TokenRefreshMiddleware(BaseHTTPMiddleware):
 
         response = await call_next(request)
 
+        # Set new access token in cookie if refreshed
         if new_access_token:
             response.set_cookie(
                 key="access_token",
                 value=new_access_token,
                 httponly=True,
                 secure=True,
-                samesite="None",
-                domain=settings.BACKEND_DOMAIN,
+                samesite="None",  
+                domain=settings.BACKEND_DOMAIN,  
                 max_age=3600,
             )
 
@@ -83,10 +85,9 @@ class TokenRefreshMiddleware(BaseHTTPMiddleware):
 
 
 def setup_middleware(app: FastAPI):
-    # CORS
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.BACKEND_CORS_ORIGINS,
+        allow_origins=settings.BACKEND_CORS_ORIGINS,  
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -98,24 +99,21 @@ def setup_middleware(app: FastAPI):
         secret_key=settings.SECRET_KEY
     )
 
-    # Trusted hosts
-    # Allow all hosts temporarily for Render deployment
     app.add_middleware(
         TrustedHostMiddleware,
         allowed_hosts=["*"]
     )
 
-    # Token refresh middleware
     app.add_middleware(
         TokenRefreshMiddleware,
         excluded_paths=[
-            "/",                 # Make root public
-            "/favicon.ico",      # Allow favicon requests
-            "/health",           # Health check endpoint
-            "/api/auth/login",
-            "/api/auth/register",
-            "/docs",
-            "/openapi.json",
+            "/",                       
+            "/favicon.ico",            
+            "/health",                 
+            "/api/auth/login",         
+            "/api/auth/register",      
+            "/docs",                   
+            "/openapi.json",           
             "/api/otp/verify",
             "/api/auth/oauth/login",
             "/api/auth/verify",
