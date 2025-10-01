@@ -39,14 +39,13 @@ app.include_router(feedback_router,prefix="/api")
 app.include_router(issue_router,prefix="/api")
 
 # ROOT ROUTE
-@app.get("/")
-async def root():
-    print(get_security_manager().hash_password("Robin@930"))
-    return {"message": "Doclin Note generator Backend running 👍"}
-
-@app.get("/health")
+@app.get("/health", dependencies=[])
 async def health_check():
     return {"status": "healthy"}
+
+@app.get("/", dependencies=[])
+async def root():
+    return {"message": "Doclin Note generator Backend running 👍"}
 
 # --- Only enable for PRODUCTION 😄 ---
 if __name__ == "__main__":
