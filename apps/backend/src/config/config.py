@@ -58,9 +58,6 @@ class Settings(BaseSettings):
     # Paid model toggle
     ALLOW_PAID_MODELS: bool = False
 
-    # App URL
-    APP_URL: Optional[str] = "http://localhost:8000"
-
     model_config = SettingsConfigDict(env_file=".env")
 
     PORT: int = 8000  
