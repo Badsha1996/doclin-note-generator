@@ -296,7 +296,12 @@ function HomePage() {
                 <Play className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 Generate Questions
               </button>
-              <button className="group px-6 sm:px-8 py-3 sm:py-4 bg-white/10 text-white font-semibold rounded-xl text-sm sm:text-base transform hover:scale-105 hover:shadow-2xl transition-all duration-300 backdrop-blur-sm border border-white/10 shadow-lg flex items-center gap-2">
+              <button
+                onClick={() => {
+                  navigate({ to: "/about" });
+                }}
+                className="group px-6 sm:px-8 py-3 sm:py-4 bg-white/10 text-white font-semibold rounded-xl text-sm sm:text-base transform hover:scale-105 hover:shadow-2xl transition-all duration-300 backdrop-blur-sm border border-white/10 shadow-lg flex items-center gap-2"
+              >
                 Learn About us
                 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
