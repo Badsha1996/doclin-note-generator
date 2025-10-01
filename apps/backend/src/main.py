@@ -50,6 +50,8 @@ async def health_check():
 
 # --- Only enable for PRODUCTION 😄 ---
 if __name__ == "__main__":
-    port = int(settings.PORT) or 8000
     import uvicorn
-    uvicorn.run("src.main:app", host="0.0.0.0", port=port, reload=True)
+    import os
+
+    port = int(os.environ.get("PORT", settings.PORT or 8000))
+    uvicorn.run("src.main:app", host="0.0.0.0", port=port)
