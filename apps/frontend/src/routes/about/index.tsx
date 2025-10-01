@@ -105,11 +105,11 @@ function RouteComponent() {
                             .join("")}
                         </AvatarFallback>
                       </Avatar>
-                      <h3 className="text-2xl font-semibold">{info.name}</h3>
-                      <h4 className="text-xl font-medium text-white">
+                      <h3 className="text-xl font-semibold">{info.name}</h3>
+                      <h4 className="text-lg font-medium text-white">
                         {info.role}
                       </h4>
-                      <p className="text-lg font-normal text-white">
+                      <p className="text-sm font-normal text-white">
                         {info.description}
                       </p>
                       <div className="flex space-x-4 pt-4">
@@ -180,13 +180,13 @@ function RouteComponent() {
                             </AvatarFallback>
                           </Avatar>
                           <div className="text-center space-y-4">
-                            <h3 className="text-2xl font-semibold">
+                            <h3 className="text-xl font-semibold">
                               {contributor.name}
                             </h3>
-                            <h4 className="text-xl font-medium text-white">
+                            <h4 className="text-lg font-medium text-white">
                               {contributor.role}
                             </h4>
-                            <p className="text-lg font-normal text-white">
+                            <p className="text-sm font-normal text-white">
                               {contributor.description}
                             </p>
                           </div>
