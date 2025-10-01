@@ -137,9 +137,8 @@ function Login() {
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button
                 name="google"
-                className="w-full flex items-center gap-3"
-                variant={"standOut"}
                 onClick={handleOAuth}
+                className="w-full flex items-center gap-3 text-white bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:opacity-90 shadow-lg  transition-all"
               >
                 <FcGoogle size={20} />
                 <span>Sign in with Google</span>
@@ -148,11 +147,10 @@ function Login() {
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button
                 name="meta"
-                className="w-full flex items-center gap-3 text-white"
-                variant={"lavender"}
                 onClick={handleOAuth}
+                className="w-full flex items-center gap-3 text-white bg-gradient-to-r from-purple-500 via-indigo-500 to-blue-500 hover:opacity-90 shadow-lg  transition-all"
               >
-                <BsMeta size={20} color="#0081FB" />
+                <BsMeta size={20} color="#fff" />
                 <span>Continue with Meta</span>
               </Button>
             </motion.div>

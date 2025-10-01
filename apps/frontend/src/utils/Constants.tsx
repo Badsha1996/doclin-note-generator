@@ -1,8 +1,17 @@
 import type { NavbarMenuData } from "@/types/constants";
 
 export const NAVBAR_MENU: NavbarMenuData[] = [
-  { title: "Home", href: "/", desc: "" },
-  { title: "Product", href: "/product", desc: "", enabled: false },
-  { title: "About", href: "/about", desc: "" },
-  { title: "Contact", href: "/contact", desc: "" },
+  { title: "Home", href: "/" },
+  {
+    title: "Product",
+    href: "/product",
+    children: [
+      {
+        title: "Generate Question Papers",
+        href: "/config",
+      },
+    ],
+  },
+  { title: "About", href: "/about" },
+  { title: "Contact", href: "/contact" },
 ];

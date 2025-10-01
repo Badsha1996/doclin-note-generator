@@ -224,8 +224,9 @@ export function Register() {
             </motion.p>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
               <Button
-                variant="standOut"
-                className="px-6 py-2 w-full max-w-xs rounded-md font-semibold cursor-pointer"
+                className="px-6 py-2 w-full max-w-xs rounded-md font-semibold 
+             bg-gradient-to-r  from-purple-500 via-indigo-500 to-blue-500 text-white shadow-md 
+             hover:opacity-90 transition"
               >
                 Learn More
               </Button>
@@ -463,8 +464,9 @@ export function Register() {
                 >
                   <Button
                     type="submit"
-                    variant="standOut"
-                    className="w-full max-w py-2 rounded-md font-semibold cursor-pointer"
+                    className="w-full py-2 rounded-md font-semibold cursor-pointer 
+             bg-gradient-to-r from-purple-600 to-pink-500 
+             text-white shadow-md hover:opacity-90 transition"
                     disabled={!otpVerified}
                   >
                     {mutation.isPending ? "Registering..." : "Register"}

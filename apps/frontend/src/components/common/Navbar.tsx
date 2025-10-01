@@ -1,9 +1,11 @@
 import { Link, useRouter } from "@tanstack/react-router";
 import {
   NavigationMenu,
+  NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
+  NavigationMenuTrigger,
 } from "../ui/navigation-menu";
 import { NAVBAR_MENU } from "@/utils/Constants";
 import { motion, AnimatePresence } from "framer-motion";
@@ -118,32 +120,60 @@ function Navbar() {
               const isDisabled = item.enabled === false;
               return (
                 <NavigationMenuItem key={item.href}>
-                  <NavigationMenuLink asChild>
-                    <motion.div
-                      initial={{ opacity: 0, y: -20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      whileHover={{ y: isDisabled ? 0 : -2 }}
-                    >
-                      <Link
-                        to={isDisabled ? undefined : item.href}
-                        className={`relative px-4 py-2 rounded-lg transition-all duration-300 ${isActive ? "bg-white/20 font-bold shadow" : ""} ${isDisabled ? "pointer-events-none text-gray-400" : "text-white/90 hover:text-white"}`}
-                        tabIndex={isDisabled ? -1 : 0}
-                        aria-disabled={isDisabled}
+                  {item.children ? (
+                    <>
+                      <NavigationMenuTrigger
+                        className={`relative px-4 py-2 rounded-lg transition-all bg-none duration-300 ${isActive ? "bg-white/20 font-bold shadow" : ""} ${isDisabled ? "pointer-events-none text-gray-400" : "text-white/90 hover:text-white"}`}
                       >
-                        <span className="relative z-10">{item.title}</span>
-                        {!isDisabled && (
-                          <motion.div
-                            className="absolute inset-0 bg-white/20 rounded-lg opacity-0 hover:opacity-100 transition-opacity duration-300"
-                            whileHover={{ scale: 1.05 }}
-                          />
-                        )}
-                        {!isDisabled && (
-                          <motion.div className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-purple-400 to-pink-400 group-hover:w-full group-hover:left-0 transition-all duration-300" />
-                        )}
-                      </Link>
-                    </motion.div>
-                  </NavigationMenuLink>
+                        {item.title}
+                      </NavigationMenuTrigger>
+                      <NavigationMenuContent className="p-4 bg-white/10 rounded-xl shadow-lg">
+                        <ul className="grid gap-3 w-[250px]">
+                          {item.children.map((sub) => (
+                            <li key={sub.href}>
+                              <NavigationMenuLink asChild>
+                                <Link
+                                  to={sub.href}
+                                  className="bg-white/10 block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-white hover:text-black"
+                                >
+                                  <div className="text-sm font-medium">
+                                    {sub.title}
+                                  </div>
+                                </Link>
+                              </NavigationMenuLink>
+                            </li>
+                          ))}
+                        </ul>
+                      </NavigationMenuContent>
+                    </>
+                  ) : (
+                    <NavigationMenuLink asChild>
+                      <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        whileHover={{ y: isDisabled ? 0 : -2 }}
+                      >
+                        <Link
+                          to={isDisabled ? undefined : item.href}
+                          className={`relative px-4 py-2 rounded-lg transition-all duration-300 ${isActive ? "bg-white/20 font-bold shadow" : ""} ${isDisabled ? "pointer-events-none text-gray-400" : "text-white/90 hover:text-white"}`}
+                          tabIndex={isDisabled ? -1 : 0}
+                          aria-disabled={isDisabled}
+                        >
+                          <span className="relative z-10">{item.title}</span>
+                          {!isDisabled && (
+                            <motion.div
+                              className="absolute inset-0 bg-white/20 rounded-lg opacity-0 hover:opacity-100 transition-opacity duration-300"
+                              whileHover={{ scale: 1.05 }}
+                            />
+                          )}
+                          {!isDisabled && (
+                            <motion.div className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-purple-400 to-pink-400 group-hover:w-full group-hover:left-0 transition-all duration-300" />
+                          )}
+                        </Link>
+                      </motion.div>
+                    </NavigationMenuLink>
+                  )}
                 </NavigationMenuItem>
               );
             })}
