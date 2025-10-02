@@ -113,7 +113,7 @@ async def oauthLogin(
         oauth_user = await oauth_manager.get_oauth_user(
             provider=state,
             code=code,
-            redirect_uri='http://localhost:8000/api/auth/oauth/login'
+            redirect_uri=f"""{settings.BACKEND_DOMAIN}/api/auth/oauth/login"""
         )
         access_token, refresh_token, user = await auth_service.oauth_login(oauth_user)
 
