@@ -305,16 +305,16 @@ class LLMProviderManager:
         # Add providers based on configuration
         if self.gemini_models and self.gemini_keys:
             chain.append(("gemini", self.get_gemini))
+
+        if self.hf_models and self.hf_keys:
+            chain.append(("huggingface", self.get_hf))
         
         if self.openrouter_keys or True:  # OpenRouter has free tier
             chain.append(("openrouter", self.get_openrouter))
         
         if self.colab_urls:
             chain.append(("colab_mistral", self.get_colab_mistral))
-        
-        if self.hf_models and self.hf_keys:
-            chain.append(("huggingface", self.get_hf))
-        
+          
         # Only add Ollama if the library is available
         if _OLLAMA_AVAILABLE and (self.ollama_models or self.ollama_urls):
             chain.append(("ollama", self.get_ollama))
