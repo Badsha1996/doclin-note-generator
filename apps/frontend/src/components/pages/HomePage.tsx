@@ -235,7 +235,7 @@ function HomePage() {
         <div className="flex flex-col justify-center items-center lg:items-start p-6 sm:p-8 md:p-12 lg:p-16 xl:p-24 text-center lg:text-left min-h-screen">
           <div className="max-w-4xl lg:max-w-2xl xl:max-w-4xl mx-auto lg:mx-0">
             {/***************************** Background: 3D MODEL ************************* */}
-            <div className="absolute left-[400px] top-[-200px] inset-0 w-full h-[40%] ">
+            <div className="hidden md:block absolute left-[400px] top-[-200px] inset-0 w-full h-[40%] ">
               <Canvas
                 className="w-full  h-full"
                 style={{ pointerEvents: "none" }}

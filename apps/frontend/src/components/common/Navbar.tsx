@@ -167,9 +167,6 @@ function Navbar() {
                               whileHover={{ scale: 1.05 }}
                             />
                           )}
-                          {!isDisabled && (
-                            <motion.div className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-purple-400 to-pink-400 group-hover:w-full group-hover:left-0 transition-all duration-300" />
-                          )}
                         </Link>
                       </motion.div>
                     </NavigationMenuLink>

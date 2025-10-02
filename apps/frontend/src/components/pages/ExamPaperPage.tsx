@@ -2,6 +2,8 @@ import PageHeader from "@/components/common/PageHeader";
 import { useApi } from "@/hook/useApi";
 import { useLocation } from "@tanstack/react-router";
 import { useMemo, useRef } from "react";
+import { Button } from "../ui/button";
+import GlassDropdown from "../common/GlassDropdown";
 
 const ExamPaperPage = () => {
   const location = useLocation();
@@ -451,30 +453,30 @@ const ExamPaperPage = () => {
       <div className="pt-24 pb-12">
         <PageHeader
           title={prevShow ? "Exam Paper Loaded" : "Exam Paper Generated"}
-          subTitle="Preview below or download in .pdf / .doc format"
+          subTitle="Preview below or download in Any format of your choising"
         />
 
         {/* Download buttons */}
         <div className="no-print max-w-4xl mx-auto mb-6 px-4">
-          <div className="flex gap-4 justify-center">
-            <button
-              onClick={() => window.print()}
-              className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition-colors"
-            >
+          <div className="flex gap-4 justify-center items-center">
+            <Button className="mt-2" variant={"glass"} onClick={() => window.print()}>
               Print Paper
-            </button>
-            <button
-              onClick={() => alert("PDF download would be implemented here")}
-              className="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700 transition-colors"
-            >
-              Download PDF
-            </button>
-            <button
-              onClick={() => alert("DOC download would be implemented here")}
-              className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition-colors"
-            >
-              Download DOC
-            </button>
+            </Button>
+            <Button className="mt-2" variant={"glass"} onClick={() => window.print()}>
+              Download
+            </Button>
+            <GlassDropdown
+              options={[
+                { label: "Select type", value: "Select" },
+                { label: "Doc", value: "doc" },
+                { label: "PDF", value: "pdf" },
+              ]}
+              label={""}
+              value={"Select"}
+              onChange={function (): void {
+                throw new Error("Function not implemented.");
+              }}
+            />
           </div>
         </div>
 
