@@ -15,6 +15,7 @@ import { getUserInfo, setUserInfo } from "@/lib/auth";
 import type { ApiError } from "@/types/api";
 import { Route } from "@/routes";
 import { useNavigate } from "@tanstack/react-router";
+import { useApi } from "@/hook/useApi";
 
 const productFeatures = [
   {
@@ -48,30 +49,6 @@ const productFeatures = [
       "Track your learning journey with detailed analytics and insights",
     highlight: "Real-time Performance Data",
     color: "from-orange-500 to-red-500",
-  },
-];
-
-const testimonials = [
-  {
-    name: "Atul Miya",
-    role: "Medical Student",
-    text: "Doclin helped me create 500+ practice questions for my finals!",
-    rating: 5,
-    avatar: "SC",
-  },
-  {
-    name: "Tinku Jiya",
-    role: "Engineering Student",
-    text: "The AI-generated notes are incredibly accurate and well-structured.",
-    rating: 5,
-    avatar: "AK",
-  },
-  {
-    name: "Ladki BAJIGAR",
-    role: "Teacher",
-    text: "Perfect for creating diverse question sets for my students.",
-    rating: 5,
-    avatar: "MR",
   },
 ];
 
@@ -112,14 +89,34 @@ function HomePage() {
   const [isVisible, setIsVisible] = useState(false);
   const [typewriterText, setTypewriterText] = useState("");
   const [stats, setStats] = useState({ users: 0, questions: 0, notes: 0 });
-
   const navigate = useNavigate();
+
+  const { data: fetchedTestimonials, isLoading: testimonialsLoading } = useApi<
+    {
+      id: number;
+      name: string;
+      role: string;
+      text: string;
+      rating: number;
+      avatar: string;
+    }[]
+  >({
+    endpoint: "/feedback/all",
+    method: "GET",
+    queryParams: { skip: 0, limit: 10 },
+  });
+
+  const showTestimonials =
+    !testimonialsLoading &&
+    fetchedTestimonials &&
+    fetchedTestimonials.length > 0;
 
   useEffect(() => {
     setIsVisible(true);
 
     // Typewriter effect
-    const text = "Your one stop for QUESTIONS, NOTES and STUDY MATERIAL";
+    const text =
+      "A single AI-driven platform that transforms the way students and teachers prepare effective study materials";
     let index = 0;
     const timer = setInterval(() => {
       if (index <= text.length) {
@@ -240,8 +237,8 @@ function HomePage() {
             {/***************************** Background: 3D MODEL ************************* */}
             <div className="absolute left-[400px] top-[-200px] inset-0 w-full h-[40%] ">
               <Canvas
-                // className="w-full  h-full"
-                style={{ pointerEvents: "none", width: "100%", height: "100%" }}
+                className="w-full  h-full"
+                style={{ pointerEvents: "none" }}
               >
                 <Suspense fallback={null}>
                   <Scene />
@@ -288,19 +285,15 @@ function HomePage() {
               style={{ transitionDelay: "0.8s" }}
             >
               <button
-                onClick={() => {
-                  navigate({ to: "/config" });
-                }}
                 className="group px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl text-sm sm:text-base transform hover:scale-105 hover:shadow-2xl transition-all duration-300 backdrop-blur-sm border border-white/20 shadow-lg flex items-center gap-2"
+                onClick={() => navigate({ to: "/config" })}
               >
                 <Play className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 Generate Questions
               </button>
               <button
-                onClick={() => {
-                  navigate({ to: "/about" });
-                }}
                 className="group px-6 sm:px-8 py-3 sm:py-4 bg-white/10 text-white font-semibold rounded-xl text-sm sm:text-base transform hover:scale-105 hover:shadow-2xl transition-all duration-300 backdrop-blur-sm border border-white/10 shadow-lg flex items-center gap-2"
+                onClick={() => navigate({ to: "/about" })}
               >
                 Learn About us
                 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -325,7 +318,7 @@ function HomePage() {
               </div>
               <div className="text-center">
                 <div className="text-2xl sm:text-3xl font-bold text-pink-400">
-                  <AnimatedCounter end={stats.notes} suffix="+" />
+                  {/* <AnimatedCounter end={stats.notes} suffix="+" /> */}0
                 </div>
                 <div className="text-white/60 text-sm">Notes Created</div>
               </div>
@@ -420,50 +413,52 @@ function HomePage() {
         </div>
 
         {/* **************************************** Testimonials *********************************** */}
-        <div className="px-6 sm:px-8 md:px-12 lg:px-16 xl:px-24 py-16 bg-black/20 backdrop-blur-sm">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl sm:text-5xl font-bold text-white mb-4">
-                What Our{" "}
-                <span className="bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
-                  Users Say
-                </span>
-              </h2>
-            </div>
+        {showTestimonials && (
+          <div className="px-6 sm:px-8 md:px-12 lg:px-16 xl:px-24 py-16 bg-black/20 backdrop-blur-sm">
+            <div className="max-w-4xl mx-auto">
+              <div className="text-center mb-16">
+                <h2 className="text-4xl sm:text-5xl font-bold text-white mb-4">
+                  What Our{" "}
+                  <span className="bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
+                    Users Say
+                  </span>
+                </h2>
+              </div>
 
-            <div className="grid md:grid-cols-3 gap-6">
-              {testimonials.map((testimonial, index) => (
-                <div
-                  key={index}
-                  className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10"
-                >
-                  <div className="flex items-center mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold mr-4">
-                      {testimonial.avatar}
-                    </div>
-                    <div>
-                      <div className="text-white font-semibold">
-                        {testimonial.name}
+              <div className="grid md:grid-cols-3 gap-6">
+                {fetchedTestimonials.map((testimonial) => (
+                  <div
+                    key={testimonial.id}
+                    className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10"
+                  >
+                    <div className="flex items-center mb-4">
+                      <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold mr-4">
+                        {testimonial.avatar || testimonial.name.charAt(0)}
                       </div>
-                      <div className="text-white/60 text-sm">
-                        {testimonial.role}
+                      <div>
+                        <div className="text-white font-semibold">
+                          {testimonial.name}
+                        </div>
+                        <div className="text-white/60 text-sm">
+                          {testimonial.role}
+                        </div>
                       </div>
                     </div>
+                    <div className="flex mb-4">
+                      {[...Array(testimonial.rating)].map((_, starIndex) => (
+                        <Star
+                          key={starIndex}
+                          className="w-4 h-4 text-yellow-400 fill-current"
+                        />
+                      ))}
+                    </div>
+                    <p className="text-white/80 italic">"{testimonial.text}"</p>
                   </div>
-                  <div className="flex mb-4">
-                    {[...Array(testimonial.rating)].map((_, starIndex) => (
-                      <Star
-                        key={starIndex}
-                        className="w-4 h-4 text-yellow-400 fill-current"
-                      />
-                    ))}
-                  </div>
-                  <p className="text-white/80 italic">"{testimonial.text}"</p>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
