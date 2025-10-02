@@ -111,7 +111,6 @@ async def get_prev_exam_paper(
         exam_paper_service = ExamPaperService(exam_paper_repo=exam_paper_repo)
 
         exam_paper = await exam_paper_service.get_prev_year_paper(subject=exam_paper_details.subject, year=exam_paper_details.year)
-
         if not exam_paper:
             return APIResponseSchema(
             success=False,

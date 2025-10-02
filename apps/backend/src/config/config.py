@@ -1,5 +1,6 @@
 import json
 from typing import List, Optional
+from pydantic import ConfigDict
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -42,7 +43,6 @@ class Settings(BaseSettings):
     VECTOR_MODEL: str
 
     # Gemini
-    LLM_API_KEY: str
     GEMINI_KEYS: Optional[List[str]] = None
 
     # OpenRouter
@@ -58,10 +58,11 @@ class Settings(BaseSettings):
     # Paid model toggle
     ALLOW_PAID_MODELS: bool = False
 
-    # App URL
-    APP_URL: Optional[str] = "http://localhost:8000"
-
     model_config = SettingsConfigDict(env_file=".env")
+
+    PORT: int = 8000  
+
+    model_config = ConfigDict(extra="ignore")
 
     # ---------------- Custom Parsers ---------------- #
     @classmethod

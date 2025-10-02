@@ -1,4 +1,6 @@
-from .infrastructure.providers.auth_provider import get_security_manager
+import os
+
+from fastapi.responses import JSONResponse
 from fastapi import FastAPI
 
 from .database.database import Base, engine
@@ -11,6 +13,7 @@ from .interfaces.routes.otp_routes import otp_router
 from .interfaces.routes.user_routes import user_router
 from .interfaces.routes.feedback_routes import feedback_router
 from .interfaces.routes.issues_routes import issue_router
+from .config.config import settings
 
 
 # main APP initiation 🎌
@@ -37,11 +40,20 @@ app.include_router(feedback_router,prefix="/api")
 app.include_router(issue_router,prefix="/api")
 
 # ROOT ROUTE
-@app.get("/")
+@app.api_route("/health", methods=["GET", "HEAD"])
+async def health_check():
+    return JSONResponse(content={"status": "healthy"})
+
+@app.get("/", dependencies=[])
 async def root():
     print(get_security_manager().hash_password("Robin@930"))
     return {"message": "Doclin Note generator Backend running 👍"}
 
-@app.get("/health")
-async def health_check():
-    return {"status": "healthy"}
+# --- Only enable for PRODUCTION 😄 ---
+if __name__ == "__main__":
+    import uvicorn
+    import os
+    
+    port = int(os.environ.get("PORT", settings.PORT or 8000))
+    print(f"Starting server on port {port}")
+    uvicorn.run("src.main:app", host="0.0.0.0", port=port)

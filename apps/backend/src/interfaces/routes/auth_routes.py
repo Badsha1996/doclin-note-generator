@@ -17,7 +17,7 @@ from ...utils.oauth import OAuthManager
 
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
 
-@auth_router.post("/register")
+@auth_router.post("/register", dependencies=[])
 async def register_user(
     user_data : RegisterSchema,
     db: Session = Depends(get_DB),
@@ -43,7 +43,7 @@ async def register_user(
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@auth_router.post("/login")
+@auth_router.post("/login", dependencies=[])
 async def login_user(
     response:Response,
     user_data : LoginSchema,
@@ -96,7 +96,7 @@ async def login_user(
         raise HTTPException(status_code=400, detail=str(e))
     
 
-@auth_router.get('/oauth/login')
+@auth_router.get('/oauth/login', dependencies=[])
 async def oauthLogin(
     code: str,
     state: str,
@@ -144,7 +144,7 @@ async def oauthLogin(
         raise HTTPException(status_code=400, detail=str(e))   
 
 
-@auth_router.post("/verify")
+@auth_router.post("/verify", dependencies=[])
 async def verify_user(
     user_data:VerifySchema,
     db : Session = Depends(get_DB),
@@ -162,7 +162,7 @@ async def verify_user(
         raise HTTPException(status_code=400, detail=str(e))
     
 
-@auth_router.get('/me')
+@auth_router.get('/me', dependencies=[])
 async def get_current_user_info(
     current_user : User= Depends(get_current_user)
 ):
@@ -176,7 +176,7 @@ async def get_current_user_info(
         raise HTTPException(status_code=400, detail=str(e))
     
 
-@auth_router.post('/logout')
+@auth_router.post('/logout', dependencies=[])
 async def logout_user(response:Response):
     try:
         response.delete_cookie(
