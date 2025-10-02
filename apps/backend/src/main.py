@@ -46,7 +46,6 @@ async def health_check():
 
 @app.get("/", dependencies=[])
 async def root():
-    print(get_security_manager().hash_password("Robin@930"))
     return {"message": "Doclin Note generator Backend running 👍"}
 
 # --- Only enable for PRODUCTION 😄 ---
@@ -55,5 +54,4 @@ if __name__ == "__main__":
     import os
     
     port = int(os.environ.get("PORT", settings.PORT or 8000))
-    print(f"Starting server on port {port}")
     uvicorn.run("src.main:app", host="0.0.0.0", port=port)
