@@ -1,8 +1,10 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-
 import { getUserInfo } from "@/lib/auth";
-import ConfigPage from "@/components/pages/ConfigPage";
 import { toast } from "sonner";
+import GlassmorphicLoader from "@/components/common/GlassLoader";
+import { lazy } from "react";
+
+const ConfigPage = lazy(() => import("@/components/pages/ConfigPage"));
 export const Route = createFileRoute("/config/")({
   beforeLoad: () => {
     if (!getUserInfo()) {
@@ -11,4 +13,9 @@ export const Route = createFileRoute("/config/")({
     }
   },
   component: ConfigPage,
+  pendingComponent: () => (
+    <GlassmorphicLoader message="Loading exam paper..." />
+  ),
+  pendingMs: 500,
+  pendingMinMs: 200,
 });

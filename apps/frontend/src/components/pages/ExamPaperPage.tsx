@@ -4,6 +4,7 @@ import { useLocation } from "@tanstack/react-router";
 import { useMemo, useRef } from "react";
 import { Button } from "../ui/button";
 import GlassDropdown from "../common/GlassDropdown";
+import GlassmorphicLoader from "../common/GlassLoader";
 
 const ExamPaperPage = () => {
   const location = useLocation();
@@ -223,18 +224,10 @@ const ExamPaperPage = () => {
   const SimpleLoader = () => (
     <div className="flex items-center justify-center min-h-screen px-4">
       <div className="text-center p-8">
-        <div className="relative mb-6">
-          <div className="w-16 h-16 border-4 border-gray-200 rounded-full animate-spin mx-auto"></div>
-          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 h-16 border-4 border-transparent border-t-blue-600 rounded-full animate-spin"></div>
-        </div>
-        <h3 className="text-lg font-medium text-gray-800 mb-2">
-          {prevShow ? "Loading Exam Paper..." : "Generating Your Exam Paper"}
-        </h3>
-        <p className="text-gray-600">
-          {prevShow
-            ? "Please wait while we fetch your paper..."
-            : "Please wait while we create your assessment..."}
-        </p>
+        <GlassmorphicLoader
+          size="lg"
+          message="Loading Exam Paper for ICSE..."
+        />
       </div>
     </div>
   );
@@ -459,10 +452,18 @@ const ExamPaperPage = () => {
         {/* Download buttons */}
         <div className="no-print max-w-4xl mx-auto mb-6 px-4">
           <div className="flex gap-4 justify-center items-center">
-            <Button className="mt-2" variant={"glass"} onClick={() => window.print()}>
+            <Button
+              className="mt-2"
+              variant={"glass"}
+              onClick={() => window.print()}
+            >
               Print Paper
             </Button>
-            <Button className="mt-2" variant={"glass"} onClick={() => window.print()}>
+            <Button
+              className="mt-2"
+              variant={"glass"}
+              onClick={() => window.print()}
+            >
               Download
             </Button>
             <GlassDropdown
