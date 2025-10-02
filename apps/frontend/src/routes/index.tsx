@@ -52,30 +52,6 @@ const productFeatures = [
   },
 ];
 
-const testimonials = [
-  {
-    name: "Atul Miya",
-    role: "Medical Student",
-    text: "Doclin helped me create 500+ practice questions for my finals!",
-    rating: 5,
-    avatar: "SC",
-  },
-  {
-    name: "Tinku Jiya",
-    role: "Engineering Student",
-    text: "The AI-generated notes are incredibly accurate and well-structured.",
-    rating: 5,
-    avatar: "AK",
-  },
-  {
-    name: "Ladki BAJIGAR",
-    role: "Teacher",
-    text: "Perfect for creating diverse question sets for my students.",
-    rating: 5,
-    avatar: "MR",
-  },
-];
-
 const useCases = [
   {
     title: "Students",
