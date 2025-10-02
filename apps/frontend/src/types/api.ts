@@ -145,12 +145,6 @@ export type ExamPaperUploadResponse = z.infer<typeof examPaperUploadSchema>;
 export const logoutSchema = apiResponseSchema(z.null());
 export type LogoutResponse = z.infer<typeof logoutSchema>;
 
-// ******Contact Us Types ********
-export const feedbackApiSchema = z.object({
-  rating: z.number(),
-  feedback_text: z.string().optional(),
-});
-export const reportDescriptionSchema = z.string().min(10);
 /* ---------------------------------- */
 /* Shared Reusable Schemas            */
 /* ---------------------------------- */
@@ -305,3 +299,13 @@ export const feedbackListResponseSchema = apiResponseSchema(
   })
 );
 export type FeedbackListResponse = z.infer<typeof feedbackListResponseSchema>;
+// ******Contact Us Types ********
+export const feedbackApiSchema = apiResponseSchema(
+  z.object({
+    feedback: feedbackItemSchema,
+  })
+);
+
+export type FeedbackResponse = z.infer<typeof feedbackApiSchema>;
+
+export const reportDescriptionSchema = z.string().min(10);
