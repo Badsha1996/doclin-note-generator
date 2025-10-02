@@ -128,9 +128,8 @@ function LoginPage() {
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button
                 name="google"
-                className="w-full flex items-center gap-3"
-                variant={"standOut"}
                 onClick={handleOAuth}
+                className="w-full flex items-center gap-3 text-white bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:opacity-90 shadow-lg  transition-all"
               >
                 <FcGoogle size={20} />
                 <span>Sign in with Google</span>
@@ -139,11 +138,10 @@ function LoginPage() {
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button
                 name="meta"
-                className="w-full flex items-center gap-3 text-white"
-                variant={"lavender"}
                 onClick={handleOAuth}
+                className="w-full flex items-center gap-3 text-white bg-gradient-to-r from-purple-500 via-indigo-500 to-blue-500 hover:opacity-90 shadow-lg  transition-all"
               >
-                <BsMeta size={20} color="#0081FB" />
+                <BsMeta size={20} color="#fff" />
                 <span>Continue with Meta</span>
               </Button>
             </motion.div>
@@ -175,7 +173,7 @@ function LoginPage() {
                   <Input
                     type="text"
                     variant="custom"
-                    placeholder="Email or Username"
+                    placeholder="Email"
                     {...form.register("email")}
                     className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
                   />
@@ -198,8 +196,9 @@ function LoginPage() {
                   </div>
                   <Button
                     type="submit"
-                    className="w-full"
-                    variant="standOut"
+                    className="px-6 py-2 w-full rounded-md font-semibold 
+             bg-white text-gray-800 shadow-md 
+             hover:bg-gray-200 transition"
                     disabled={mutation.isPending}
                   >
                     {mutation.isPending ? "Logging in..." : "Continue"}

@@ -36,7 +36,7 @@ async def add_feedback(
 
 
 
-@feedback_router.get("/all",dependencies=[Depends(admin_or_super_admin_only)])
+@feedback_router.get("/all",dependencies=[])
 async def get_all_feedback(
     skip:int=0,
     limit:int=10,
