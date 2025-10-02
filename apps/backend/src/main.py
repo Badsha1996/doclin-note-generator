@@ -1,5 +1,6 @@
 import os
-from .infrastructure.providers.auth_provider import get_security_manager
+
+from fastapi.responses import JSONResponse
 from fastapi import FastAPI
 
 from .database.database import Base, engine
@@ -39,9 +40,9 @@ app.include_router(feedback_router,prefix="/api")
 app.include_router(issue_router,prefix="/api")
 
 # ROOT ROUTE
-@app.get("/health", dependencies=[])
+@app.api_route("/health", methods=["GET", "HEAD"])
 async def health_check():
-    return {"status": "healthy"}
+    return JSONResponse(content={"status": "healthy"})
 
 @app.get("/", dependencies=[])
 async def root():
