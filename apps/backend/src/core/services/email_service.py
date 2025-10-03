@@ -1,8 +1,9 @@
 import smtplib
-from email import encoders
-from email.mime.text import MIMEText
-from email.mime.base import MIMEBase
-from email.mime.multipart import MIMEMultipart
+from mailersend import MailerSendClient,EmailBuilder
+# from email import encoders
+# from email.mime.text import MIMEText
+# from email.mime.base import MIMEBase
+# from email.mime.multipart import MIMEMultipart
 from typing import Literal,Dict,Any
 
 
@@ -15,7 +16,9 @@ from ...utils.exceptions import AuthExceptionError,InternelServerException
 class EmailService:
     def __init__(self):
         self.sender=settings.EMAIL
-        self.password=settings.GOOGLE_APP_PASSWORD
+        self.client = MailerSendClient(api_key=settings.MAILERSEND_API_KEY)
+        self.sender_name = "Doclin Team"
+        # self.password=settings.GOOGLE_APP_PASSWORD
     async def send_email(
             self,
             receiver:str,
@@ -38,27 +41,29 @@ class EmailService:
                 template_func, subject = templates[type]
                 html_content = template_func(data)
 
-            message = MIMEMultipart()
-            message["Subject"] = subject
-            message["From"] = self.sender
-            message["To"] = receiver
+            # message.attach(MIMEText(html_content, "html"))
+            # if file_bytes and filename and content_type:
+                # message.attach(part)
+ 
 
-            message.attach(MIMEText(html_content, "html"))
-            if file_bytes and filename and content_type:
-                maintype, subtype = content_type.split("/")
-                part = MIMEBase(maintype, subtype)
-                part.set_payload(file_bytes)
-                encoders.encode_base64(part)
-                part.add_header("Content-Disposition", f"attachment; filename={filename}")
-                message.attach(part)
+            email = (EmailBuilder()
+                .from_email(self.sender, "Doclin Team")
+                .to_many([{"email": receiver, "name": "Recipient"}])
+                .subject(subject)
+                .html(html_content)
+                .build())
+            response = self.client.emails.send(email)
 
-            with smtplib.SMTP("smtp.gmail.com", 587) as server:
-                server.starttls()
-                server.login(self.sender, self.password)
-                server.sendmail(self.sender, receiver, message.as_string())
+            if response.success:
                 return True
+            else:
+                status_code = response.status_code
+                error_details = response.data
 
-        except smtplib.SMTPAuthenticationError:
-            raise AuthExceptionError(detail="Invalid credentials for SMTP")
+                if response.status_code == 429 and response.retry_after:
+                    retry_seconds = response.retry_after
+                    raise AuthExceptionError(f"Rate limit exceeded. Retry after {retry_seconds} seconds.")
+                else:
+                    raise InternelServerException(f"Failed to send email. Status code: {status_code}, Details: {error_details}")
         except Exception as e:
             raise InternelServerException()
