@@ -25,7 +25,6 @@ class Settings(BaseSettings):
     META_USER_URL:str
 
     EMAIL:str
-    # GOOGLE_APP_PASSWORD:str
     MAILERSEND_API_KEY: str
     SUPER_ADMIN_EMAIL:str
     MAX_COUNT_FOR_PREVILEGED:int

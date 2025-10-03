@@ -69,7 +69,7 @@ async def login_user(
             httponly=True,
             secure=True,   
             samesite="None", 
-            domain=settings.BACKEND_DOMAIN, 
+            domain=settings.FRONTEND_DOMAIN, 
             max_age=3600
         )
         response.set_cookie(
@@ -78,7 +78,7 @@ async def login_user(
             httponly=True,
             secure=True,
             samesite="None",
-            domain=settings.BACKEND_DOMAIN,
+            domain=settings.FRONTEND_DOMAIN,
             max_age=60*60*24*7
         )
 
@@ -126,7 +126,7 @@ async def oauthLogin(
             httponly=True,
             secure=True,   
             samesite="None", 
-            domain=settings.BACKEND_DOMAIN, 
+            domain=settings.FRONTEND_DOMAIN, 
             max_age=3600
         )
         response.set_cookie(
@@ -135,7 +135,7 @@ async def oauthLogin(
             httponly=True,
             secure=True,
             samesite="None",
-            domain=settings.BACKEND_DOMAIN,
+            domain=settings.FRONTEND_DOMAIN,
             max_age=60*60*24*7
         )
 
@@ -181,11 +181,11 @@ async def logout_user(response:Response):
     try:
         response.delete_cookie(
             key="access_token",
-            domain=settings.BACKEND_DOMAIN
+            domain=settings.FRONTEND_DOMAIN
         )
         response.delete_cookie(
             key="refresh_token",
-            domain=settings.BACKEND_DOMAIN
+            domain=settings.FRONTEND_DOMAIN
         )
         return APIResponseSchema(
             success=True,
