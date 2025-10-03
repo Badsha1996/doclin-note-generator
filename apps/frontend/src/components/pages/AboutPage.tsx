@@ -21,7 +21,7 @@ function AboutPage() {
       name: "Anirudha Pradhan",
       role: "Lead Fullstack Engineer",
       description:
-        "blah blah guysss khud ki tareef khud kare aur meri bhi kar de please",
+        "Fullstack engineer with 1+ years of experience building scalable applications and contributing to diverse projects.",
       avatar: "/images/anirudha.webp",
       linkedin: "https://www.linkedin.com/in/anirudha-pradhan-346388240/",
       github: "https://github.com/Anirudha0702",
@@ -32,7 +32,7 @@ function AboutPage() {
       name: "Badsha Laskar",
       role: "Project Owner & Technical Lead",
       description:
-        "blah blah guysss khud ki tareef khud kare aur meri bhi kar de please",
+        "Technical leader with 4 years of experience in developing, managing, and delivering production-ready applications.",
       avatar: "/images/badsha.jpg",
       linkedin: "https://www.linkedin.com/in/badsha-laskar/",
       github: "https://github.com/Badsha1996",
@@ -43,7 +43,7 @@ function AboutPage() {
       name: "Sanya Garg",
       role: "Lead Frontend Engineer",
       description:
-        "blah blah guysss khud ki tareef khud kare aur meri bhi kar de please",
+        "Frontend engineer with 3 years of experience in modern web technologies, crafting intuitive and high-performance user interfaces.",
       avatar: "/images/sanya.jpg",
       linkedin: "https://www.linkedin.com/in/sanya-garg-7a45bb195/",
       github: "https://github.com/sanyagarg15",
@@ -57,14 +57,14 @@ function AboutPage() {
       name: "Atul Bhartiya",
       role: "Junior Frontend Engineer",
       description:
-        "blah blah guysss khud ki tareef khud kare aur meri bhi kar de please",
+        "Enthusiastic frontend developer with a passion for building user-friendly interfaces.",
       avatar: "/images/atul.jpg",
-      linkedin:
-        "https://www.linkedin.com/in/atul-bhartiya-743838359/?trk=contact-info",
+      linkedin: "https://www.linkedin.com/in/atul-bhartiya-743838359/",
       github: "https://github.com/atul96anand",
       email: "mailto:anandatul509@gmail.com",
     },
   ];
+
   return (
     <div className="space-y-8 mt-24">
       <PageHeader title="About Us" subTitle="" />
