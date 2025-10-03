@@ -231,7 +231,6 @@ function ContactPage() {
                 </button>
               </div>
             </div>
-
             <div>
               {activeTab === "feedback" && (
                 <Form {...feedbackForm}>
