@@ -13,6 +13,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { FaWhatsapp } from "react-icons/fa";
 import { Rating } from "@/components/common/Rating";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -203,37 +204,28 @@ function ContactPage() {
 
             {/* Tabs */}
             <div className="flex mb-6">
-              <div className="inline-flex w-full rounded-lg border bg-slate-50 px-6 py-2 justify-between items-center">
+              <div className="inline-flex w-full rounded-2xl backdrop-blur-lg bg-[#6a1b9a]/20 border border-[#6a1b9a]/30 shadow-lg p-2 justify-between items-center">
                 <button
                   role="tab"
                   onClick={() => setActiveTab("feedback")}
-                  className={`px-3 py-1 rounded-md font-normal text-sm transition ${
-                    activeTab === "feedback"
-                      ? "bg-secondary text-white"
-                      : "text-slate-800 hover:bg-slate-100"
-                  }`}
+                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 
+        ${activeTab === "feedback" ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md" : "text-slate-800 hover:bg-[#6a1b9a]/30 hover:text-white"}`}
                 >
                   Feedback
                 </button>
                 <button
                   role="tab"
                   onClick={() => setActiveTab("report")}
-                  className={`px-3 py-1 rounded-md font-normal text-sm transition ${
-                    activeTab === "report"
-                      ? "bg-secondary text-white"
-                      : "text-slate-800 hover:bg-slate-100"
-                  }`}
+                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300
+        ${activeTab === "report" ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md" : "text-slate-800 hover:bg-[#6a1b9a]/30 hover:text-white"}`}
                 >
                   Report an Issue
                 </button>
                 <button
                   role="tab"
                   onClick={() => setActiveTab("Join Team")}
-                  className={`px-3 py-1 rounded-md font-normal text-sm transition ${
-                    activeTab === "Join Team"
-                      ? "bg-secondary text-white"
-                      : "text-slate-800 hover:bg-slate-100"
-                  }`}
+                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300
+        ${activeTab === "Join Team" ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md" : "text-slate-800 hover:bg-[#6a1b9a]/30 hover:text-white"}`}
                 >
                   Join Team
                 </button>
@@ -288,6 +280,7 @@ function ContactPage() {
                     />
                     <div className="flex items-center">
                       <Button
+                        className="bg-card/70 border border-card/70 text-white hover:bg-card/90 transition-all duration-300"
                         type="submit"
                         disabled={feedbackForm.formState.isSubmitting}
                       >
@@ -377,6 +370,7 @@ function ContactPage() {
                     <div className="flex items-center">
                       <Button
                         type="submit"
+                        className="bg-card/70 border border-card/70 text-white hover:bg-card/90 transition-all duration-300"
                         disabled={reportForm.formState.isSubmitting}
                       >
                         {reportForm.formState.isSubmitting
@@ -403,8 +397,9 @@ function ContactPage() {
                     href="https://chat.whatsapp.com/FlZQTmQBK9EKuUSHg3JvPB?mode=ems_copy_t"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-block bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-md transition"
+                    className="inline-block font-semibold px-6 py-3 rounded-md  bg-card/70 border border-card/70 text-white hover:bg-card/90 transition-all duration-300"
                   >
+                    <FaWhatsapp className="inline mr-2 text-lg" />
                     Join WhatsApp Group
                   </a>
                 </div>

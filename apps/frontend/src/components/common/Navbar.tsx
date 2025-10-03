@@ -12,7 +12,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { LogOut, Menu, X } from "lucide-react";
-import { clearUserInfo, getUserInfo } from "@/lib/auth";
+import { clearUserInfo, getUserInfo, setUserInfo } from "@/lib/auth";
 import {
   Menubar,
   MenubarContent,
@@ -25,14 +25,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { useApiMutation } from "@/hook/useApi";
 import { logoutSchema, type ApiError, type LogoutResponse } from "@/types/api";
 import { toast } from "sonner";
-
+import { Route } from "@/routes";
 function Navbar() {
   // *********** All States ***********
+  const { oauth } = Route.useSearch();
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const router = useRouter();
   const currentPath = router.state.location.pathname;
-  const user = getUserInfo();
+  const [user, setUser] = useState(getUserInfo());
 
   // *********** Effects ***********
   useEffect(() => {
@@ -43,6 +44,50 @@ function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    if (!oauth || getUserInfo()) return;
+    const fetchUser = async () => {
+      try {
+        const url = `${import.meta.env.VITE_API_BASE_URL}/auth/me`;
+        const response = await fetch(url, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        });
+
+        if (!response.ok) {
+          const error: ApiError = {
+            message: `Request failed with status ${response.status}`,
+            status: response.status,
+          };
+
+          try {
+            error.details = await response.json();
+          } catch {
+            console.error("Failed to parse error details");
+          }
+          throw error;
+        }
+
+        const data = await response.json();
+        console.log("OAuth user data:", data);
+        setUserInfo({
+          email: data.data.email,
+          role: data.data.role,
+          username: data.data.username,
+        });
+        setUser({
+          email: data.data.email,
+          role: data.data.role,
+          username: data.data.username,
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchUser();
+  }, [oauth]);
   const mutation = useApiMutation<LogoutResponse>(
     {
       endpoint: "/auth/logout",
@@ -53,6 +98,7 @@ function Navbar() {
       onSuccess: (data) => {
         clearUserInfo();
         toast.success(data.message || "Loggedout successfully.");
+        setUser(null);
         router.navigate({ to: "/" });
       },
       onError: (error: ApiError) => {
@@ -142,14 +188,15 @@ function Navbar() {
                         >
                           {item.title}
                         </NavigationMenuTrigger>
-                        <NavigationMenuContent className="p-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl shadow-lg">
+
+                        <NavigationMenuContent className="p-2 !bg-white/50 text-white/90  backdrop-blur-xl border border-white/20 rounded-xl shadow-lg ">
                           <ul className="grid gap-3 w-[250px]">
                             {item.children.map((sub) => (
                               <li key={sub.href}>
                                 <NavigationMenuLink asChild>
                                   <Link
                                     to={sub.href}
-                                    className="bg-white/10 text-white block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-white hover:text-black"
+                                    className="bg-white/10 text-white  space-y-1 rounded-md p-1  transition-colors hover:bg-white/50 hover:text-gray-700"
                                   >
                                     <div className="text-sm font-medium">
                                       {sub.title}

@@ -31,6 +31,8 @@ function LoginPage() {
   // ********** Hooks *************
   const form = useForm<loginTypes>({
     resolver: zodResolver(LoginFormSchema),
+    mode: "onChange",
+    reValidateMode: "onChange",
     defaultValues: {
       email: "",
       password: "",
@@ -170,14 +172,20 @@ function LoginPage() {
                   onSubmit={form.handleSubmit(onSubmit)}
                   className="space-y-3"
                 >
-                  <Input
-                    type="text"
-                    variant="custom"
-                    placeholder="Email"
-                    {...form.register("email")}
-                    className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
-                  />
-
+                  <div>
+                    <Input
+                      type="text"
+                      variant="custom"
+                      placeholder="Email"
+                      {...form.register("email")}
+                      className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
+                    />
+                    {form.formState.errors.email && (
+                      <p className="text-red-400 text-sm mt-1">
+                        {form.formState.errors.email.message}
+                      </p>
+                    )}
+                  </div>
                   <div>
                     <Input
                       type={showPassword ? "text" : "password"}
@@ -186,19 +194,24 @@ function LoginPage() {
                       {...form.register("password")}
                       className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
                     />
-                    <div className=" relative bottom-8 left-11/12 h-1 cursor-pointer">
+                    <div className="relative bottom-8 left-11/12 h-1 cursor-pointer">
                       {showPassword ? (
-                        <Eye className=" w-3" onClick={showHidePassword} />
+                        <Eye className="w-3" onClick={showHidePassword} />
                       ) : (
                         <EyeClosed className="w-3" onClick={showHidePassword} />
                       )}
                     </div>
+                    {form.formState.errors.password && (
+                      <p className="text-red-400 text-sm mt-1">
+                        {form.formState.errors.password.message}
+                      </p>
+                    )}
                   </div>
                   <Button
                     type="submit"
                     className="px-6 py-2 w-full rounded-md font-semibold 
-             bg-white text-gray-800 shadow-md 
-             hover:bg-gray-200 transition"
+                   bg-white text-gray-800 shadow-md 
+                   hover:bg-gray-200 transition"
                     disabled={mutation.isPending}
                   >
                     {mutation.isPending ? "Logging in..." : "Continue"}
