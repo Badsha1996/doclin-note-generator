@@ -14,7 +14,9 @@ export const Route = createFileRoute("/config/")({
   },
   component: ConfigPage,
   pendingComponent: () => (
-    <GlassmorphicLoader message="Loading configuration..." />
+    <div className="w-full h-screen">
+      <GlassmorphicLoader message="Loading..." />
+    </div>
   ),
   pendingMs: 500,
   pendingMinMs: 200,

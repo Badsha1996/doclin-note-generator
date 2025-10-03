@@ -12,7 +12,9 @@ export const Route = createFileRoute("/login/")({
   },
   component: LoginPage,
   pendingComponent: () => (
-    <GlassmorphicLoader message="Loading Login..." />
+    <div className="w-full h-screen">
+      <GlassmorphicLoader message="Loading..." />
+    </div>
   ),
   pendingMs: 500,
   pendingMinMs: 200,
