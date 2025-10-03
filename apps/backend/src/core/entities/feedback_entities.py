@@ -17,3 +17,12 @@ class AddFeedback(BaseModel):
     user_id:UUID
     rating:float
     feedback_text:Optional[str]=None
+class FeedbackResponse(BaseModel):
+    id:UUID
+    user_id:UUID
+    rating:float
+    feedback_text:Optional[str]
+    created_at:datetime
+    username:Optional[str]=None
+    class Config:
+        from_attributes = True

@@ -25,7 +25,8 @@ class Settings(BaseSettings):
     META_USER_URL:str
 
     EMAIL:str
-    GOOGLE_APP_PASSWORD:str
+    # GOOGLE_APP_PASSWORD:str
+    MAILERSEND_API_KEY: str
     SUPER_ADMIN_EMAIL:str
     MAX_COUNT_FOR_PREVILEGED:int
     MAX_COUNT_FOR_USER:int 
@@ -33,8 +34,10 @@ class Settings(BaseSettings):
     FRONTEND_DOMAIN:str
     BACKEND_DOMAIN:str
     FRONTEND_URL:str
+    BACKEND_URL:str
 
     LLM_MODELS : list[str]
+
     
     LLM_PROVIDER: str
     OLLAMA_URL: str
