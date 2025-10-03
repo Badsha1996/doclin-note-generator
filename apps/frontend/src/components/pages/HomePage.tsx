@@ -11,9 +11,8 @@ import {
   Star,
   Play,
 } from "lucide-react";
-import { getUserInfo, setUserInfo } from "@/lib/auth";
-import type { ApiError, FeedbackListResponse } from "@/types/api";
-import { Route } from "@/routes";
+import type { FeedbackListResponse } from "@/types/api";
+
 import { useNavigate } from "@tanstack/react-router";
 import { useApi } from "@/hook/useApi";
 import { motion, AnimatePresence } from "framer-motion";
@@ -173,46 +172,6 @@ function HomePage() {
       };
     }
   }, [pageLoading]);
-
-  useEffect(() => {
-    if (!oauth || getUserInfo()) return;
-    const fetchUser = async () => {
-      try {
-        const url = `${import.meta.env.VITE_API_BASE_URL}/auth/me`;
-        const response = await fetch(url, {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-        });
-
-        if (!response.ok) {
-          const error: ApiError = {
-            message: `Request failed with status ${response.status}`,
-            status: response.status,
-          };
-
-          try {
-            error.details = await response.json();
-          } catch {
-            console.error("Failed to parse error details");
-          }
-          throw error;
-        }
-
-        const data = await response.json();
-
-        setUserInfo({
-          email: data.data.email,
-          role: data.data.role,
-          username: data.data.username,
-        });
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    fetchUser();
-  }, [oauth]);
 
   const AnimatedCounter: React.FC<{
     end: number;
