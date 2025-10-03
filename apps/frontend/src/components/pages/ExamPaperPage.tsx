@@ -2,6 +2,9 @@ import PageHeader from "@/components/common/PageHeader";
 import { useApi } from "@/hook/useApi";
 import { useLocation } from "@tanstack/react-router";
 import { useMemo, useRef } from "react";
+import { Button } from "../ui/button";
+import GlassDropdown from "../common/GlassDropdown";
+import GlassmorphicLoader from "../common/GlassLoader";
 
 const ExamPaperPage = () => {
   const location = useLocation();
@@ -221,18 +224,10 @@ const ExamPaperPage = () => {
   const SimpleLoader = () => (
     <div className="flex items-center justify-center min-h-screen px-4">
       <div className="text-center p-8">
-        <div className="relative mb-6">
-          <div className="w-16 h-16 border-4 border-gray-200 rounded-full animate-spin mx-auto"></div>
-          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 h-16 border-4 border-transparent border-t-blue-600 rounded-full animate-spin"></div>
-        </div>
-        <h3 className="text-lg font-medium text-gray-800 mb-2">
-          {prevShow ? "Loading Exam Paper..." : "Generating Your Exam Paper"}
-        </h3>
-        <p className="text-gray-600">
-          {prevShow
-            ? "Please wait while we fetch your paper..."
-            : "Please wait while we create your assessment..."}
-        </p>
+        <GlassmorphicLoader
+          size="lg"
+          message="Loading Exam Paper for ICSE..."
+        />
       </div>
     </div>
   );
@@ -451,30 +446,38 @@ const ExamPaperPage = () => {
       <div className="pt-24 pb-12">
         <PageHeader
           title={prevShow ? "Exam Paper Loaded" : "Exam Paper Generated"}
-          subTitle="Preview below or download in .pdf / .doc format"
+          subTitle="Preview below or download in Any format of your choising"
         />
 
         {/* Download buttons */}
         <div className="no-print max-w-4xl mx-auto mb-6 px-4">
-          <div className="flex gap-4 justify-center">
-            <button
+          <div className="flex gap-4 justify-center items-center">
+            <Button
+              className="mt-2"
+              variant={"glass"}
               onClick={() => window.print()}
-              className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition-colors"
             >
               Print Paper
-            </button>
-            <button
-              onClick={() => alert("PDF download would be implemented here")}
-              className="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700 transition-colors"
+            </Button>
+            <Button
+              className="mt-2"
+              variant={"glass"}
+              onClick={() => window.print()}
             >
-              Download PDF
-            </button>
-            <button
-              onClick={() => alert("DOC download would be implemented here")}
-              className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition-colors"
-            >
-              Download DOC
-            </button>
+              Download
+            </Button>
+            <GlassDropdown
+              options={[
+                { label: "Select type", value: "Select" },
+                { label: "Doc", value: "doc" },
+                { label: "PDF", value: "pdf" },
+              ]}
+              label={""}
+              value={"Select"}
+              onChange={function (): void {
+                throw new Error("Function not implemented.");
+              }}
+            />
           </div>
         </div>
 

@@ -1,7 +1,9 @@
-import LoginPage from "@/components/pages/LoginPage";
+import GlassmorphicLoader from "@/components/common/GlassLoader";
 import { getUserInfo } from "@/lib/auth";
 import { createFileRoute, redirect } from "@tanstack/react-router";
+import { lazy } from "react";
 
+const LoginPage = lazy(() => import("@/components/pages/LoginPage"));
 export const Route = createFileRoute("/login/")({
   beforeLoad: () => {
     if (getUserInfo()) {
@@ -9,4 +11,11 @@ export const Route = createFileRoute("/login/")({
     }
   },
   component: LoginPage,
+  pendingComponent: () => (
+    <div className="w-full h-screen flex items-center justify-center">
+      <GlassmorphicLoader message="Loading..." />
+    </div>
+  ),
+  pendingMs: 500,
+  pendingMinMs: 200,
 });

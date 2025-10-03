@@ -1,5 +1,8 @@
-import Home from "@/components/pages/HomePage";
+import GlassmorphicLoader from "@/components/common/GlassLoader";
 import { createFileRoute } from "@tanstack/react-router";
+import { lazy } from "react";
+
+const HomePage = lazy(() => import("@/components/pages/HomePage"));
 
 export const Route = createFileRoute("/")({
   validateSearch: (search: Record<string, unknown> | null = null) => {
@@ -8,5 +11,12 @@ export const Route = createFileRoute("/")({
       oauth: search?.oauth?.toString() || undefined,
     };
   },
-  component: Home,
+  component: HomePage,
+  pendingComponent: () => (
+    <div className="w-full h-screen flex items-center justify-center">
+      <GlassmorphicLoader message="Loading..." />
+    </div>
+  ),
+  pendingMs: 500,
+  pendingMinMs: 200,
 });

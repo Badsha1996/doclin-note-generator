@@ -1,110 +1,222 @@
-import { Apple } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import PageHeader from "@/components/common/PageHeader";
+import { VscGithubInverted } from "react-icons/vsc";
+import { HiOutlineMail } from "react-icons/hi";
+import { FaLinkedin } from "react-icons/fa";
+import { motion } from "framer-motion";
+import type { LeadContributorInfo } from "@/types/type";
 
 function AboutPage() {
+  const leadInfos: LeadContributorInfo[] = [
+    {
+      id: 1,
+      name: "Anirudha Pradhan",
+      role: "Lead Fullstack Engineer",
+      description:
+        "Fullstack engineer with 1+ years of experience building scalable applications and contributing to diverse projects.",
+      avatar: "/images/anirudha.webp",
+      linkedin: "https://www.linkedin.com/in/anirudha-pradhan-346388240/",
+      github: "https://github.com/Anirudha0702",
+      email: "mailto:anirudhapradhan403@gmail.com",
+    },
+    {
+      id: 2,
+      name: "Badsha Laskar",
+      role: "Project Owner & Technical Lead",
+      description:
+        "Technical leader with 4 years of experience in developing, managing, and delivering production-ready applications.",
+      avatar: "/images/badsha.jpg",
+      linkedin: "https://www.linkedin.com/in/badsha-laskar/",
+      github: "https://github.com/Badsha1996",
+      email: "mailto:badshalaskar0@gmail.com",
+    },
+    {
+      id: 3,
+      name: "Sanya Garg",
+      role: "Lead Frontend Engineer",
+      description:
+        "Frontend engineer with 3 years of experience in modern web technologies, crafting intuitive and high-performance user interfaces.",
+      avatar: "/images/sanya.jpg",
+      linkedin: "https://www.linkedin.com/in/sanya-garg-7a45bb195/",
+      github: "https://github.com/sanyagarg15",
+      email: "mailto:sanyagarg1511@gmail.com",
+    },
+  ];
+
+  const contributors: LeadContributorInfo[] = [
+    {
+      id: 1,
+      name: "Atul Bhartiya",
+      role: "Junior Frontend Engineer",
+      description:
+        "Enthusiastic frontend developer with a passion for building user-friendly interfaces.",
+      avatar: "/images/atul.jpg",
+      linkedin: "https://www.linkedin.com/in/atul-bhartiya-743838359/",
+      github: "https://github.com/atul96anand",
+      email: "mailto:anandatul509@gmail.com",
+    },
+  ];
+
   return (
-    <div
-      className=" flex flex-col justify-center items-center
-      text-white/80 
-      "
-    >
-      <div
-        className="h-[30svh] w-11/12 items-center flex relative top-24
-         bg-[rgba(0,0,0,0.4)]"
-      >
-        <div className="relative bottom-9 p-3">
-          <div className="font-extralight text-xs">WHAT WE OFFER</div>
-          <div className=" font-semibold text-2xl ">Our Services</div>
-        </div>
-      </div>
-      <div
-        className=" relative  w-3/4 flex items-center flex-col
-        bg-white/20 gap-y-4 p-4 mb-4 "
-      >
-        <div className="grid grid-cols-1 lg:grid-cols-[25%_65%] gap-x-[10%]  pt-4 mb-10 w-9/12 px-5">
-          <div className=" p-2">
-            <h3 className="text-xs">our services</h3>
-            <h1 className="font-bold">take our services</h1>
-          </div>
-          <p className="text-sm p-2 break-words">
-            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Similique
-            ipsum repellendus officia minima aliquid culpa sint dolorum,
-            perspiciatis, optio reiciendis ratione fuga. Illum deserunt suscipit
-            aperiam dolorem alias deleniti perspiciatis. Lorem ipsum dolor, sit
-            amet consectetur adipisicing elit. Delectus impedit amet tempora
-            nostrum nulla. Numquam similique vero veritatis officiis ab ipsum
-            expedita earum, in enim saepe nihil non necessitatibus magni! Lorem
-            ipsum dolor sit amet consectetur adipisicing elit.
-          </p>
-        </div>
-
-        <div
-          className=" w-9/12 grid [&>*]:grid   lg:grid-cols-3
-          place-items-center md:grid-cols-2 [&>*]:place-items-center
-           [&>*]:bg-white/30 [&>*]:h-65 [&>*]:w-5/6 gap-y-16
-          [&>*]:shadow-md [&>*]:shadow-white/45 "
-        >
-          <div className=" ">
-            <image>
-              <Apple className="w-20 h-20" />
-            </image>
-            <div className="font-semibold">gfhgh</div>
-            <p className="p-4 text-xs">
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit. Soluta,
-              laborum. Aliquam dolor ducimus quo
-            </p>
-          </div>
-          <div className=" ">
-            <image>
-              <Apple className="w-20 h-20" />
-            </image>
-            <div className="font-semibold">gfhgh</div>
-            <p className="p-4 text-xs">
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit. Soluta,
-              laborum. Aliquam dolor ducimus quo
-            </p>
-          </div>
-          <div className="  ">
-            <image>
-              <Apple className="w-20 h-20" />
-            </image>
-            <div className="font-semibold">gfhgh</div>
-            <p className="p-4 text-xs">
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit. Soluta,
-              laborum. Aliquam dolor ducimus quo
-            </p>
-          </div>
-          <div className="  ">
-            <image>
-              <Apple className="w-20 h-20" />
-            </image>
-            <div className="font-semibold">gfhgh</div>
-            <p className="p-4 text-xs">
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit. Soluta,
-              laborum. Aliquam dolor ducimus quo
-            </p>
-          </div>
-          <div className="  ">
-            <image>
-              <Apple className="w-20 h-20" />
-            </image>
-            <div className="font-semibold">gfhgh</div>
-
-            <p className="p-4 text-xs">
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit. Soluta,
-              laborum. Aliquam dolor ducimus quo
-            </p>
-          </div>
-          <div className=" ">
-            <image>
-              <Apple className="w-20 h-20" />
-            </image>
-            <div className="font-semibold">gfhgh</div>
-            <p className="p-4 text-xs">
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit. Soluta,
-              laborum. Aliquam dolor ducimus quo
-            </p>
-          </div>
-        </div>
+    <div className="space-y-8 mt-24">
+      <PageHeader title="About Us" subTitle="" />
+      <div className="max-w-6xl mx-auto">
+        <Card className="bg-card/50 backdrop-blur-sm border-border shadow-xl">
+          <CardContent className="space-y-12">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {leadInfos.map((info) => (
+                <motion.div
+                  key={info.id}
+                  initial={{ y: 0 }}
+                  whileHover={{ scale: 1.01, y: -8 }}
+                  className="rounded-2xl bg-white/10 backdrop-blur-md border-2 border-transparent bg-clip-padding shadow-lg py-5 transition-all"
+                >
+                  <CardContent className="p-6">
+                    <div className="flex flex-col items-center text-center space-y-4">
+                      <Avatar className="w-24 h-24">
+                        <AvatarImage src={info.avatar} alt={info.name} />
+                        <AvatarFallback className="text-xl">
+                          {info.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
+                        </AvatarFallback>
+                      </Avatar>
+                      <h3 className="text-xl font-semibold">{info.name}</h3>
+                      <h4 className="text-lg font-medium text-white">
+                        {info.role}
+                      </h4>
+                      <p className="text-sm font-normal text-white">
+                        {info.description}
+                      </p>
+                      <div className="flex space-x-4 pt-4">
+                        {info.linkedin && (
+                          <a
+                            href={info.linkedin}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label="LinkedIn"
+                          >
+                            <FaLinkedin size={20} />
+                          </a>
+                        )}
+                        {info.github && (
+                          <a
+                            href={info.github}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label="GitHub"
+                          >
+                            <VscGithubInverted size={20} />
+                          </a>
+                        )}
+                        {info.email && (
+                          <a href={info.email} aria-label="Email">
+                            <HiOutlineMail size={21} />
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </motion.div>
+              ))}
+            </div>
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold text-center">
+                Our Contributors
+              </h2>
+              <Carousel
+                opts={{
+                  align: "start",
+                  loop: true,
+                }}
+                className="w-full max-w-6xl mx-auto"
+              >
+                <CarouselContent className="justify-center">
+                  {contributors.map((contributor) => (
+                    <CarouselItem
+                      key={contributor.id}
+                      className="basis-[260px] md:basis-[310px] lg:basis-[350px]"
+                    >
+                      <motion.div
+                        initial={{ y: 0 }}
+                        whileHover={{ scale: 1.01, y: -8 }}
+                        className="rounded-2xl bg-white/10 backdrop-blur-md border-2 border-transparent bg-clip-padding shadow-lg py-8 transition-all mt-10"
+                      >
+                        <CardContent className="flex flex-col items-center space-y-4">
+                          <Avatar className="w-24 h-24 border-2 border-primary/20">
+                            <AvatarImage
+                              src={contributor.avatar}
+                              alt={contributor.name}
+                            />
+                            <AvatarFallback className="text-xl">
+                              {contributor.name
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="text-center space-y-4">
+                            <h3 className="text-xl font-semibold">
+                              {contributor.name}
+                            </h3>
+                            <h4 className="text-lg font-medium text-white">
+                              {contributor.role}
+                            </h4>
+                            <p className="text-sm font-normal text-white">
+                              {contributor.description}
+                            </p>
+                          </div>
+                          <div className="flex space-x-4 pt-2">
+                            {contributor.linkedin && (
+                              <a
+                                href={contributor.linkedin}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label="LinkedIn"
+                              >
+                                <FaLinkedin size={20} />
+                              </a>
+                            )}
+                            {contributor.github && (
+                              <a
+                                href={contributor.github}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label="GitHub"
+                              >
+                                <VscGithubInverted size={20} />
+                              </a>
+                            )}
+                            {contributor.email && (
+                              <a href={contributor.email} aria-label="Email">
+                                <HiOutlineMail size={21} />
+                              </a>
+                            )}
+                          </div>
+                        </CardContent>
+                      </motion.div>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                {contributors.length > 3 && (
+                  <>
+                    <CarouselPrevious className="absolute left-0 -translate-y-1/2 top-1/2" />
+                    <CarouselNext className="absolute right-0 -translate-y-1/2 top-1/2" />
+                  </>
+                )}
+              </Carousel>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

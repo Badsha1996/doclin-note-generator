@@ -1,7 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { X, BookOpen, Menu, ChevronDown } from "lucide-react";
 import { useState, useEffect } from "react";
-
 import { Input } from "../ui/input";
 import type { Dispatch, SetStateAction } from "react";
 
@@ -14,6 +13,7 @@ import {
   subjectResponseSchema,
 } from "@/types/api";
 import { useNavigate } from "@tanstack/react-router";
+import GlassmorphicLoader from "./GlassLoader";
 
 // ************** Props ********************
 interface SidebarProps {
@@ -171,6 +171,22 @@ function Sidebar({
     />
   );
 
+  // *********** Combined API Loading/Error State ***********
+  {
+    isBoardsLoading ? (
+      <GlassmorphicLoader size="sm" message="Loading boards..." />
+    ) : isSubjectsLoading ? (
+      <GlassmorphicLoader size="sm" message="Loading subjects..." />
+    ) : (
+      <p>Something went wrong</p>
+    );
+  }
+  const isApiLoading = isBoardsLoading || isSubjectsLoading;
+  {
+    isApiLoading && (
+      <GlassmorphicLoader fullScreen message="Fetching data..." />
+    );
+  }
   return (
     <>
       {/* 🔑 Hamburger button for mobile */}

@@ -283,7 +283,6 @@ export function Scene() {
     <>
       <PerspectiveCamera makeDefault position={[0, 0, 8]} />
       <OrbitControls enableZoom={false} enablePan={false} />
-
       {/* Lighting */}
       <ambientLight intensity={0.2} />
       <directionalLight position={[10, 10, 5]} intensity={1} />

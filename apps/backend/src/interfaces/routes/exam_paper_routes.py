@@ -136,4 +136,3 @@ async def get_prev_exam_paper(
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-

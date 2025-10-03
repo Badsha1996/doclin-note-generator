@@ -1,9 +1,11 @@
 import { Link, useRouter } from "@tanstack/react-router";
 import {
   NavigationMenu,
+  NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
+  NavigationMenuTrigger,
 } from "../ui/navigation-menu";
 import { NAVBAR_MENU } from "@/utils/Constants";
 import { motion, AnimatePresence } from "framer-motion";
@@ -105,10 +107,13 @@ function Navbar() {
       },
     }
   );
+
   const closeMobileMenu = () => setIsOpen(false);
+
   function handleLogout() {
     mutation.mutate(undefined);
   }
+
   return (
     <>
       <AnimatePresence>
@@ -123,7 +128,7 @@ function Navbar() {
         )}
       </AnimatePresence>
 
-      <NavigationMenu className="fixed top-0 left-0 right-0 z-50">
+      <div className="fixed top-0 left-0 right-0 z-50">
         <motion.div
           initial={{ y: -100 }}
           animate={{ y: 0 }}
@@ -158,45 +163,92 @@ function Navbar() {
           </motion.div>
 
           {/***************** Desktop Navigation *****************/}
-          <NavigationMenuList className="hidden lg:flex flex-1 justify-center gap-8">
-            {NAVBAR_MENU.map((item, index) => {
-              const isActive =
-                item.href === currentPath ||
-                (item.href === "" && currentPath === "/");
-              return (
-                <NavigationMenuItem key={item.href}>
-                  <NavigationMenuLink asChild>
-                    <motion.div
-                      initial={{ opacity: 0, y: -20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      whileHover={{ y: -2 }}
-                    >
-                      <Link
-                        to={item.href}
-                        className={`relative text-white/90 hover:text-white transition-all duration-300 px-4 py-2 rounded-lg group ${
-                          isActive ? "bg-white/20 font-bold shadow" : ""
-                        }`}
-                      >
-                        <span className="relative z-10">{item.title}</span>
+          <NavigationMenu
+            className="hidden lg:flex flex-1 justify-center"
+            viewport={false}
+          >
+            <NavigationMenuList className="gap-8">
+              {NAVBAR_MENU.map((item, index) => {
+                const isActive =
+                  item.href === currentPath ||
+                  (item.href === "" && currentPath === "/");
+                const isDisabled = item.enabled === false;
+                return (
+                  <NavigationMenuItem key={item.href}>
+                    {item.children ? (
+                      <>
+                        <NavigationMenuTrigger
+                          className={`relative px-4 py-2 rounded-lg transition-all bg-transparent hover:bg-transparent  focus:bg-transparent focus-within:bg-transparent focus-visible:bg-transparent data-[state=open]:bg-white/20 duration-300 ${
+                            isActive ? "bg-white/20 font-bold shadow" : ""
+                          } ${
+                            isDisabled
+                              ? "pointer-events-none text-gray-400"
+                              : "text-white/90 hover:text-white"
+                          }`}
+                        >
+                          {item.title}
+                        </NavigationMenuTrigger>
+                        <NavigationMenuContent className="p-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl shadow-lg">
+                          <ul className="grid gap-3 w-[250px]">
+                            {item.children.map((sub) => (
+                              <li key={sub.href}>
+                                <NavigationMenuLink asChild>
+                                  <Link
+                                    to={sub.href}
+                                    className="bg-white/10 text-white block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-white hover:text-black"
+                                  >
+                                    <div className="text-sm font-medium">
+                                      {sub.title}
+                                    </div>
+                                  </Link>
+                                </NavigationMenuLink>
+                              </li>
+                            ))}
+                          </ul>
+                        </NavigationMenuContent>
+                      </>
+                    ) : (
+                      <NavigationMenuLink asChild>
                         <motion.div
-                          className="absolute inset-0 bg-white/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                          whileHover={{ scale: 1.05 }}
-                        />
-                        <motion.div className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-purple-400 to-pink-400 group-hover:w-full group-hover:left-0 transition-all duration-300" />
-                      </Link>
-                    </motion.div>
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
-              );
-            })}
-          </NavigationMenuList>
+                          initial={{ opacity: 0, y: -20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          whileHover={{ y: isDisabled ? 0 : -2 }}
+                        >
+                          <Link
+                            to={isDisabled ? undefined : item.href}
+                            className={`relative px-4 py-2 rounded-lg transition-all duration-300 ${
+                              isActive ? "bg-white/20 font-bold shadow" : ""
+                            } ${
+                              isDisabled
+                                ? "pointer-events-none text-gray-400"
+                                : "text-white/90 hover:text-white"
+                            }`}
+                            tabIndex={isDisabled ? -1 : 0}
+                            aria-disabled={isDisabled}
+                          >
+                            <span className="relative z-10">{item.title}</span>
+                            {!isDisabled && (
+                              <motion.div
+                                className="absolute inset-0 bg-white/20 rounded-lg opacity-0 hover:opacity-100 transition-opacity duration-300"
+                                whileHover={{ scale: 1.05 }}
+                              />
+                            )}
+                          </Link>
+                        </motion.div>
+                      </NavigationMenuLink>
+                    )}
+                  </NavigationMenuItem>
+                );
+              })}
+            </NavigationMenuList>
+          </NavigationMenu>
 
           <div className="hidden lg:flex items-center gap-3">
             {user ? (
               <Menubar className="bg-transparent border-none">
                 <MenubarMenu>
-                  <MenubarTrigger className="bg-transparent">
+                  <MenubarTrigger className="bg-transparent hover:bg-white/10 cursor-pointer">
                     <Avatar className="rounded-full">
                       <AvatarImage
                         src="https://github.com/shadcn.png"
@@ -205,17 +257,19 @@ function Navbar() {
                       <AvatarFallback>CN</AvatarFallback>
                     </Avatar>
                   </MenubarTrigger>
-                  <MenubarContent className="mr-4 text-white/90 hover:text-white bg-white/50 backdrop-blur-md border border-white/20 shadow-lg">
-                    <MenubarItem inset>{user.username}</MenubarItem>
+                  <MenubarContent className="mr-4 text-white/90 bg-white/50 backdrop-blur-md border border-white/20 shadow-lg">
+                    <MenubarItem inset className="text-white">
+                      {user.username}
+                    </MenubarItem>
                     <MenubarSeparator />
                     <MenubarItem
                       inset
                       onClick={handleLogout}
-                      className="cursor-pointer"
+                      className="cursor-pointer text-white hover:text-white hover:bg-white/20"
                     >
                       <div className="flex justify-between items-center w-full">
                         <span>Logout</span>
-                        <LogOut color="white" />
+                        <LogOut className="ml-2" size={16} />
                       </div>
                     </MenubarItem>
                   </MenubarContent>
@@ -292,22 +346,31 @@ function Navbar() {
             >
               <div className="flex flex-col h-full pt-24 px-6">
                 <nav className="flex flex-col gap-2 mb-8">
-                  {NAVBAR_MENU.map((item, index) => (
-                    <motion.div
-                      key={item.href}
-                      initial={{ opacity: 0, x: 50 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                    >
-                      <Link
-                        to={item.href}
-                        onClick={closeMobileMenu}
-                        className="block text-white text-lg font-medium py-3 px-4 rounded-xl hover:bg-white/10 transition-all duration-300 border border-transparent hover:border-white/20"
+                  {NAVBAR_MENU.map((item, index) => {
+                    const isDisabled = item.enabled === false;
+                    return (
+                      <motion.div
+                        key={item.href}
+                        initial={{ opacity: 0, x: 50 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.1 }}
                       >
-                        {item.title}
-                      </Link>
-                    </motion.div>
-                  ))}
+                        <Link
+                          to={isDisabled ? undefined : item.href}
+                          onClick={isDisabled ? undefined : closeMobileMenu}
+                          className={`block py-3 px-4 rounded-xl font-medium transition-all duration-300 border border-transparent ${
+                            isDisabled
+                              ? "pointer-events-none text-gray-400 bg-gray-200/30"
+                              : "text-white text-lg hover:bg-white/10 hover:border-white/20"
+                          }`}
+                          tabIndex={isDisabled ? -1 : 0}
+                          aria-disabled={isDisabled}
+                        >
+                          {item.title}
+                        </Link>
+                      </motion.div>
+                    );
+                  })}
                 </nav>
                 <motion.div
                   className="flex flex-col gap-3 mt-auto mb-8"
@@ -316,7 +379,7 @@ function Navbar() {
                   transition={{ delay: 0.3 }}
                 >
                   {user ? (
-                    <div className="text-white/90 hover:text-white bg-white/20 backdrop-blur-md border border-white/20 shadow-lg p-4 rounded-xl">
+                    <div className="text-white/90 bg-white/20 backdrop-blur-md border border-white/20 shadow-lg p-4 rounded-xl">
                       <div className="flex justify-between items-center mb-2">
                         <Avatar className="rounded-full">
                           <AvatarImage
@@ -327,11 +390,14 @@ function Navbar() {
                         </Avatar>
                         <LogOut
                           onClick={handleLogout}
-                          className="cursor-pointer"
+                          className="cursor-pointer text-white"
+                          size={20}
                         />
                       </div>
-                      <p className=" text-white/80">{user.username}</p>
-                      <p className="font-medium text-sm">{user.email}</p>
+                      <p className="text-white/80">{user.username}</p>
+                      <p className="font-medium text-sm text-white">
+                        {user.email}
+                      </p>
                     </div>
                   ) : (
                     <>
@@ -353,7 +419,7 @@ function Navbar() {
             </motion.div>
           )}
         </AnimatePresence>
-      </NavigationMenu>
+      </div>
     </>
   );
 }

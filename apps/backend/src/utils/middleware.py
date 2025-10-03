@@ -2,6 +2,9 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
+from datetime import datetime, timedelta,timezone
+from jose import jwt, JWTError, ExpiredSignatureError
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from datetime import datetime, timedelta, timezone
@@ -27,7 +30,6 @@ class TokenRefreshMiddleware(BaseHTTPMiddleware):
 
         if not access_token and not refresh_token:
             return JSONResponse({"detail": "Unauthorized"}, status_code=401)
-
         if not access_token and refresh_token:
             try:
                 refresh_payload = security.verify_token(refresh_token)

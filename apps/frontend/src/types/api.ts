@@ -285,3 +285,27 @@ export const allUserDataSchema = z.object({
 export const allUserResponseSchema = apiResponseSchema(allUserDataSchema);
 
 export type AllUserResponse = z.infer<typeof allUserResponseSchema>;
+
+export const feedbackItemSchema = z.object({
+  id: z.uuid(),
+  user_id: z.uuid(),
+  rating: z.number(),
+  feedback_text: z.string().nullable(),
+  created_at: z.coerce.date(),
+});
+export const feedbackListResponseSchema = apiResponseSchema(
+  z.object({
+    feedbacks: z.array(feedbackItemSchema),
+  })
+);
+export type FeedbackListResponse = z.infer<typeof feedbackListResponseSchema>;
+// ******Contact Us Types ********
+export const feedbackApiSchema = apiResponseSchema(
+  z.object({
+    feedback: feedbackItemSchema,
+  })
+);
+
+export type FeedbackResponse = z.infer<typeof feedbackApiSchema>;
+
+export const reportDescriptionSchema = z.string().min(10);
