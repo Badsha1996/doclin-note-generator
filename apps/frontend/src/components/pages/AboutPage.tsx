@@ -12,7 +12,17 @@ import { VscGithubInverted } from "react-icons/vsc";
 import { HiOutlineMail } from "react-icons/hi";
 import { FaLinkedin } from "react-icons/fa";
 import { motion } from "framer-motion";
-import type { LeadContributorInfo } from "@/types/type";
+
+interface LeadContributorInfo {
+  id: number;
+  name: string;
+  role: string;
+  description: string;
+  avatar: string;
+  linkedin?: string;
+  github?: string;
+  email?: string;
+}
 
 function AboutPage() {
   const leadInfos: LeadContributorInfo[] = [

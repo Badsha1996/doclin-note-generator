@@ -175,13 +175,4 @@ export const reportFormSchema = z.object({
 });
 
 export type ReportFormValues = z.infer<typeof reportFormSchema>;
-export interface LeadContributorInfo {
-  id: number;
-  name: string;
-  role: string;
-  description: string;
-  avatar: string;
-  linkedin?: string;
-  github?: string;
-  email?: string;
-}
+
