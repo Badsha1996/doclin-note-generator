@@ -14,7 +14,7 @@ export const Route = createFileRoute("/config/")({
   },
   component: ConfigPage,
   pendingComponent: () => (
-    <GlassmorphicLoader message="Loading exam paper..." />
+    <GlassmorphicLoader message="Loading configuration..." />
   ),
   pendingMs: 500,
   pendingMinMs: 200,

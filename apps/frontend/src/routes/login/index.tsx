@@ -12,7 +12,7 @@ export const Route = createFileRoute("/login/")({
   },
   component: LoginPage,
   pendingComponent: () => (
-    <GlassmorphicLoader message="Loading exam paper..." />
+    <GlassmorphicLoader message="Loading Login..." />
   ),
   pendingMs: 500,
   pendingMinMs: 200,
