@@ -270,6 +270,9 @@ function HomePage() {
             <div className="max-w-4xl lg:max-w-2xl xl:max-w-4xl mx-auto lg:mx-0">
               {/***************************** Background: 3D MODEL ************************* */}
               <div className="hidden md:block absolute left-[400px] top-[-200px] inset-0 w-full h-[40%]">
+                {!modelLoaded && (
+                  <GlassmorphicLoader size="md" message="Loading 3D model..." />
+                )}
                 <Suspense
                   fallback={
                     <div className="flex items-center justify-center h-full">
