@@ -12,7 +12,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { LogOut, Menu, X } from "lucide-react";
-import { clearUserInfo, getUserInfo } from "@/lib/auth";
+import { clearUserInfo, getUserInfo, setUserInfo } from "@/lib/auth";
 import {
   Menubar,
   MenubarContent,
@@ -25,14 +25,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { useApiMutation } from "@/hook/useApi";
 import { logoutSchema, type ApiError, type LogoutResponse } from "@/types/api";
 import { toast } from "sonner";
-
+import { Route } from "@/routes";
 function Navbar() {
   // *********** All States ***********
+  const { oauth } = Route.useSearch();
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const router = useRouter();
   const currentPath = router.state.location.pathname;
-  const user = getUserInfo();
+  const [user, setUser] = useState(getUserInfo());
 
   // *********** Effects ***********
   useEffect(() => {
@@ -43,6 +44,50 @@ function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    if (!oauth || getUserInfo()) return;
+    const fetchUser = async () => {
+      try {
+        const url = `${import.meta.env.VITE_API_BASE_URL}/auth/me`;
+        const response = await fetch(url, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        });
+
+        if (!response.ok) {
+          const error: ApiError = {
+            message: `Request failed with status ${response.status}`,
+            status: response.status,
+          };
+
+          try {
+            error.details = await response.json();
+          } catch {
+            console.error("Failed to parse error details");
+          }
+          throw error;
+        }
+
+        const data = await response.json();
+        console.log("OAuth user data:", data);
+        setUserInfo({
+          email: data.data.email,
+          role: data.data.role,
+          username: data.data.username,
+        });
+        setUser({
+          email: data.data.email,
+          role: data.data.role,
+          username: data.data.username,
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchUser();
+  }, [oauth]);
   const mutation = useApiMutation<LogoutResponse>(
     {
       endpoint: "/auth/logout",
@@ -53,6 +98,7 @@ function Navbar() {
       onSuccess: (data) => {
         clearUserInfo();
         toast.success(data.message || "Loggedout successfully.");
+        setUser(null);
         router.navigate({ to: "/" });
       },
       onError: (error: ApiError) => {
