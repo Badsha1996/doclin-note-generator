@@ -5,7 +5,6 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import {
   Form,
   FormControl,
@@ -20,8 +19,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import { useApiMutation } from "@/hook/useApi";
-import { feedbackApiSchema, reportDescriptionSchema } from "@/types/api";
 import {
+  feedbackApiSchema,
+  reportDescriptionSchema,
+  type FeedbackResponse,
+} from "@/types/api";
+import {
+  feedbackFormPayloadSchema,
   reportFormSchema,
   type FeedbackFormValues,
   type ReportFormValues,
@@ -33,12 +37,14 @@ export const Route = createFileRoute("/contact/")({
 
 function RouteComponent() {
   // *************** All States ***************
-  const [activeTab, setActiveTab] = useState<"feedback" | "report">("feedback");
+  const [activeTab, setActiveTab] = useState<
+    "feedback" | "report" | "Join Team"
+  >("feedback");
   const [isFlying, setIsFlying] = useState(false);
 
   const feedbackForm = useForm<FeedbackFormValues>({
-    resolver: zodResolver(feedbackApiSchema),
-    defaultValues: { rating: 3, feedback: "" },
+    resolver: zodResolver(feedbackFormPayloadSchema),
+    defaultValues: { rating: 3, feedback_text: "" },
   });
 
   const reportForm = useForm<ReportFormValues>({
@@ -52,14 +58,12 @@ function RouteComponent() {
   });
 
   //*************** Hook API Calls ***************
-  const feedbackMutation = useApiMutation<
-    { message: string },
-    z.infer<typeof feedbackApiSchema>
-  >(
+  const feedbackMutation = useApiMutation<FeedbackResponse, FeedbackFormValues>(
     {
       endpoint: "/feedback/add",
       method: "POST",
-      payloadSchema: feedbackApiSchema,
+      payloadSchema: feedbackFormPayloadSchema,
+      responseSchema: feedbackApiSchema,
     },
     {
       onSuccess: () => {
@@ -69,7 +73,7 @@ function RouteComponent() {
         setTimeout(() => setIsFlying(false), 1500);
       },
       onError: (error) => {
-        console.error(error);
+        console.error("Feedback submission failed:", error);
         toast.error("Failed to submit feedback. Please try again.");
         setIsFlying(true);
         setTimeout(() => setIsFlying(false), 1500);
@@ -96,10 +100,13 @@ function RouteComponent() {
 
   // ***************  Functions ***************
   function onSubmitFeedback(data: FeedbackFormValues) {
-    feedbackMutation.mutate({
+    const payload = {
       rating: data.rating,
-      feedback_text: data.feedback || undefined,
-    });
+      feedback_text: data.feedback_text?.trim()
+        ? data.feedback_text.trim()
+        : undefined,
+    };
+    feedbackMutation.mutate(payload);
   }
 
   function onSubmitReport(data: ReportFormValues) {
@@ -140,13 +147,13 @@ function RouteComponent() {
       />
       <div className="relative flex justify-center items-center px-6 py-12">
         <div
-          className="w-full max-w-4xl bg-white/70 backdrop-blur-md 
+          className="w-full max-w-4xl backdrop-blur-md 
         shadow-xl grid md:grid-cols-2 rounded-xl
         overflow-hidden"
         >
-          <div className="hidden md:flex flex-col items-center justify-center bg-gradient-to-br from-violet-600 to-fuchsia-400 text-white p-10 relative">
+          <div className="hidden md:flex flex-col items-center justify-center bg-card/60 text-white p-10 relative">
             <h2 className="text-3xl font-bold mb-4">Let’s Connect ✨</h2>
-            <p className="text-white/80 text-center mb-8">
+            <p className="text-white text-center mb-8">
               Got feedback, questions, or just want to say hi? Drop us a message
               anytime!
             </p>
@@ -166,37 +173,49 @@ function RouteComponent() {
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 512 512"
-                className="w-20 h-20 text-white drop-shadow-lg"
+                className="w-20 h-20 text-[#c084fc] drop-shadow-lg"
                 fill="currentColor"
               >
                 <path d="M476.59 3.11 17.73 212.63c-22.58 10.45-21.08 43.14 2.2 51.16l111.9 37.3 45.9 147.7c6.47 20.81 32.77 27.3 48.55 12.15l66.25-65.13 104.8 76.7c19.7 14.42 47.9 4.57 53.6-19.5l62.1-278.48c6.2-27.79-20.7-51.38-47.5-40.86zM195.6 422.63l-33.6-108 190.8-120.84-128.7 149.8-28.5 79.04z" />
               </svg>
             </motion.div>
           </div>
-          <div className="bg-white p-8">
-            <div className="mb-4 flex gap-2 text-xs text-slate-500 justify-end">
+          <div className="bg-white/80 p-6">
+            {/* <div className="mb-4 flex gap-2 text-xs text-slate-500 justify-end">
               {activeTab === "feedback" ? (
                 <>
-                  <span className="text-lg ">💬</span>
-                  <span className="mt-1">Share quick feedback</span>
+                  <span className="text-xl">💬</span>
+                  <span className="mt-1 text-gray-800">
+                    Share quick feedback
+                  </span>
+                </>
+              ) : activeTab === "report" ? (
+                <>
+                  <span className="text-lg">🐞</span>
+                  <span className="mt-1 text-gray-800">
+                    Report a bug or request
+                  </span>
                 </>
               ) : (
                 <>
-                  <span className="text-lg ">🐞</span>
-                  <span className="mt-1">Report a bug or request</span>
+                  <span className="text-lg">📱</span>
+                  <span className="mt-1 text-gray-800">
+                    Join our team on WhatsApp
+                  </span>
                 </>
               )}
-            </div>
+            </div> */}
+
             {/* Tabs */}
             <div className="flex mb-6">
-              <div className="inline-flex max-w-2xl rounded-lg border bg-slate-50 p-2 justify-between items-center">
+              <div className="inline-flex w-full rounded-lg border bg-slate-50 px-6 py-2 justify-between items-center">
                 <button
                   role="tab"
                   onClick={() => setActiveTab("feedback")}
                   className={`px-3 py-1 rounded-md font-normal text-sm transition ${
                     activeTab === "feedback"
-                      ? "bg-violet-600 text-white"
-                      : "text-slate-600 hover:bg-slate-100"
+                      ? "bg-secondary text-white"
+                      : "text-slate-800 hover:bg-slate-100"
                   }`}
                 >
                   Feedback
@@ -206,11 +225,22 @@ function RouteComponent() {
                   onClick={() => setActiveTab("report")}
                   className={`px-3 py-1 rounded-md font-normal text-sm transition ${
                     activeTab === "report"
-                      ? "bg-violet-600 text-white"
-                      : "text-slate-600 hover:bg-slate-100"
+                      ? "bg-secondary text-white"
+                      : "text-slate-800 hover:bg-slate-100"
                   }`}
                 >
                   Report an Issue
+                </button>
+                <button
+                  role="tab"
+                  onClick={() => setActiveTab("Join Team")}
+                  className={`px-3 py-1 rounded-md font-normal text-sm transition ${
+                    activeTab === "Join Team"
+                      ? "bg-secondary text-white"
+                      : "text-slate-800 hover:bg-slate-100"
+                  }`}
+                >
+                  Join Team
                 </button>
               </div>
             </div>
@@ -233,7 +263,7 @@ function RouteComponent() {
                               onChange={(val) => field.onChange(val)}
                             />
                           </FormControl>
-                          <FormDescription>
+                          <FormDescription className="text-slate-600">
                             Please provide your rating.
                           </FormDescription>
                           <FormMessage />
@@ -243,18 +273,18 @@ function RouteComponent() {
 
                     <FormField
                       control={feedbackForm.control}
-                      name="feedback"
+                      name="feedback_text"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Feedback</FormLabel>
                           <FormControl>
                             <Textarea
                               placeholder="Share your experience..."
-                              className="resize-none"
+                              className="resize-none border border-slate-400"
                               {...field}
                             />
                           </FormControl>
-                          <FormDescription>
+                          <FormDescription className="text-slate-600">
                             You can @mention other users and organizations.
                           </FormDescription>
                           <FormMessage />
@@ -270,7 +300,7 @@ function RouteComponent() {
                           ? "Submitting..."
                           : "Submit"}
                       </Button>
-                      <div className="ml-4 text-sm text-slate-500">
+                      <div className="ml-4 text-sm text-slate-600">
                         Thank you — your feedback helps us improve.
                       </div>
                     </div>
@@ -364,6 +394,25 @@ function RouteComponent() {
                     </div>
                   </form>
                 </Form>
+              )}
+              {activeTab === "Join Team" && (
+                <div className="flex flex-col items-center justify-center space-y-4 p-6">
+                  <h3 className="text-xl font-semibold">
+                    Join Our Team on WhatsApp
+                  </h3>
+                  <p className="text-center text-slate-600">
+                    Click the button below to join our team chat and start
+                    collaborating!
+                  </p>
+                  <a
+                    href="https://chat.whatsapp.com/FlZQTmQBK9EKuUSHg3JvPB?mode=ems_copy_t"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-md transition"
+                  >
+                    Join WhatsApp Group
+                  </a>
+                </div>
               )}
             </div>
           </div>

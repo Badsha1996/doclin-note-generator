@@ -12,7 +12,7 @@ import {
   Play,
 } from "lucide-react";
 import { getUserInfo, setUserInfo } from "@/lib/auth";
-import type { ApiError } from "@/types/api";
+import type { ApiError, FeedbackListResponse } from "@/types/api";
 import { Route } from "@/routes";
 import { useNavigate } from "@tanstack/react-router";
 import { useApi } from "@/hook/useApi";
