@@ -213,7 +213,9 @@ function RegisterPage() {
              bg-gradient-to-r  from-purple-500 via-indigo-500 to-blue-500 text-white shadow-md 
              hover:opacity-90 transition"
               >
+                <Link to="/about" className="w-full">
                 Learn More
+                </Link>
               </Button>
             </motion.div>
           </div>

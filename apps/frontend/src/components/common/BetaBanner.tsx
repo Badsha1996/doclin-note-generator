@@ -17,11 +17,11 @@ export default function BetaBanner() {
         <motion.div
           initial={{ x: 0, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
-          exit={{ x: +40, opacity: 0 }}
+          exit={{ x: -40, opacity: 0 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
-          className="w-full flex justify-end z-50 sticky top-[100px] px-5"
+          className="flex z-50 sticky top-[100px] px-5 overflow-hidden"
         >
-          <Alert className="relative w-110 bg-purple-100 border border-purple-300 text-purple-800 shadow-md p-3 rounded-lg ">
+          <Alert className="relative w-110 bg-purple-100 border border-purple-300 text-purple-800 shadow-md p-3 rounded-lg overflow-hidden">
             <Button
               onClick={handleDismiss}
               variant="ghost"

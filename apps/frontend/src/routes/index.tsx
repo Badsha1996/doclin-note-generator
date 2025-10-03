@@ -13,7 +13,7 @@ export const Route = createFileRoute("/")({
   },
   component: HomePage,
   pendingComponent: () => (
-    <div className="w-full h-screen">
+    <div className="w-full h-screen flex items-center justify-center">
       <GlassmorphicLoader message="Loading..." />
     </div>
   ),

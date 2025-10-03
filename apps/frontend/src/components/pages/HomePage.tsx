@@ -499,39 +499,22 @@ function HomePage() {
                 </div>
 
                 <div className="grid md:grid-cols-3 gap-6">
-                  {showTestimonials && (
-                    <div className="px-6 sm:px-8 md:px-12 lg:px-16 xl:px-24 py-16 bg-black/20 backdrop-blur-sm">
-                      <div className="max-w-4xl mx-auto">
-                        <div className="text-center mb-16">
-                          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-4">
-                            What Our{" "}
-                            <span className="bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
-                              Users Say
-                            </span>
-                          </h2>
-                        </div>
-
-                        <div className="grid md:grid-cols-3 gap-6">
-                          {realTestimonials.map((t) => (
-                            <div
-                              key={t.id}
-                              className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10"
-                            >
-                              <div className="flex mb-4">
-                                {[...Array(t.rating)].map((_, i) => (
-                                  <Star
-                                    key={i}
-                                    className="w-4 h-4 text-yellow-400 fill-current"
-                                  />
-                                ))}
-                              </div>
-                              <p className="text-white/80 italic">"{t.text}"</p>
-                            </div>
-                          ))}
-                        </div>
+                  {realTestimonials.map((t) => (
+                    <div
+                      key={t.id}
+                      className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10"
+                    >
+                      <div className="flex mb-4">
+                        {[...Array(t.rating)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className="w-4 h-4 text-yellow-400 fill-current"
+                          />
+                        ))}
                       </div>
+                      <p className="text-white/80 italic">"{t.text}"</p>
                     </div>
-                  )}
+                  ))}
                 </div>
               </div>
             </div>
