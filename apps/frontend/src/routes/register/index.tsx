@@ -12,7 +12,9 @@ export const Route = createFileRoute("/register/")({
   },
   component: RegisterPage,
   pendingComponent: () => (
-    <GlassmorphicLoader message="Loading registration..." />
+    <div className="w-full h-screen">
+      <GlassmorphicLoader message="Loading..." />
+    </div>
   ),
   pendingMs: 500,
   pendingMinMs: 200,

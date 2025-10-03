@@ -14,7 +14,9 @@ export const Route = createFileRoute("/examPaper/")({
   },
   component: ExamPaper,
   pendingComponent: () => (
-    <GlassmorphicLoader message="Loading exam paper..." />
+    <div className="w-full h-screen">
+      <GlassmorphicLoader message="Loading..." />
+    </div>
   ),
   pendingMs: 500,
   pendingMinMs: 200,
