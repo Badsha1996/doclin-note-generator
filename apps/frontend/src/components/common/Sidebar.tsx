@@ -147,7 +147,7 @@ function Sidebar({
   const HandlePrevYearRoute = (year: number) => {
     const payload = {
       subject: selectedSubject || "",
-      year: year || "",
+      year: Number(year) || new Date().getFullYear(),
       prev: true,
     };
 

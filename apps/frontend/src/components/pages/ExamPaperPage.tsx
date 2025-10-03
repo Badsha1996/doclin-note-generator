@@ -9,7 +9,20 @@ import GlassmorphicLoader from "../common/GlassLoader";
 const ExamPaperPage = () => {
   const location = useLocation();
 
-  const searchParams = new URLSearchParams(location.search);
+  const searchString =
+    typeof location.search === "string"
+      ? location.search
+      : new URLSearchParams(
+          Object.entries(location.search).reduce(
+            (acc, [key, value]) => {
+              acc[key] = String(value);
+              return acc;
+            },
+            {} as Record<string, string>
+          )
+        ).toString();
+
+  const searchParams = new URLSearchParams(searchString);
   const prevShow = searchParams.get("prev") === "true";
 
   const apiPayload = useMemo(() => {
