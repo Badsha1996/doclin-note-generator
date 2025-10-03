@@ -79,7 +79,7 @@ class TokenRefreshMiddleware(BaseHTTPMiddleware):
                 httponly=True,
                 secure=True,
                 samesite="None",  
-                domain=settings.BACKEND_DOMAIN,  
+                domain=settings.FRONTEND_DOMAIN,  
                 max_age=3600,
             )
 
