@@ -19,7 +19,7 @@ export type registerTypes = z.infer<typeof FormSchema>;
 // **************** Login File Types ****************
 export const LoginFormSchema = z.object({
   email: z.email("Please enter a valid email"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string().min(6, "Please enter your password"),
 });
 
 export type loginTypes = z.infer<typeof LoginFormSchema>;

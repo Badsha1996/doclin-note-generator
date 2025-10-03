@@ -18,6 +18,7 @@ import { Route as ExamPaperIndexRouteImport } from './routes/examPaper/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as ContactIndexRouteImport } from './routes/contact/index'
 import { Route as ConfigIndexRouteImport } from './routes/config/index'
+import { Route as CommunityIndexRouteImport } from './routes/community/index'
 import { Route as AboutIndexRouteImport } from './routes/about/index'
 
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
@@ -64,6 +65,11 @@ const ConfigIndexRoute = ConfigIndexRouteImport.update({
   path: '/config/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CommunityIndexRoute = CommunityIndexRouteImport.update({
+  id: '/community/',
+  path: '/community/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AboutIndexRoute = AboutIndexRouteImport.update({
   id: '/about/',
   path: '/about/',
@@ -74,6 +80,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/about': typeof AboutIndexRoute
+  '/community': typeof CommunityIndexRoute
   '/config': typeof ConfigIndexRoute
   '/contact': typeof ContactIndexRoute
   '/dashboard': typeof DashboardIndexRoute
@@ -85,6 +92,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/about': typeof AboutIndexRoute
+  '/community': typeof CommunityIndexRoute
   '/config': typeof ConfigIndexRoute
   '/contact': typeof ContactIndexRoute
   '/dashboard': typeof DashboardIndexRoute
@@ -98,6 +106,7 @@ export interface FileRoutesById {
   '/$': typeof SplatRoute
   '/_authenticated': typeof AuthenticatedRoute
   '/about/': typeof AboutIndexRoute
+  '/community/': typeof CommunityIndexRoute
   '/config/': typeof ConfigIndexRoute
   '/contact/': typeof ContactIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
@@ -111,6 +120,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/about'
+    | '/community'
     | '/config'
     | '/contact'
     | '/dashboard'
@@ -122,6 +132,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/about'
+    | '/community'
     | '/config'
     | '/contact'
     | '/dashboard'
@@ -134,6 +145,7 @@ export interface FileRouteTypes {
     | '/$'
     | '/_authenticated'
     | '/about/'
+    | '/community/'
     | '/config/'
     | '/contact/'
     | '/dashboard/'
@@ -147,6 +159,7 @@ export interface RootRouteChildren {
   SplatRoute: typeof SplatRoute
   AuthenticatedRoute: typeof AuthenticatedRoute
   AboutIndexRoute: typeof AboutIndexRoute
+  CommunityIndexRoute: typeof CommunityIndexRoute
   ConfigIndexRoute: typeof ConfigIndexRoute
   ContactIndexRoute: typeof ContactIndexRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
@@ -220,6 +233,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConfigIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/community/': {
+      id: '/community/'
+      path: '/community'
+      fullPath: '/community'
+      preLoaderRoute: typeof CommunityIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/about/': {
       id: '/about/'
       path: '/about'
@@ -235,6 +255,7 @@ const rootRouteChildren: RootRouteChildren = {
   SplatRoute: SplatRoute,
   AuthenticatedRoute: AuthenticatedRoute,
   AboutIndexRoute: AboutIndexRoute,
+  CommunityIndexRoute: CommunityIndexRoute,
   ConfigIndexRoute: ConfigIndexRoute,
   ContactIndexRoute: ContactIndexRoute,
   DashboardIndexRoute: DashboardIndexRoute,
