@@ -79,8 +79,7 @@ class TokenRefreshMiddleware(BaseHTTPMiddleware):
                 value=new_access_token,
                 httponly=True,
                 secure=True,
-                samesite="None",  
-                domain=settings.FRONTEND_DOMAIN,  
+                samesite="None",    
                 max_age=3600,
             )
 
