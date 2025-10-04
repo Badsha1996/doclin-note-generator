@@ -23,3 +23,7 @@ class ConflictException(HTTPException):
 class InternelServerException(HTTPException):
     def __init__(self, detail : str = "Internal server Error"):
         super().__init__(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail = detail)
+
+class LargePayloadException(HTTPException):
+    def __init__(self, detail : str = "Payload is too large"):
+        super().__init__(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail = detail)

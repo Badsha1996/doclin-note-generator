@@ -35,37 +35,38 @@ class TokenRefreshMiddleware(BaseHTTPMiddleware):
                 refresh_payload = security.verify_token(refresh_token)
                 refresh_exp = refresh_payload.exp
                 refresh_exp_datetime = datetime.fromtimestamp(refresh_exp, tz=timezone.utc)
-                if refresh_exp_datetime > datetime.now(timezone.utc):
-                    new_access_token = security.create_access_token(
-                        data={
-                            "user_id": refresh_payload.user_id,
-                            "email": refresh_payload.email,
-                            "role": refresh_payload.role,
-                        },
-                        expires_delta=timedelta(hours=1),
-                    )
+                if refresh_exp_datetime <= datetime.now(timezone.utc):
+                    return JSONResponse({"detail": "Refresh token expired"}, status_code=401)
+                
+                new_access_token = security.create_access_token(
+                    data={
+                        "user_id": refresh_payload.user_id,
+                        "email": refresh_payload.email,
+                        "role": refresh_payload.role,
+                    },
+                    expires_delta=timedelta(hours=1),
+                )
             except Exception as e:
                 return JSONResponse({"detail": str(e)}, status_code=401)
 
         elif access_token:
             try:
                 payload = security.verify_token(access_token)
-                exp = payload.exp
-                if exp:
-                    exp_datetime = datetime.fromtimestamp(exp, tz=timezone.utc)
-                    if exp_datetime - datetime.now(timezone.utc) < timedelta(minutes=5) and refresh_token:
-                        refresh_payload = security.verify_token(refresh_token)
-                        refresh_exp = refresh_payload.exp
-                        refresh_exp_datetime = datetime.fromtimestamp(refresh_exp, tz=timezone.utc)
-                        if refresh_exp_datetime > datetime.now(timezone.utc):
-                            new_access_token = security.create_access_token(
-                                data={
-                                    "user_id": payload.user_id,
-                                    "email": payload.email,
-                                    "role": payload.role,
-                                },
-                                expires_delta=timedelta(hours=1),
-                            )
+                exp_datetime = datetime.fromtimestamp(payload.exp, tz=timezone.utc)
+
+                if exp_datetime - datetime.now(timezone.utc) < timedelta(minutes=5) and refresh_token:
+                    refresh_payload = security.verify_token(refresh_token)
+                    refresh_exp = refresh_payload.exp
+                    refresh_exp_datetime = datetime.fromtimestamp(refresh_exp, tz=timezone.utc)
+                    if refresh_exp_datetime > datetime.now(timezone.utc):
+                        new_access_token = security.create_access_token(
+                            data={
+                                "user_id": payload.user_id,
+                                "email": payload.email,
+                                "role": payload.role,
+                            },
+                             expires_delta=timedelta(hours=1),
+                        )
             except Exception as e:
                 return JSONResponse({"detail": str(e)}, status_code=401)
 
