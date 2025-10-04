@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     META_USER_URL:str
 
     EMAIL:str
-    MAILERSEND_API_KEY: str
+    BREVO_API_KEY: str
     SUPER_ADMIN_EMAIL:str
     MAX_COUNT_FOR_PREVILEGED:int
     MAX_COUNT_FOR_USER:int 

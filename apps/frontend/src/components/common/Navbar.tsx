@@ -25,7 +25,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { useApiMutation } from "@/hook/useApi";
 import { logoutSchema, type ApiError, type LogoutResponse } from "@/types/api";
 import { toast } from "sonner";
-
 function Navbar() {
   // *********** All States ***********
   const searchParams = useSearch({ from: "__root__" });

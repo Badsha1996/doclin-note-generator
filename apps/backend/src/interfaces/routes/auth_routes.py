@@ -41,7 +41,7 @@ async def register_user(
             message="User registered successfully"
         )
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException( 400, detail=str(e))
 
 @auth_router.post("/login", dependencies=[])
 async def login_user(
