@@ -1,4 +1,4 @@
-// __root.tsx - Updated with loading states
+// __root.tsx - Updated with search params validation
 import {
   Outlet,
   createRootRoute,
@@ -10,8 +10,14 @@ import Navbar from "@/components/common/Navbar";
 import BetaBanner from "@/components/common/BetaBanner";
 import { AnimatePresence, motion } from "framer-motion";
 import GlassmorphicLoader from "@/components/common/GlassLoader";
+import { z } from "zod";
+
+const rootSearchSchema = z.object({
+  oauth: z.string().optional(),
+});
 
 export const Route = createRootRoute({
+  validateSearch: rootSearchSchema,
   component: RootComponent,
   pendingComponent: () => (
     <GlassmorphicLoader fullScreen message="Loading page..." size="lg" />
@@ -22,7 +28,6 @@ function RootComponent() {
   const matches = useMatches();
   const routerState = useRouterState();
 
-  // Track loading state
   const isLoading = routerState.isLoading;
 
   const isAuthRoute = matches.some(
@@ -31,7 +36,6 @@ function RootComponent() {
 
   return (
     <div className="relative">
-      {/* Optional: Top progress bar for route changes */}
       <AnimatePresence>
         {isLoading && (
           <motion.div

@@ -61,6 +61,8 @@ type ApiResponse = RegisterResponse;
 function RegisterPage() {
   const form = useForm<registerTypes>({
     resolver: zodResolver(FormSchema),
+    mode: "onChange",
+    reValidateMode: "onChange",
     defaultValues: {
       email: "",
       username: "",
@@ -69,6 +71,7 @@ function RegisterPage() {
       otp: "",
     },
   });
+
   const [showPassword, setShowPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
@@ -214,7 +217,7 @@ function RegisterPage() {
              hover:opacity-90 transition"
               >
                 <Link to="/about" className="w-full">
-                Learn More
+                  Learn More
                 </Link>
               </Button>
             </motion.div>

@@ -1,4 +1,4 @@
-import { Link, useRouter } from "@tanstack/react-router";
+import { Link, useRouter, useSearch } from "@tanstack/react-router";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -28,7 +28,8 @@ import { toast } from "sonner";
 import { Route } from "@/routes";
 function Navbar() {
   // *********** All States ***********
-  const { oauth } = Route.useSearch();
+  const searchParams = useSearch({ from: "__root__" });
+  const oauth = searchParams?.oauth;
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const router = useRouter();
@@ -188,14 +189,15 @@ function Navbar() {
                         >
                           {item.title}
                         </NavigationMenuTrigger>
-                        <NavigationMenuContent className="p-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl shadow-lg">
+
+                        <NavigationMenuContent className="p-2 !bg-white/50 text-white/90  backdrop-blur-xl border border-white/20 rounded-xl shadow-lg ">
                           <ul className="grid gap-3 w-[250px]">
                             {item.children.map((sub) => (
                               <li key={sub.href}>
                                 <NavigationMenuLink asChild>
                                   <Link
                                     to={sub.href}
-                                    className="bg-white/10 text-white block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-white hover:text-black"
+                                    className="bg-white/10 text-white  space-y-1 rounded-md p-1  transition-colors hover:bg-white/50 hover:text-gray-700"
                                   >
                                     <div className="text-sm font-medium">
                                       {sub.title}

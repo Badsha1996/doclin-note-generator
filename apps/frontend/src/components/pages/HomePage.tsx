@@ -1,4 +1,4 @@
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState, useEffect, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
 import { Scene } from "@/components/models/PulseModel";
 import {
@@ -92,6 +92,9 @@ function HomePage() {
   const [stats, setStats] = useState({ users: 0, questions: 0, notes: 0 });
   const [pageLoading, setPageLoading] = useState(true);
   const [modelLoaded, setModelLoaded] = useState(false);
+  const [canvasKey, setCanvasKey] = useState(0);
+  const [webglError, setWebglError] = useState(false);
+  const canvasContainerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
   const { data: rawFeedbackData, isLoading: testimonialsLoading } =
@@ -127,9 +130,45 @@ function HomePage() {
 
   const showTestimonials = !testimonialsLoading && realTestimonials.length > 0;
 
+  // Handle WebGL context loss
+  useEffect(() => {
+    const handleContextLost = (event: Event) => {
+      event.preventDefault();
+      console.warn("WebGL context lost, attempting to restore...");
+      setWebglError(true);
+
+      // Attempt to restore after a delay
+      setTimeout(() => {
+        setCanvasKey((prev) => prev + 1);
+        setWebglError(false);
+        setModelLoaded(false);
+      }, 1000);
+    };
+
+    const handleContextRestored = () => {
+      console.log("WebGL context restored");
+      setWebglError(false);
+    };
+
+    const canvas = canvasContainerRef.current?.querySelector("canvas");
+    if (canvas) {
+      canvas.addEventListener("webglcontextlost", handleContextLost);
+      canvas.addEventListener("webglcontextrestored", handleContextRestored);
+    }
+
+    return () => {
+      if (canvas) {
+        canvas.removeEventListener("webglcontextlost", handleContextLost);
+        canvas.removeEventListener(
+          "webglcontextrestored",
+          handleContextRestored
+        );
+      }
+    };
+  }, [canvasKey]);
+
   // Main page loading effect
   useEffect(() => {
-    // Simulate minimum loading time for smooth experience
     const minLoadTime = setTimeout(() => {
       setPageLoading(false);
     }, 2000);
@@ -142,7 +181,6 @@ function HomePage() {
     if (!pageLoading) {
       setIsVisible(true);
 
-      // Typewriter effect
       const text =
         "A single AI-driven platform that transforms the way students and teachers prepare effective study materials";
       let index = 0;
@@ -155,12 +193,10 @@ function HomePage() {
         }
       }, 50);
 
-      // Feature rotation
       const featureTimer = setInterval(() => {
         setCurrentFeature((prev) => (prev + 1) % features.length);
       }, 3000);
 
-      // Stats animation
       const statsTimer = setTimeout(() => {
         setStats({ users: 25000, questions: 500000, notes: 150000 });
       }, 1500);
@@ -200,7 +236,6 @@ function HomePage() {
     );
   };
 
-  // Show loader while page is loading
   if (pageLoading) {
     return (
       <GlassmorphicLoader
@@ -219,7 +254,6 @@ function HomePage() {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
-        {/* Animated Background Elements */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
           <div
             className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-bounce"
@@ -235,14 +269,21 @@ function HomePage() {
           ></div>
         </div>
 
-        {/****************************** Foreground: Enhanced Content ******************************/}
         <div className="relative z-10 w-full pointer-events-auto">
-          {/* Hero Section */}
           <div className="flex flex-col justify-center items-center lg:items-start p-6 sm:p-8 md:p-12 lg:p-16 xl:p-24 text-center lg:text-left min-h-screen">
             <div className="max-w-4xl lg:max-w-2xl xl:max-w-4xl mx-auto lg:mx-0">
-              {/***************************** Background: 3D MODEL ************************* */}
-              <div className="hidden md:block absolute left-[400px] top-[-200px] inset-0 w-full h-[40%]">
-                {!modelLoaded && (
+              <div
+                ref={canvasContainerRef}
+                className="hidden md:block absolute left-[400px] top-[-200px] inset-0 w-full h-[40%]"
+              >
+                {webglError && (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="text-white/60 text-sm">
+                      Restoring 3D view...
+                    </div>
+                  </div>
+                )}
+                {!modelLoaded && !webglError && (
                   <GlassmorphicLoader size="md" message="Loading 3D model..." />
                 )}
                 <Suspense
@@ -256,16 +297,27 @@ function HomePage() {
                   }
                 >
                   <Canvas
+                    key={canvasKey}
                     className="w-full h-full"
                     style={{ pointerEvents: "none" }}
-                    onCreated={() => setModelLoaded(true)}
+                    onCreated={(state) => {
+                      setModelLoaded(true);
+                      // Configure renderer for better stability
+                      state.gl.setClearColor(0x000000, 0);
+                    }}
+                    gl={{
+                      powerPreference: "high-performance",
+                      antialias: true,
+                      alpha: true,
+                      preserveDrawingBuffer: false,
+                      failIfMajorPerformanceCaveat: false,
+                    }}
                   >
                     <Scene />
                   </Canvas>
                 </Suspense>
               </div>
 
-              {/* **************************************** TITLE ****************************************** */}
               <h1
                 className={`text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-8xl xl:text-8xl font-black text-white mb-4 sm:mb-6 leading-tight tracking-tighter transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
                 style={{ transitionDelay: "0.2s" }}
@@ -348,7 +400,6 @@ function HomePage() {
             </div>
           </div>
 
-          {/* **************************************************Feature***************************************** */}
           <div className="px-6 sm:px-8 md:px-12 lg:px-16 xl:px-24 py-16 bg-black/20 backdrop-blur-sm">
             <div className="max-w-6xl mx-auto">
               <div className="text-center mb-16">
@@ -390,7 +441,6 @@ function HomePage() {
             </div>
           </div>
 
-          {/* **************************************** User base ****************************************** */}
           <div className="px-6 sm:px-8 md:px-12 lg:px-16 xl:px-24 py-16">
             <div className="max-w-6xl mx-auto">
               <div className="text-center mb-16">
@@ -434,7 +484,6 @@ function HomePage() {
             </div>
           </div>
 
-          {/* **************************************** Testimonials *********************************** */}
           {testimonialsLoading ? (
             <div className="px-6 sm:px-8 md:px-12 lg:px-16 xl:px-24 py-16 bg-black/20 backdrop-blur-sm">
               <div className="flex justify-center">
