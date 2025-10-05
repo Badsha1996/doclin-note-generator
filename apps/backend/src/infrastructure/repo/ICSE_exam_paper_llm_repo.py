@@ -1,3 +1,4 @@
+import numpy as np
 from sqlalchemy.orm import Session
 from typing import List, Dict, Optional, Any
 import asyncio
@@ -23,12 +24,32 @@ class SQLLMRepo:
         self.llm_manager = LLMProviderManager()
         self.max_retrieval_limit = 300
         self.context_per_section = 50
+        
     def _get_query_embedding(self, query: str) -> List[float]:
+        if not query or not query.strip():
+            raise ValueError("Query string cannot be empty")
+        
         if self.model is not None:
-            return self.model.encode(query).tolist()
-        elif self.embedding_client is not None:
-            embedding = self.embedding_client.encode(query, normalize=False)
+            # Using local SentenceTransformer model
+            embedding = self.model.encode(query)
+            # Normalize the embedding
+            embedding = embedding / np.linalg.norm(embedding)
             return embedding.tolist()
+            
+        elif self.embedding_client is not None:
+            # Using API client
+            # Note: API client returns normalized embeddings when normalize=True
+            embedding = self.embedding_client.encode(query, normalize=True)
+            
+            # embedding is a 1D numpy array for single text
+            if isinstance(embedding, np.ndarray):
+                return embedding.tolist()
+            elif isinstance(embedding, list):
+                return embedding
+            else:
+                # Fallback conversion
+                return list(embedding)
+                
         else:
             raise Exception("No embedding model or API client available")
 

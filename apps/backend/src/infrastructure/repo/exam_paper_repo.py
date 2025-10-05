@@ -14,16 +14,35 @@ class SQLExamPaperRepo:
         self.embedding_client = EmbeddingAPIClient(embedding_api_url) if embedding_api_url else None
     
     def _get_embeddings(self, texts: List[str], batch_size: int = 32) -> List[List[float]]:
+        """Generate embeddings for a list of texts"""
+        if not texts:
+            return []
+            
         if self.model is not None:
+            # Using local model (SentenceTransformer)
             embeddings = self.model.encode(texts, batch_size=batch_size)
+            # Normalize and convert to list
             embeddings = [(e / np.linalg.norm(e)).tolist() for e in embeddings]
+            
         elif self.embedding_client is not None:
+            # Using API client
             embeddings = self.embedding_client.encode(
                 texts, 
                 batch_size=batch_size,
                 normalize=True
             )
-            embeddings = [e.tolist() for e in embeddings]
+            # embeddings is already a numpy array from the API
+            if isinstance(embeddings, np.ndarray):
+                # If it's 2D array, convert each row to list
+                if embeddings.ndim == 2:
+                    embeddings = [row.tolist() for row in embeddings]
+                # If it's 1D array (single text), wrap in list
+                elif embeddings.ndim == 1:
+                    embeddings = [embeddings.tolist()]
+            elif not isinstance(embeddings, list):
+                # Fallback: ensure it's a list
+                embeddings = list(embeddings)
+                
         else:
             raise Exception("No embedding model or API client available")
         
@@ -105,7 +124,14 @@ class SQLExamPaperRepo:
 
             # generate embeddings for subparts
             if subpart_texts:
+                print(f"Generating embeddings for {len(subpart_texts)} subparts...")
                 embeddings = self._get_embeddings(subpart_texts, batch_size=32)
+                
+                if len(embeddings) != len(subpart_refs):
+                    raise Exception(
+                        f"Embedding count mismatch: got {len(embeddings)} embeddings "
+                        f"for {len(subpart_refs)} subparts"
+                    )
                 
                 for (part, sp_data), emb in zip(subpart_refs, embeddings):
                     subpart = SubPartModel(
@@ -117,18 +143,20 @@ class SQLExamPaperRepo:
                         constants_given=sp_data.constants_given,
                         equation_template=sp_data.equation_template,
                         choices_given=sp_data.choices_given,
-                        embedding=emb,
+                        embedding=emb,  # This should be a list of floats
                     )
                     part.sub_parts.append(subpart)
 
             self.db.add(exam)
             self.db.commit()
+            print(f"✓ Successfully created exam paper with {len(subpart_texts)} embedded subparts")
             return True
 
         except Exception as e:
             self.db.rollback()
+            print(f"✗ Error creating exam paper: {str(e)}")
             raise e
-
+        
     async def get_exam_paper_json(self, subject: str, year: int) -> ExamPaper | None:
         exam = (
             self.db.query(ExamPaperModel)
