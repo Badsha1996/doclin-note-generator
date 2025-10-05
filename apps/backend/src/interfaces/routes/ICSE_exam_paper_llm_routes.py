@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from ..schemas.response_schemas import APIResponseSchema
-from ..schemas.llm_schemas import LLMGenQuestionSchema
+from ..schemas.ICSE_exam_paper_llm_schemas import LLMGenICSEQuestionSchema
 from ..dependencies.dependencies import get_current_user,admin_or_super_admin_only
 
 from ...database.database import get_DB
@@ -16,20 +16,22 @@ from ...core.entities.user_entities import User, UserUpdate
 from ...core.services.user_service import UserService
 
 from ...config.config import settings
+from ...config.model import get_embedding_model
 
 llm_router = APIRouter(prefix="/llm", tags=["llm"])
 
 
 @llm_router.post('/gen-question-paper',dependencies=[Depends(get_current_user)])
 async def generate_question_paper(
-    llm_gen_data : LLMGenQuestionSchema,
+    llm_gen_data : LLMGenICSEQuestionSchema,
     db: Session = Depends(get_DB),
     current_user: User = Depends(get_current_user),
     security_manager:SecurityManager = Depends(get_security_manager)
 ):
     try:
-        llm_repo = SQLLMRepo(db=db)
-        exam_paper_repo = SQLExamPaperRepo(db=db)
+        # get_embedding_model for local
+        llm_repo = SQLLMRepo(db=db, model=None, embedding_api_url=settings.EMBEDDING_API_URL)
+        exam_paper_repo = SQLExamPaperRepo(db=db, model=None, embedding_api_url=settings.EMBEDDING_API_URL)
         user_repo = SQLUserRepo(db=db)
         user_service = UserService(user_repo, security_manager)
         

@@ -63,6 +63,7 @@ class Settings(BaseSettings):
     PORT: int = 8000  
 
     model_config = ConfigDict(extra="ignore")
+    EMBEDDING_API_URL : str
 
     # ---------------- Custom Parsers ---------------- #
     @classmethod

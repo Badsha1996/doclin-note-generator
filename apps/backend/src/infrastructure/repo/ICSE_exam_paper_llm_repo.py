@@ -1,5 +1,5 @@
+import numpy as np
 from sqlalchemy.orm import Session
-from sentence_transformers import SentenceTransformer
 from typing import List, Dict, Optional, Any
 import asyncio
 import json
@@ -7,23 +7,52 @@ from uuid import uuid4
 import logging
 from string import Template
 
-from ...config.config import settings
+from ..models.exam_paper_models import SubPartModel, QuestionPartModel, QuestionModel, SectionModel, ExamPaperModel
 from ...LLMs.LLMs import LLMProviderManager
 from ...core.entities.exam_paper_entities import ExamInfo, ExamPaperCreate, Section
-from ..models.exam_paper_models import SubPartModel, QuestionPartModel, QuestionModel, SectionModel, ExamPaperModel
 from ...prompts.ICSE_questions import PERFECT_DIAGRAM, PERFECT_QUESTION, PERFECT_SECTION_A, PERFECT_SECTION_B, ULTRA_STRICT_SECTION_A_PROMPT, ULTRA_STRICT_SECTION_B_PROMPT
-
+from ...config.embedding_api_client import EmbeddingAPIClient
 
 ROMAN_NUMERALS = ["i", "ii", "iii", "iv", "v", "vi", "vii", "viii", "ix", "x", "xi", "xii", "xiii", "xiv", "xv"]
 
 
 class SQLLMRepo:
-    def __init__(self, db: Session):
+    def __init__(self, db: Session, model=None, embedding_api_url=None):
         self.db = db
-        self.model = SentenceTransformer(settings.VECTOR_MODEL)
+        self.model = model
+        self.embedding_client = EmbeddingAPIClient(embedding_api_url) if embedding_api_url else None
         self.llm_manager = LLMProviderManager()
         self.max_retrieval_limit = 300
         self.context_per_section = 50
+        
+    def _get_query_embedding(self, query: str) -> List[float]:
+        if not query or not query.strip():
+            raise ValueError("Query string cannot be empty")
+        
+        if self.model is not None:
+            # Using local SentenceTransformer model
+            embedding = self.model.encode(query)
+            # Normalize the embedding
+            embedding = embedding / np.linalg.norm(embedding)
+            return embedding.tolist()
+            
+        elif self.embedding_client is not None:
+            # Using API client
+            # Note: API client returns normalized embeddings when normalize=True
+            embedding = self.embedding_client.encode(query, normalize=True)
+            
+            # embedding is a 1D numpy array for single text
+            if isinstance(embedding, np.ndarray):
+                return embedding.tolist()
+            elif isinstance(embedding, list):
+                return embedding
+            else:
+                # Fallback conversion
+                return list(embedding)
+                
+        else:
+            raise Exception("No embedding model or API client available")
+
     def _get_roman_numeral(self, num: int) -> str:
         return ROMAN_NUMERALS[num - 1] if 1 <= num <= len(ROMAN_NUMERALS) else str(num)
 
@@ -271,7 +300,7 @@ class SQLLMRepo:
 
     async def gen_new_exam_paper(self, subject: str, board: str, paper: str, code: str, year: int) -> ExamPaperCreate:
         """Generate perfect exam paper with 100% schema compliance."""
-        query_embedding = self.model.encode(f"{subject} exam questions").tolist()
+        query_embedding = self._get_query_embedding(f"{subject} exam questions")
         similar_subparts = self._get_subparts_by_subject(subject, query_embedding)
         context_items = self._prepare_retrieval_context(similar_subparts)
         
