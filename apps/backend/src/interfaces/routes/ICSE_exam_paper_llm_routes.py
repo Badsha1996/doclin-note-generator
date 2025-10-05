@@ -29,8 +29,9 @@ async def generate_question_paper(
     security_manager:SecurityManager = Depends(get_security_manager)
 ):
     try:
-        llm_repo = SQLLMRepo(db=db, model=get_embedding_model, embedding_api_url=settings.EMBEDDING_API_URL)
-        exam_paper_repo = SQLExamPaperRepo(db=db, model=get_embedding_model, embedding_api_url=settings.EMBEDDING_API_URL)
+        # get_embedding_model for local
+        llm_repo = SQLLMRepo(db=db, model=None, embedding_api_url=settings.EMBEDDING_API_URL)
+        exam_paper_repo = SQLExamPaperRepo(db=db, model=None, embedding_api_url=settings.EMBEDDING_API_URL)
         user_repo = SQLUserRepo(db=db)
         user_service = UserService(user_repo, security_manager)
         

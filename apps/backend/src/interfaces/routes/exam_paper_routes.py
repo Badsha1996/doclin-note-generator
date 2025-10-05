@@ -20,7 +20,7 @@ async def save_exam_paper(
     db : Session = Depends(get_DB)
 ):
     try:
-        exam_paper_repo = SQLExamPaperRepo(db, model=get_embedding_model, embedding_api_url=settings.EMBEDDING_API_URL)
+        exam_paper_repo = SQLExamPaperRepo(db, model=None, embedding_api_url=settings.EMBEDDING_API_URL)
         exam_paper_service = ExamPaperService(exam_paper_repo=exam_paper_repo)
 
         is_saved = await exam_paper_service.save_exam_paper(exam_paper_data=exam_paper_data)
@@ -36,7 +36,9 @@ async def get_exam_paper(
     db : Session = Depends(get_DB),
 ):
     try:
-        exam_paper_repo = SQLExamPaperRepo(db, model=get_embedding_model, embedding_api_url=settings.EMBEDDING_API_URL)
+        # FOR LOCAL USE
+        # model=get_embedding_model
+        exam_paper_repo = SQLExamPaperRepo(db, model=None, embedding_api_url=settings.EMBEDDING_API_URL)
         exam_paper_service = ExamPaperService(exam_paper_repo=exam_paper_repo)
 
         exam_paper = await exam_paper_service.get_exam_paper(subject=exam_paper_details.subject, year=exam_paper_details.year)
@@ -54,7 +56,7 @@ async def get_all_subjects(
     db : Session = Depends(get_DB),
 ):
     try:
-        exam_paper_repo = SQLExamPaperRepo(db, model=get_embedding_model, embedding_api_url=settings.EMBEDDING_API_URL)
+        exam_paper_repo = SQLExamPaperRepo(db, model=None, embedding_api_url=settings.EMBEDDING_API_URL)
         exam_paper_service = ExamPaperService(exam_paper_repo=exam_paper_repo)
 
         exam_subjects = await exam_paper_service.get_subjects()
@@ -72,7 +74,7 @@ async def get_all_boards(
     db : Session = Depends(get_DB),
 ):
     try:
-        exam_paper_repo = SQLExamPaperRepo(db, model=get_embedding_model, embedding_api_url=settings.EMBEDDING_API_URL)
+        exam_paper_repo = SQLExamPaperRepo(db, model=None, embedding_api_url=settings.EMBEDDING_API_URL)
         exam_paper_service = ExamPaperService(exam_paper_repo=exam_paper_repo)
 
         exam_boards = await exam_paper_service.get_boards()
@@ -91,7 +93,7 @@ async def get_prev_years(
     db : Session = Depends(get_DB),
 ):
     try:
-        exam_paper_repo = SQLExamPaperRepo(db, model=get_embedding_model, embedding_api_url=settings.EMBEDDING_API_URL)
+        exam_paper_repo = SQLExamPaperRepo(db, model=None, embedding_api_url=settings.EMBEDDING_API_URL)
         exam_paper_service = ExamPaperService(exam_paper_repo=exam_paper_repo)
 
         years : list[int] = await exam_paper_service.get_prev_years(subject=exam_paper_details.subject)
@@ -110,7 +112,7 @@ async def get_prev_exam_paper(
     db : Session = Depends(get_DB),
 ):
     try:
-        exam_paper_repo = SQLExamPaperRepo(db, model=get_embedding_model, embedding_api_url=settings.EMBEDDING_API_URL)
+        exam_paper_repo = SQLExamPaperRepo(db, model=None, embedding_api_url=settings.EMBEDDING_API_URL)
         exam_paper_service = ExamPaperService(exam_paper_repo=exam_paper_repo)
 
         exam_paper = await exam_paper_service.get_prev_year_paper(subject=exam_paper_details.subject, year=exam_paper_details.year)
