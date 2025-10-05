@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from ..schemas.response_schemas import APIResponseSchema
-from ..schemas.llm_schemas import LLMGenQuestionSchema
+from ..schemas.ICSE_exam_paper_llm_schemas import LLMGenICSEQuestionSchema
 from ..dependencies.dependencies import get_current_user,admin_or_super_admin_only
 
 from ...database.database import get_DB
@@ -22,7 +22,7 @@ llm_router = APIRouter(prefix="/llm", tags=["llm"])
 
 @llm_router.post('/gen-question-paper',dependencies=[Depends(get_current_user)])
 async def generate_question_paper(
-    llm_gen_data : LLMGenQuestionSchema,
+    llm_gen_data : LLMGenICSEQuestionSchema,
     db: Session = Depends(get_DB),
     current_user: User = Depends(get_current_user),
     security_manager:SecurityManager = Depends(get_security_manager)

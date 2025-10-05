@@ -7,7 +7,7 @@ from .database.database import Base, engine
 from .utils.middleware import setup_middleware
 
 from .interfaces.routes.auth_routes import auth_router
-from .interfaces.routes.llm_routes import llm_router
+from .interfaces.routes.ICSE_exam_paper_llm_routes import llm_router
 from .interfaces.routes.exam_paper_routes import exam_paper_router
 from .interfaces.routes.otp_routes import otp_router
 from .interfaces.routes.user_routes import user_router
