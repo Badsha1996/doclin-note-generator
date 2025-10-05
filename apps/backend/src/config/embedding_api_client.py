@@ -5,8 +5,8 @@ from typing import List, Union
 from .config import settings
 
 class EmbeddingAPIClient:
-    def __init__(self):
-        self.api_base_url = settings.EMBEDDING_API_URL
+    def __init__(self,embedding_api_url):
+        self.api_base_url = settings.EMBEDDING_API_URL or embedding_api_url
         self.endpoint = f"{self.api_base_url}/api/v1/embeddings"
         self.timeout = 30.0
     
