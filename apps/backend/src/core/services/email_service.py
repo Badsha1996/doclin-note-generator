@@ -1,24 +1,24 @@
-import smtplib
-from mailersend import MailerSendClient,EmailBuilder
-# from email import encoders
-# from email.mime.text import MIMEText
-# from email.mime.base import MIMEBase
-# from email.mime.multipart import MIMEMultipart
+
+import base64
+import sib_api_v3_sdk
 from typing import Literal,Dict,Any
-
-
+from sib_api_v3_sdk.rest import ApiException
 from ...config.config import settings
-from ...core.templates.verify_template import get_verify_email_template
-from ...core.templates.report_template import get_report_email_template
+from ...utils.exceptions import InternelServerException, LargePayloadException
 from ...core.templates.acknowledge_template import get_acknowledge_template
-from ...utils.exceptions import AuthExceptionError,InternelServerException
+from ...core.templates.report_template import get_report_email_template
+from ...core.templates.verify_template import get_verify_email_template
 
 class EmailService:
     def __init__(self):
         self.sender=settings.EMAIL
-        self.client = MailerSendClient(api_key=settings.MAILERSEND_API_KEY)
         self.sender_name = "Doclin Team"
-        # self.password=settings.GOOGLE_APP_PASSWORD
+        self.MAX_FILE_SIZE = 5 * 1024 * 1024
+        self.configuration = sib_api_v3_sdk.Configuration()
+        self.configuration.api_key['api-key'] = settings.BREVO_API_KEY
+        self.mailer=sib_api_v3_sdk.TransactionalEmailsApi(
+                sib_api_v3_sdk.ApiClient(self.configuration)
+            )
     async def send_email(
             self,
             receiver:str,
@@ -40,30 +40,25 @@ class EmailService:
             else:
                 template_func, subject = templates[type]
                 html_content = template_func(data)
+            attachments = []
+            if file_bytes and filename:
+                if len(file_bytes) > self.MAX_FILE_SIZE:
+                    raise LargePayloadException("Attachment size exceeds the maximum limit of 5MB.")
+                encoded_file = base64.b64encode(file_bytes).decode("utf-8")
+                attachments.append({
+                    "content": encoded_file,
+                    "name": filename
+                })
+            send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
+                to=[{"email": receiver}],
+                sender={"name": self.sender_name, "email": self.sender},
+                subject=subject,
+                html_content=html_content,
+                attachment=attachments if attachments else None
+            )
+            
+            response = self.mailer.send_transac_email(send_smtp_email)
+            return True
+        except ApiException as e:
+            raise InternelServerException(str(e))
 
-            # message.attach(MIMEText(html_content, "html"))
-            # if file_bytes and filename and content_type:
-                # message.attach(part)
- 
-
-            email = (EmailBuilder()
-                .from_email(self.sender, "Doclin Team")
-                .to_many([{"email": receiver, "name": "Recipient"}])
-                .subject(subject)
-                .html(html_content)
-                .build())
-            response = self.client.emails.send(email)
-
-            if response.success:
-                return True
-            else:
-                status_code = response.status_code
-                error_details = response.data
-
-                if response.status_code == 429 and response.retry_after:
-                    retry_seconds = response.retry_after
-                    raise AuthExceptionError(f"Rate limit exceeded. Retry after {retry_seconds} seconds.")
-                else:
-                    raise InternelServerException(f"Failed to send email. Status code: {status_code}, Details: {error_details}")
-        except Exception as e:
-            raise InternelServerException()

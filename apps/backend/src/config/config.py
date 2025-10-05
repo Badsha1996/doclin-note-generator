@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str
     SECRET_KEY : str
     ALGORITHM : str
-    BACKEND_CORS_ORIGINS: list = ["http://localhost:3000", "http://localhost:5173"]
+    BACKEND_CORS_ORIGINS: list
 
     GOOGLE_CLIENT_ID:str
     GOOGLE_CLIENT_SECRET:str
@@ -25,13 +25,11 @@ class Settings(BaseSettings):
     META_USER_URL:str
 
     EMAIL:str
-    MAILERSEND_API_KEY: str
+    BREVO_API_KEY: str
     SUPER_ADMIN_EMAIL:str
     MAX_COUNT_FOR_PREVILEGED:int
     MAX_COUNT_FOR_USER:int 
     
-    FRONTEND_DOMAIN:str
-    BACKEND_DOMAIN:str
     FRONTEND_URL:str
     BACKEND_URL:str
 

@@ -1,4 +1,4 @@
-import { Link, useRouter } from "@tanstack/react-router";
+import { Link, useRouter, useSearch } from "@tanstack/react-router";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -25,10 +25,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { useApiMutation } from "@/hook/useApi";
 import { logoutSchema, type ApiError, type LogoutResponse } from "@/types/api";
 import { toast } from "sonner";
-import { Route } from "@/routes";
 function Navbar() {
   // *********** All States ***********
-  const { oauth } = Route.useSearch();
+  const searchParams = useSearch({ from: "__root__" });
+  const oauth = searchParams?.oauth;
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const router = useRouter();

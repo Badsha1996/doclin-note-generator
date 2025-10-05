@@ -1,5 +1,4 @@
 from sqlalchemy.orm import Session, joinedload
-from sentence_transformers import SentenceTransformer
 import numpy as np
 
 from ..models.exam_paper_models import ExamPaperModel, QuestionPartModel, SubPartModel, QuestionModel, SectionModel
@@ -10,7 +9,7 @@ from ...config.model import get_embedding_model
 class SQLExamPaperRepo:
     def __init__(self, db: Session):
         self.db = db
-        self.model: SentenceTransformer = get_embedding_model()
+        self.model = get_embedding_model()
     
     async def create_exam_paper(self, exam_paper_data: ExamPaperCreate) -> bool:
         try:

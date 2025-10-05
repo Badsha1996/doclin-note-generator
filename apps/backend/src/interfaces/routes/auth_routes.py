@@ -41,7 +41,7 @@ async def register_user(
             message="User registered successfully"
         )
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException( 400, detail=str(e))
 
 @auth_router.post("/login", dependencies=[])
 async def login_user(
@@ -69,7 +69,6 @@ async def login_user(
             httponly=True,
             secure=True,   
             samesite="None", 
-            domain=settings.FRONTEND_DOMAIN, 
             max_age=3600
         )
         response.set_cookie(
@@ -78,7 +77,6 @@ async def login_user(
             httponly=True,
             secure=True,
             samesite="None",
-            domain=settings.FRONTEND_DOMAIN,
             max_age=60*60*24*7
         )
 
@@ -126,7 +124,6 @@ async def oauthLogin(
             httponly=True,
             secure=True,   
             samesite="None", 
-            domain=settings.FRONTEND_DOMAIN, 
             max_age=3600
         )
         response.set_cookie(
@@ -135,7 +132,6 @@ async def oauthLogin(
             httponly=True,
             secure=True,
             samesite="None",
-            domain=settings.FRONTEND_DOMAIN,
             max_age=60*60*24*7
         )
 
@@ -180,12 +176,10 @@ async def get_current_user_info(
 async def logout_user(response:Response):
     try:
         response.delete_cookie(
-            key="access_token",
-            domain=settings.FRONTEND_DOMAIN
+            key="access_token"
         )
         response.delete_cookie(
-            key="refresh_token",
-            domain=settings.FRONTEND_DOMAIN
+            key="refresh_token"
         )
         return APIResponseSchema(
             success=True,

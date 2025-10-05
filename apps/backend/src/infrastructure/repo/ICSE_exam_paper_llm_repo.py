@@ -1,5 +1,4 @@
 from sqlalchemy.orm import Session
-from sentence_transformers import SentenceTransformer
 from typing import List, Dict, Optional, Any
 import asyncio
 import json
@@ -7,7 +6,7 @@ from uuid import uuid4
 import logging
 from string import Template
 
-from ...config.config import settings
+from ...config.model import get_embedding_model
 from ...LLMs.LLMs import LLMProviderManager
 from ...core.entities.exam_paper_entities import ExamInfo, ExamPaperCreate, Section
 from ..models.exam_paper_models import SubPartModel, QuestionPartModel, QuestionModel, SectionModel, ExamPaperModel
@@ -20,7 +19,7 @@ ROMAN_NUMERALS = ["i", "ii", "iii", "iv", "v", "vi", "vii", "viii", "ix", "x", "
 class SQLLMRepo:
     def __init__(self, db: Session):
         self.db = db
-        self.model = SentenceTransformer(settings.VECTOR_MODEL)
+        self.model = get_embedding_model()
         self.llm_manager = LLMProviderManager()
         self.max_retrieval_limit = 300
         self.context_per_section = 50
