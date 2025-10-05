@@ -70,7 +70,6 @@ function Navbar() {
         }
 
         const data = await response.json();
-        console.log("OAuth user data:", data);
         setUserInfo({
           email: data.data.email,
           role: data.data.role,
@@ -264,6 +263,7 @@ function Navbar() {
                     </MenubarItem>
                     <MenubarSeparator />
                     <MenubarItem
+                      disabled={mutation.isPending}
                       inset
                       onClick={handleLogout}
                       className="cursor-pointer text-white hover:text-white hover:bg-white/20"
@@ -389,11 +389,13 @@ function Navbar() {
                           />
                           <AvatarFallback>CN</AvatarFallback>
                         </Avatar>
-                        <LogOut
+                        <button
                           onClick={handleLogout}
-                          className="cursor-pointer text-white"
-                          size={20}
-                        />
+                          disabled={mutation.isPending} // disables click
+                          className="flex items-center"
+                        >
+                          <LogOut size={20} />
+                        </button>
                       </div>
                       <p className="text-white/80">{user.username}</p>
                       <p className="font-medium text-sm text-white">
