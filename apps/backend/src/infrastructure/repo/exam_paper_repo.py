@@ -1,15 +1,33 @@
+from typing import List
 from sqlalchemy.orm import Session, joinedload
 import numpy as np
 
 from ..models.exam_paper_models import ExamPaperModel, QuestionPartModel, SubPartModel, QuestionModel, SectionModel
 from ...core.entities.exam_paper_entities import ExamPaperCreate, ExamPaper
-from ...config.model import get_embedding_model
+from ...config.embedding_api_client import EmbeddingAPIClient
 
 
 class SQLExamPaperRepo:
-    def __init__(self, db: Session):
+    def __init__(self, db: Session, model=None, embedding_api_url=None):
         self.db = db
-        self.model = get_embedding_model()
+        self.model = model
+        self.embedding_client = EmbeddingAPIClient(embedding_api_url) if embedding_api_url else None
+    
+    def _get_embeddings(self, texts: List[str], batch_size: int = 32) -> List[List[float]]:
+        if self.model is not None:
+            embeddings = self.model.encode(texts, batch_size=batch_size)
+            embeddings = [(e / np.linalg.norm(e)).tolist() for e in embeddings]
+        elif self.embedding_client is not None:
+            embeddings = self.embedding_client.encode(
+                texts, 
+                batch_size=batch_size,
+                normalize=True
+            )
+            embeddings = [e.tolist() for e in embeddings]
+        else:
+            raise Exception("No embedding model or API client available")
+        
+        return embeddings
     
     async def create_exam_paper(self, exam_paper_data: ExamPaperCreate) -> bool:
         try:
@@ -87,9 +105,8 @@ class SQLExamPaperRepo:
 
             # generate embeddings for subparts
             if subpart_texts:
-                embeddings = self.model.encode(subpart_texts, batch_size=32)
-                embeddings = [(e / np.linalg.norm(e)).tolist() for e in embeddings]
-
+                embeddings = self._get_embeddings(subpart_texts, batch_size=32)
+                
                 for (part, sp_data), emb in zip(subpart_refs, embeddings):
                     subpart = SubPartModel(
                         letter=sp_data.letter,
