@@ -115,7 +115,7 @@ async def oauthLogin(
         )
         access_code,  user = await auth_service.oauth_login(oauth_user)
 
-        response = RedirectResponse(url=f"""{settings.FRONTEND_URL}?oauth=success&code={access_code}""",status_code=303)
+        response = RedirectResponse(url=f"""{settings.FRONTEND_URL}?oauth=success&code={access_code}""")
 
 
         
@@ -174,7 +174,7 @@ async def logout_user(response:Response):
         raise HTTPException(status_code=400, detail=str(e))
     
 
-@auth_router.post('/exchange',depedencies=[])
+@auth_router.post('/exchange',dependencies=[])
 async def exchange_tokens(
     response:Response,
     payload:AccessCodeSchema,
@@ -183,11 +183,11 @@ async def exchange_tokens(
     try:
         user=security_manager.verify_token(payload.code)
         access_token = security_manager.create_access_token(
-            data={"user_id": user.user_id, "email": user.email, "role": user.role, "username": user.username}
+            data={"user_id": user.user_id, "email": user.email, "role": user.role, "username": user.user_name}
         )
         
         refresh_token = security_manager.create_refresh_token(
-            data={"user_id": user.user_id, "email": user.email, "role": user.role, "username": user.username}
+            data={"user_id": user.user_id, "email": user.email, "role": user.role, "username": user.user_name}
         )
         response.set_cookie(
             key="access_token",
@@ -205,5 +205,14 @@ async def exchange_tokens(
             samesite="None",
             max_age=60*60*24*7
         )
+        return APIResponseSchema(
+            success=True,
+                data={
+                    "user": user,
+                    "access_token": access_token,
+                    "refresh_token": refresh_token
+                },
+                message="User logged in successfully"
+            )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

@@ -74,14 +74,14 @@ function Navbar() {
 
         const data = await response.json();
         setUserInfo({
-          email: data.data.email,
-          role: data.data.role,
-          username: data.data.username,
+          email: data.data.user.email,
+          role: data.data.user.role,
+          username: data.data.user.user_name,
         });
         setUser({
-          email: data.data.email,
-          role: data.data.role,
-          username: data.data.username,
+          email: data.data.user.email,
+          role: data.data.user.role,
+          username: data.data.user.user_name,
         });
       } catch (err) {
         console.error(err);
@@ -89,7 +89,7 @@ function Navbar() {
     };
 
     fetchUser();
-  }, [oauth]);
+  }, [oauth, code]);
   const mutation = useApiMutation<LogoutResponse>(
     {
       endpoint: "/auth/logout",
