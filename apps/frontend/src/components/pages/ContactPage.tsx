@@ -19,6 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import { useApiMutation } from "@/hook/useApi";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   feedbackApiSchema,
   reportDescriptionSchema,
@@ -30,6 +31,104 @@ import {
   type FeedbackFormValues,
   type ReportFormValues,
 } from "@/types/type";
+import { getUserInfo } from "@/lib/auth";
+import { useRouter } from "@tanstack/react-router";
+const tabContent = {
+  feedback: {
+    title: "Share Your Feedback 📝",
+    description:
+      "Help us improve! Rate your experience and leave your comments so we can make our service even better.",
+    svg: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 512 512"
+        className="w-15 h-15 drop-shadow-lg"
+      >
+        <defs>
+          <linearGradient
+            id="purpleGradient"
+            x1="0%"
+            y1="0%"
+            x2="100%"
+            y2="100%"
+          >
+            <stop offset="0%" stopColor="#7c3aed" />
+            <stop offset="50%" stopColor="#a78bfa" />
+            <stop offset="100%" stopColor="#c084fc" />
+          </linearGradient>
+        </defs>
+
+        <path
+          d="M476.59 3.11 17.73 212.63c-22.58 10.45-21.08 43.14 2.2 51.16l111.9 37.3 45.9 147.7c6.47 20.81 32.77 27.3 48.55 12.15l66.25-65.13 104.8 76.7c19.7 14.42 47.9 4.57 53.6-19.5l62.1-278.48c6.2-27.79-20.7-51.38-47.5-40.86zM195.6 422.63l-33.6-108 190.8-120.84-128.7 149.8-28.5 79.04z"
+          fill="url(#purpleGradient)"
+        />
+      </svg>
+    ),
+    animation: { x: 300, y: -200, rotate: 45, opacity: 0 },
+  },
+  report: {
+    title: "Report an Issue 🐞",
+    description:
+      "Found an issue? Let us know so we can fix it quickly and improve your experience.",
+    svg: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 512 512"
+        className="w-15 h-15 drop-shadow-lg"
+      >
+        <defs>
+          <linearGradient id="bugGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#f43f5e" />
+            <stop offset="100%" stopColor="#f97316" />
+          </linearGradient>
+        </defs>
+
+        <path
+          fill="url(#bugGradient)"
+          d="M256 0C114.836 0 0 114.836 0 256s114.836 256 256 256 256-114.836 256-256S397.164 0 256 0zm0 472c-119.103 0-216-96.897-216-216S136.897 40 256 40s216 96.897 216 216-96.897 216-216 216zm-12-324h24v120h-24V148zm0 168h24v24h-24v-24z"
+        />
+      </svg>
+    ),
+    animation: { x: -200, y: 150, rotate: -30, opacity: 0 },
+  },
+  "Join Team": {
+    title: "Join Our Team 🖇️",
+    description:
+      "Love what we do? Collaborate with us, contribute your skills, and help build something amazing together!",
+    svg: (
+      <svg
+        viewBox="0 0 24 24"
+        className="w-20 h-20 drop-shadow-lg"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <linearGradient id="joinGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#6366f1" />
+            <stop offset="100%" stopColor="#3b82f6" />
+          </linearGradient>
+        </defs>
+
+        <path
+          d="M9 4A4 4 0 1 0 9 12 4 4 0 1 0 9 4z"
+          fill="url(#joinGradient)"
+        />
+        <path
+          d="m10,13h-2c-2.76,0-5,2.24-5,5v1c0,.55.45,1,1,1h10c.55,0,1-.45,1-1v-1c0-2.76-2.24-5-5-5Z"
+          fill="url(#joinGradient)"
+        />
+        <path
+          d="m15,4c-.47,0-.9.09-1.31.22.82,1.02,1.31,2.33,1.31,3.78s-.49,2.75-1.31,3.78c.41.13.84.22,1.31.22,2.28,0,4-1.72,4-4s-1.72-4-4-4Z"
+          fill="url(#joinGradient)"
+        />
+        <path
+          d="m16,13h-1.11c1.3,1.27,2.11,3.04,2.11,5v1c0,.35-.07.69-.18,1h3.18c.55,0,1-.45,1-1v-1c0-2.76-2.24-5-5-5Z"
+          fill="url(#joinGradient)"
+        />
+      </svg>
+    ),
+    animation: { x: 0, y: 200, rotate: 15, opacity: 0 },
+  },
+};
 
 function ContactPage() {
   // *************** All States ***************
@@ -37,11 +136,12 @@ function ContactPage() {
     "feedback" | "report" | "Join Team"
   >("feedback");
   const [isFlying, setIsFlying] = useState(false);
-
+  const router = useRouter();
   const feedbackForm = useForm<FeedbackFormValues>({
     resolver: zodResolver(feedbackFormPayloadSchema),
     defaultValues: { rating: 3, feedback_text: "" },
   });
+  const queryClient = useQueryClient();
 
   const reportForm = useForm<ReportFormValues>({
     resolver: zodResolver(reportFormSchema),
@@ -67,6 +167,7 @@ function ContactPage() {
         feedbackForm.reset();
         setIsFlying(true);
         setTimeout(() => setIsFlying(false), 1500);
+        queryClient.invalidateQueries({ queryKey: ["/feedback/all", "GET"] });
       },
       onError: (error) => {
         console.error("Feedback submission failed:", error);
@@ -96,6 +197,11 @@ function ContactPage() {
 
   // ***************  Functions ***************
   function onSubmitFeedback(data: FeedbackFormValues) {
+    if (!getUserInfo()) {
+      toast.error("You have to login first in order to send feedback");
+      router.navigate({ to: "/login" });
+      return;
+    }
     const payload = {
       rating: data.rating,
       feedback_text: data.feedback_text?.trim()
@@ -106,6 +212,11 @@ function ContactPage() {
   }
 
   function onSubmitReport(data: ReportFormValues) {
+    if (!getUserInfo()) {
+      toast.error("You have to login first in order to report an issue");
+      router.navigate({ to: "/login" });
+      return;
+    }
     const descResult = reportDescriptionSchema.safeParse(data.description);
     if (!descResult.success) {
       reportForm.setError("description", {
@@ -148,17 +259,19 @@ function ContactPage() {
         overflow-hidden"
         >
           <div className="hidden md:flex flex-col items-center justify-center bg-card/60 text-white p-10 relative">
-            <h2 className="text-3xl font-bold mb-4">Let’s Connect ✨</h2>
+            <h2 className="text-3xl font-bold mb-4">
+              {tabContent[activeTab].title}
+            </h2>
             <p className="text-white text-center mb-8">
-              Got feedback, questions, or just want to say hi? Drop us a message
-              anytime!
+              {tabContent[activeTab].description}
             </p>
+
             <motion.div
-              key={isFlying ? "flying" : "resting"}
+              key={activeTab + (isFlying ? "-flying" : "-resting")}
               initial={{ x: 0, y: 0, rotate: 0, opacity: 1 }}
               animate={
                 isFlying
-                  ? { x: 300, y: -200, rotate: 45, opacity: 0 }
+                  ? tabContent[activeTab].animation
                   : { x: 0, y: 0, rotate: 0, opacity: 1 }
               }
               transition={{ duration: 1.2, ease: "easeInOut" }}
@@ -166,43 +279,11 @@ function ContactPage() {
                 if (isFlying) setIsFlying(false);
               }}
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 512 512"
-                className="w-20 h-20 text-[#c084fc] drop-shadow-lg"
-                fill="currentColor"
-              >
-                <path d="M476.59 3.11 17.73 212.63c-22.58 10.45-21.08 43.14 2.2 51.16l111.9 37.3 45.9 147.7c6.47 20.81 32.77 27.3 48.55 12.15l66.25-65.13 104.8 76.7c19.7 14.42 47.9 4.57 53.6-19.5l62.1-278.48c6.2-27.79-20.7-51.38-47.5-40.86zM195.6 422.63l-33.6-108 190.8-120.84-128.7 149.8-28.5 79.04z" />
-              </svg>
+              {tabContent[activeTab].svg}
             </motion.div>
           </div>
-          <div className="bg-white/80 p-6">
-            {/* <div className="mb-4 flex gap-2 text-xs text-slate-500 justify-end">
-              {activeTab === "feedback" ? (
-                <>
-                  <span className="text-xl">💬</span>
-                  <span className="mt-1 text-gray-800">
-                    Share quick feedback
-                  </span>
-                </>
-              ) : activeTab === "report" ? (
-                <>
-                  <span className="text-lg">🐞</span>
-                  <span className="mt-1 text-gray-800">
-                    Report a bug or request
-                  </span>
-                </>
-              ) : (
-                <>
-                  <span className="text-lg">📱</span>
-                  <span className="mt-1 text-gray-800">
-                    Join our team on WhatsApp
-                  </span>
-                </>
-              )}
-            </div> */}
 
-            {/* Tabs */}
+          <div className="bg-white/80 p-6">
             <div className="flex mb-6">
               <div className="inline-flex w-full rounded-2xl backdrop-blur-lg bg-[#6a1b9a]/20 border border-[#6a1b9a]/30 shadow-lg p-2 justify-between items-center">
                 <button
@@ -280,7 +361,7 @@ function ContactPage() {
                     />
                     <div className="flex items-center">
                       <Button
-                        className="bg-card/70 border border-card/70 text-white hover:bg-card/90 transition-all duration-300"
+                        className="bg-gradient-to-r from-card/60 to-card/90  text-white hover:bg-card/90 transition-all duration-300"
                         type="submit"
                         disabled={feedbackForm.formState.isSubmitting}
                       >
@@ -356,7 +437,7 @@ function ContactPage() {
                       <FormControl>
                         <input
                           type="file"
-                          className="block w-full text-sm text-slate-700 file:border-0 file:bg-slate-100 file:py-2 file:px-3 file:rounded-md"
+                          className="block w-full text-sm text-slate-700 file:border-0 file:bg-slate-300 file:py-2 file:px-3 file:rounded-md"
                           onChange={(e) => {
                             reportForm.setValue("attachment", e.target.files);
                           }}
@@ -370,7 +451,7 @@ function ContactPage() {
                     <div className="flex items-center">
                       <Button
                         type="submit"
-                        className="bg-card/70 border border-card/70 text-white hover:bg-card/90 transition-all duration-300"
+                        className="bg-gradient-to-r from-card/60 to-card/90  text-white hover:bg-card/90 transition-all duration-300"
                         disabled={reportForm.formState.isSubmitting}
                       >
                         {reportForm.formState.isSubmitting
@@ -397,7 +478,7 @@ function ContactPage() {
                     href="https://chat.whatsapp.com/FlZQTmQBK9EKuUSHg3JvPB?mode=ems_copy_t"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-block font-semibold px-6 py-3 rounded-md  bg-card/70 border border-card/70 text-white hover:bg-card/90 transition-all duration-300"
+                    className="inline-block font-semibold px-6 py-3 rounded-md  bg-gradient-to-r from-card/60 to-card/90  text-white hover:bg-card/90  transition-all duration-300"
                   >
                     <FaWhatsapp className="inline mr-2 text-lg" />
                     Join WhatsApp Group
