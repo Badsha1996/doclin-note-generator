@@ -48,17 +48,26 @@ import {
 import { useApiMutation } from "@/hook/useApi";
 
 import { EyeClosed, Eye, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   InputOTP,
   InputOTPGroup,
   InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { getUserInfo } from "@/lib/auth";
 
 type ApiResponse = RegisterResponse;
 
 function RegisterPage() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (getUserInfo()) {
+      navigate({ to: "/" });
+    }
+  }, []);
+
   const form = useForm<registerTypes>({
     resolver: zodResolver(FormSchema),
     mode: "onChange",
@@ -76,8 +85,6 @@ function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [otpVerified, setOtpVerified] = useState(false);
-
-  const navigate = useNavigate();
 
   const profileMutation = useApiMutation<VerifyUserResponse, VerifyUserType>(
     {
