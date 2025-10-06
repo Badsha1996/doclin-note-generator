@@ -115,7 +115,7 @@ async def oauthLogin(
         )
         access_token, refresh_token, user = await auth_service.oauth_login(oauth_user)
 
-        response = RedirectResponse(url=f"""{settings.FRONTEND_URL}?oauth=success""")
+        response = RedirectResponse(url=f"""{settings.FRONTEND_URL}?oauth=success""",status_code=303)
 
 
         response.set_cookie(

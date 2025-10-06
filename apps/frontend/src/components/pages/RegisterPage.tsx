@@ -328,6 +328,24 @@ function RegisterPage() {
                                   });
                                 }
                               }}
+                              onPaste={(
+                                e: React.ClipboardEvent<HTMLInputElement>
+                              ) => {
+                                e.preventDefault();
+                                const pasteData = e.clipboardData
+                                  .getData("text")
+                                  .trim()
+                                  .slice(0, 6); // take only first 6 characters
+
+                                field.onChange(pasteData);
+
+                                if (pasteData.length === 6) {
+                                  verifyOtpMutation.mutate({
+                                    email: form.getValues("email"),
+                                    otp: pasteData,
+                                  });
+                                }
+                              }}
                             >
                               <InputOTPGroup>
                                 <InputOTPSlot
