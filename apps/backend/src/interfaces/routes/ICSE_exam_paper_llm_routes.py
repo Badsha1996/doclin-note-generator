@@ -29,8 +29,14 @@ async def generate_question_paper(
     security_manager:SecurityManager = Depends(get_security_manager)
 ):
     try:
-        llm_repo = SQLLMRepo(db=db, model=get_embedding_model, embedding_api_url=settings.EMBEDDING_API_URL)
-        exam_paper_repo = SQLExamPaperRepo(db=db, model=get_embedding_model, embedding_api_url=settings.EMBEDDING_API_URL)
+        local_model = get_embedding_model()
+        
+        if settings.VECTOR_MODEL==False:
+            llm_repo = SQLLMRepo(db=db, model=None, cohere_api_keys=settings.COHERE_API_KEY)
+            exam_paper_repo = SQLExamPaperRepo(db, model=None, cohere_api_keys=settings.COHERE_API_KEY)
+        else:
+            llm_repo = SQLLMRepo(db=db, model=local_model, cohere_api_keys=settings.COHERE_API_KEY)
+            exam_paper_repo = SQLExamPaperRepo(db, model=settings.VECTOR_MODEL, cohere_api_keys=settings.COHERE_API_KEY)
         user_repo = SQLUserRepo(db=db)
         user_service = UserService(user_repo, security_manager)
         
@@ -58,18 +64,9 @@ async def generate_question_paper(
             year=llm_gen_data.year
         )
         
-        # Debug the exam_paper before serialization
-        print(f"DEBUG: exam_paper type: {type(exam_paper)}")
-        print(f"DEBUG: exam_paper sections count: {len(exam_paper.sections)}")
-        print(f"DEBUG: Section 0 questions: {len(exam_paper.sections[0].questions)}")
-        print(f"DEBUG: Section 1 questions: {len(exam_paper.sections[1].questions)}")
         
         # Convert to dict explicitly to ensure proper serialization
         exam_paper_dict = exam_paper.model_dump()
-        
-        # Debug the dict version
-        print(f"DEBUG: exam_paper_dict sections count: {len(exam_paper_dict['sections'])}")
-        print(f"DEBUG: Dict Section 0 questions: {len(exam_paper_dict['sections'][0]['questions'])}")
         
         await user_service.update_user(
             current_user.id,
@@ -78,13 +75,12 @@ async def generate_question_paper(
         
         return APIResponseSchema(
             success=True,
-            data={"exam_paper": exam_paper_dict},  # Use the dict version
+            data={"exam_paper": exam_paper_dict},  
             message="Exam Paper has been generated"
         )
         
     except Exception as e:
         import traceback
-        print("GEN PAPER ERROR:", e)
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
     

@@ -302,9 +302,9 @@ function HomePage() {
                     style={{ pointerEvents: "none" }}
                     onCreated={(state) => {
                       setModelLoaded(true);
-                      // Configure renderer for better stability
                       state.gl.setClearColor(0x000000, 0);
                     }}
+                    dpr={Math.min(window.devicePixelRatio, 2)}
                     gl={{
                       powerPreference: "high-performance",
                       antialias: true,
@@ -312,6 +312,7 @@ function HomePage() {
                       preserveDrawingBuffer: false,
                       failIfMajorPerformanceCaveat: false,
                     }}
+                    
                   >
                     <Scene />
                   </Canvas>

@@ -48,17 +48,26 @@ import {
 import { useApiMutation } from "@/hook/useApi";
 
 import { EyeClosed, Eye, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   InputOTP,
   InputOTPGroup,
   InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { getUserInfo } from "@/lib/auth";
 
 type ApiResponse = RegisterResponse;
 
 function RegisterPage() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (getUserInfo()) {
+      navigate({ to: "/" });
+    }
+  }, []);
+
   const form = useForm<registerTypes>({
     resolver: zodResolver(FormSchema),
     mode: "onChange",
@@ -76,8 +85,6 @@ function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [otpVerified, setOtpVerified] = useState(false);
-
-  const navigate = useNavigate();
 
   const profileMutation = useApiMutation<VerifyUserResponse, VerifyUserType>(
     {
@@ -362,6 +369,24 @@ function RegisterPage() {
                                   verifyOtpMutation.mutate({
                                     email: form.getValues("email"),
                                     otp: val,
+                                  });
+                                }
+                              }}
+                              onPaste={(
+                                e: React.ClipboardEvent<HTMLInputElement>
+                              ) => {
+                                e.preventDefault();
+                                const pasteData = e.clipboardData
+                                  .getData("text")
+                                  .trim()
+                                  .slice(0, 6); // take only first 6 characters
+
+                                field.onChange(pasteData);
+
+                                if (pasteData.length === 6) {
+                                  verifyOtpMutation.mutate({
+                                    email: form.getValues("email"),
+                                    otp: pasteData,
                                   });
                                 }
                               }}

@@ -123,6 +123,6 @@ class SubPartModel(Base):
     constants_given = Column(JSON, nullable=True)
     equation_template = Column(String, nullable=True)
     choices_given = Column(ARRAY(String), nullable=True)
-    embedding = Column(Vector(768))
+    embedding = Column(Vector(384))
 
     part = relationship("QuestionPartModel", back_populates="sub_parts")
