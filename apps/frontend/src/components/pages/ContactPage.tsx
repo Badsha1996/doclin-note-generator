@@ -35,14 +35,14 @@ import { getUserInfo } from "@/lib/auth";
 import { useRouter } from "@tanstack/react-router";
 const tabContent = {
   feedback: {
-    title: "Let’s Connect ✨",
+    title: "Share Your Feedback 📝",
     description:
-      "Got feedback, questions, or just want to say hi? Drop us a message anytime!",
+      "Help us improve! Rate your experience and leave your comments so we can make our service even better.",
     svg: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 512 512"
-        className="w-20 h-20 drop-shadow-lg"
+        className="w-15 h-15 drop-shadow-lg"
       >
         <defs>
           <linearGradient
@@ -69,12 +69,12 @@ const tabContent = {
   report: {
     title: "Report an Issue 🐞",
     description:
-      "Encountered a bug or issue? Let us know and we’ll fix it as soon as possible.",
+      "Found an issue? Let us know so we can fix it quickly and improve your experience.",
     svg: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 512 512"
-        className="w-20 h-20 drop-shadow-lg"
+        className="w-15 h-15 drop-shadow-lg"
       >
         <defs>
           <linearGradient id="bugGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -94,13 +94,11 @@ const tabContent = {
   "Join Team": {
     title: "Join Our Team 🖇️",
     description:
-      "Want to collaborate with us? Join our Doclin Team and start contributing!",
+      "Love what we do? Collaborate with us, contribute your skills, and help build something amazing together!",
     svg: (
       <svg
-        width="128"
-        height="128"
         viewBox="0 0 24 24"
-        className="drop-shadow-lg"
+        className="w-20 h-20 drop-shadow-lg"
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
