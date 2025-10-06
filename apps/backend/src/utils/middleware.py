@@ -121,5 +121,6 @@ def setup_middleware(app: FastAPI):
             "/api/auth/verify",
             "/api/otp/generate",
             "/api/feedback/all",
+            "/api/auth/logout"
         ]
     )
