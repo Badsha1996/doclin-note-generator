@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 
 
-from ..dependencies.dependencies import admin_only, get_current_user
+from ..dependencies.dependencies import get_current_user,admin_or_super_admin_only
 from ..schemas.exam_paper_schemas import ExamPaperSchema,GetExamPaperSchema, GetExamPaperYearsSchema
 from ..schemas.response_schemas import APIResponseSchema
 
@@ -15,7 +15,7 @@ from ...config.config import settings
 
 exam_paper_router = APIRouter(prefix="/exam-paper", tags=[""])
 
-@exam_paper_router.post("/save",dependencies=[Depends(admin_only)])
+@exam_paper_router.post("/save",dependencies=[Depends(admin_or_super_admin_only)])
 async def save_exam_paper(
     exam_paper_data : ExamPaperSchema,
     db : Session = Depends(get_DB)
