@@ -18,6 +18,15 @@ import { useApi } from "@/hook/useApi";
 import { motion, AnimatePresence } from "framer-motion";
 import GlassmorphicLoader from "../common/GlassLoader";
 import React from "react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "../ui/carousel";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CardContent } from "../ui/card";
 
 const productFeatures = [
   {
@@ -106,26 +115,22 @@ function HomePage() {
 
   const realTestimonials = React.useMemo(() => {
     if (!rawFeedbackData?.data?.feedbacks) return [];
+    const filtered = rawFeedbackData.data.feedbacks
+      .filter((f) => f.rating >= 4)
+      .sort((a, b) => {
+        const dateA = new Date(a.created_at).getTime();
+        const dateB = new Date(b.created_at).getTime();
+        return dateB - dateA;
+      });
 
-    const textual = rawFeedbackData.data.feedbacks
-      .filter((f) => f.feedback_text && f.rating >= 4)
-      .map((f) => ({
-        id: f.id,
-        text: f.feedback_text!,
-        rating: Math.round(f.rating),
-      }));
-
-    const starsOnly = rawFeedbackData.data.feedbacks
-      .filter((f) => !f.feedback_text && f.rating >= 4)
-      .map((f) => ({
-        id: f.id,
-        text: "⭐ Highly rated, but no comment left",
-        rating: Math.round(f.rating),
-      }));
-    const combined = [...textual, ...starsOnly];
-
-    console.log("Filtered testimonials:", combined);
-    return combined.slice(0, 3);
+    return filtered.map((f) => ({
+      id: f.id,
+      text: f.feedback_text,
+      rating: Math.round(f.rating),
+      username: f.username,
+      createdAt: new Date(f.created_at).toLocaleString(),
+      avatarUrl: `https://api.adorable.io/avatars/285/${f.user_id}.png`,
+    }));
   }, [rawFeedbackData]);
 
   const showTestimonials = !testimonialsLoading && realTestimonials.length > 0;
@@ -312,7 +317,6 @@ function HomePage() {
                       preserveDrawingBuffer: false,
                       failIfMajorPerformanceCaveat: false,
                     }}
-                    
                   >
                     <Scene />
                   </Canvas>
@@ -506,24 +510,74 @@ function HomePage() {
                   </h2>
                 </div>
 
-                <div className="grid md:grid-cols-3 gap-6">
-                  {realTestimonials.map((t) => (
-                    <div
-                      key={t.id}
-                      className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10"
-                    >
-                      <div className="flex mb-4">
-                        {[...Array(t.rating)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className="w-4 h-4 text-yellow-400 fill-current"
-                          />
-                        ))}
-                      </div>
-                      <p className="text-white/80 italic">"{t.text}"</p>
-                    </div>
-                  ))}
-                </div>
+                <Carousel
+                  opts={{
+                    align: "start",
+                    loop: true,
+                  }}
+                  className="w-full"
+                >
+                  <CarouselContent>
+                    {realTestimonials.map((testimonial) => (
+                      <CarouselItem
+                        key={testimonial.id}
+                        className="w-full basis-[260px] md:basis-[310px] lg:basis-[320px] p-2 gap-0"
+                      >
+                        <motion.div
+                          initial={{ y: 0 }}
+                          whileHover={{ scale: 1.01, y: -8 }}
+                          className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10"
+                        >
+                          <CardContent className="flex flex-col items-center space-y-4">
+                            <Avatar className="w-24 h-24 border-2 border-primary/20">
+                              <AvatarImage
+                              // src={}
+                              // alt={}
+                              />
+                              <AvatarFallback className="text-xl">
+                                {(testimonial.username ?? "CN")
+                                  .split(" ")
+                                  .map((n) => n[0])
+                                  .join("")}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="text-center space-y-4">
+                              <h3 className="text-xl font-semibold">
+                                {testimonial.username}
+                              </h3>
+
+                              <div className="flex mb-4">
+                                {[...Array(Math.round(testimonial.rating))].map(
+                                  (_, i) => (
+                                    <Star
+                                      key={i}
+                                      className="w-4 h-4 text-yellow-400 fill-current"
+                                    />
+                                  )
+                                )}
+                              </div>
+                              <p className="text-white/80 italic">
+                                "{testimonial.text}"
+                              </p>
+                              <p className="text-sm font-normal text-white">
+                                {new Date(
+                                  testimonial.createdAt
+                                ).toLocaleString()}{" "}
+                              </p>
+                            </div>
+                          </CardContent>
+                        </motion.div>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+
+                  {realTestimonials.length > 3 && (
+                    <>
+                      <CarouselPrevious className="absolute left-0 -translate-y-1/2 top-1/2" />
+                      <CarouselNext className="absolute right-0 -translate-y-1/2 top-1/2" />
+                    </>
+                  )}
+                </Carousel>
               </div>
             </div>
           ) : null}

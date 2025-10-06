@@ -19,6 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import { useApiMutation } from "@/hook/useApi";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   feedbackApiSchema,
   reportDescriptionSchema,
@@ -30,6 +31,8 @@ import {
   type FeedbackFormValues,
   type ReportFormValues,
 } from "@/types/type";
+import { getUserInfo } from "@/lib/auth";
+import { useRouter } from "@tanstack/react-router";
 const tabContent = {
   feedback: {
     title: "Let’s Connect ✨",
@@ -135,11 +138,12 @@ function ContactPage() {
     "feedback" | "report" | "Join Team"
   >("feedback");
   const [isFlying, setIsFlying] = useState(false);
-
+  const router = useRouter();
   const feedbackForm = useForm<FeedbackFormValues>({
     resolver: zodResolver(feedbackFormPayloadSchema),
     defaultValues: { rating: 3, feedback_text: "" },
   });
+  const queryClient = useQueryClient();
 
   const reportForm = useForm<ReportFormValues>({
     resolver: zodResolver(reportFormSchema),
@@ -165,6 +169,7 @@ function ContactPage() {
         feedbackForm.reset();
         setIsFlying(true);
         setTimeout(() => setIsFlying(false), 1500);
+        queryClient.invalidateQueries({ queryKey: ["/feedback/all", "GET"] });
       },
       onError: (error) => {
         console.error("Feedback submission failed:", error);
@@ -194,6 +199,11 @@ function ContactPage() {
 
   // ***************  Functions ***************
   function onSubmitFeedback(data: FeedbackFormValues) {
+    if (!getUserInfo()) {
+      toast.error("You have to login first in order to send feedback");
+      router.navigate({ to: "/login" });
+      return;
+    }
     const payload = {
       rating: data.rating,
       feedback_text: data.feedback_text?.trim()
@@ -204,6 +214,11 @@ function ContactPage() {
   }
 
   function onSubmitReport(data: ReportFormValues) {
+    if (!getUserInfo()) {
+      toast.error("You have to login first in order to report an issue");
+      router.navigate({ to: "/login" });
+      return;
+    }
     const descResult = reportDescriptionSchema.safeParse(data.description);
     if (!descResult.success) {
       reportForm.setError("description", {
