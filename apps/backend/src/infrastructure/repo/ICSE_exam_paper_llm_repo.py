@@ -4,55 +4,54 @@ from typing import List, Dict, Optional, Any
 import asyncio
 import json
 from uuid import uuid4
-import logging
 from string import Template
 
 from ..models.exam_paper_models import SubPartModel, QuestionPartModel, QuestionModel, SectionModel, ExamPaperModel
 from ...LLMs.LLMs import LLMProviderManager
 from ...core.entities.exam_paper_entities import ExamInfo, ExamPaperCreate, Section
-from ...prompts.ICSE_questions import PERFECT_DIAGRAM, PERFECT_QUESTION, PERFECT_SECTION_A, PERFECT_SECTION_B, ULTRA_STRICT_SECTION_A_PROMPT, ULTRA_STRICT_SECTION_B_PROMPT
-from ...config.embedding_api_client import EmbeddingAPIClient
+from ...prompts.ICSE_questions import PERFECT_QUESTION, PERFECT_SECTION_A, PERFECT_SECTION_B, ULTRA_STRICT_SECTION_A_PROMPT, ULTRA_STRICT_SECTION_B_PROMPT
+from ...config.cohere_api_client import CohereEmbeddingClient
 
 ROMAN_NUMERALS = ["i", "ii", "iii", "iv", "v", "vi", "vii", "viii", "ix", "x", "xi", "xii", "xiii", "xiv", "xv"]
 
 
 class SQLLMRepo:
-    def __init__(self, db: Session, model=None, embedding_api_url=None):
+    def __init__(self, db: Session, model=None, cohere_api_keys=None):
         self.db = db
         self.model = model
-        self.embedding_client = EmbeddingAPIClient(embedding_api_url) if embedding_api_url else None
+        self.cohere_client = None
+
+        # Use Cohere if no local model
+        if model is None:
+            self.cohere_client = CohereEmbeddingClient(api_keys=cohere_api_keys)
+
         self.llm_manager = LLMProviderManager()
         self.max_retrieval_limit = 300
         self.context_per_section = 50
-        
+
     def _get_query_embedding(self, query: str) -> List[float]:
         if not query or not query.strip():
             raise ValueError("Query string cannot be empty")
-        
+
+        # ① Local model
         if self.model is not None:
-            # Using local SentenceTransformer model
             embedding = self.model.encode(query)
-            # Normalize the embedding
             embedding = embedding / np.linalg.norm(embedding)
             return embedding.tolist()
-            
-        elif self.embedding_client is not None:
-            # Using API client
-            # Note: API client returns normalized embeddings when normalize=True
-            embedding = self.embedding_client.encode(query, normalize=True)
-            
-            # embedding is a 1D numpy array for single text
+
+        # ② Cohere fallback
+        elif self.cohere_client is not None:
+            embedding = self.cohere_client.encode(query, input_type="search_document", normalize=True)
             if isinstance(embedding, np.ndarray):
                 return embedding.tolist()
             elif isinstance(embedding, list):
                 return embedding
             else:
-                # Fallback conversion
                 return list(embedding)
-                
-        else:
-            raise Exception("No embedding model or API client available")
 
+        else:
+            raise Exception("No embedding model or Cohere client available")
+        
     def _get_roman_numeral(self, num: int) -> str:
         return ROMAN_NUMERALS[num - 1] if 1 <= num <= len(ROMAN_NUMERALS) else str(num)
 
