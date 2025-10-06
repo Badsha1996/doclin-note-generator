@@ -47,7 +47,7 @@ import {
 } from "@/lib/motion";
 import { useApiMutation } from "@/hook/useApi";
 
-import { EyeClosed, Eye, Loader2 } from "lucide-react";
+import { EyeClosed, Eye } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   InputOTP,
