@@ -162,7 +162,7 @@ class CohereEmbeddingClient:
                         return embeddings[0]
                     return embeddings
                     
-                except cohere.CohereAPIError as e:
+                except errors.CohereAPIError as e:
                     last_error = e
                     error_msg = str(e).lower()
                     
