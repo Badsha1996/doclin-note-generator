@@ -4,6 +4,7 @@ import numpy as np
 import time
 import logging
 from typing import List, Union, Optional
+from cohere import errors
 from .config import settings
 
 logger = logging.getLogger(__name__)
@@ -161,7 +162,7 @@ class CohereEmbeddingClient:
                         return embeddings[0]
                     return embeddings
                     
-                except cohere.error.CohereAPIError as e:
+                except errors.CohereAPIError as e:
                     last_error = e
                     error_msg = str(e).lower()
                     
@@ -205,7 +206,7 @@ class CohereEmbeddingClient:
                         )
                         break  # Try next key
                 
-                except cohere.error.CohereConnectionError as e:
+                except errors.CohereConnectionError as e:
                     last_error = e
                     if attempt < self.max_retries - 1:
                         wait_time = self._get_retry_delay(attempt)
@@ -221,6 +222,9 @@ class CohereEmbeddingClient:
                             f"Trying next key..."
                         )
                         break  # Try next key
+                
+                except errors.UnauthorizedError as e:
+                    logger.error(f"⚠️ Invalid API key: {e}")
                 
                 except Exception as e:
                     last_error = e
@@ -298,7 +302,7 @@ class CohereEmbeddingClient:
                     "status": "healthy"
                 })
                 
-            except cohere.error.CohereAPIError as e:
+            except errors.CohereAPIError as e:
                 error_msg = str(e).lower()
                 
                 if "rate limit" in error_msg or "429" in error_msg:

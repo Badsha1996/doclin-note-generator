@@ -1,5 +1,4 @@
 import * as React from "react";
-
 import { cn } from "@/lib/utils";
 
 type InputVariant = "default" | "outline" | "filled" | "custom";
@@ -20,6 +19,8 @@ function Input({
   variant = "default",
   ...props
 }: React.ComponentProps<"input"> & { variant?: InputVariant }) {
+  const isCustom = variant === "custom";
+
   return (
     <input
       type={type}
@@ -30,9 +31,20 @@ function Input({
         "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
         className
       )}
+      style={
+        isCustom
+          ? {
+              WebkitBoxShadow: "0 0 0px 1000px rgba(255, 255, 255, 0.1) inset",
+              WebkitTextFillColor: "white",
+              caretColor: "white",
+              transition: "background-color 5000s ease-in-out 0s",
+            }
+          : undefined
+      }
       {...props}
     />
   );
 }
+
 
 export { Input };

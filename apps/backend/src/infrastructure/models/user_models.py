@@ -22,9 +22,9 @@ class UserModel(Base):
     username = Column(String, unique=True, index=True, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
     hash_password = Column(String, nullable=False)
-    role = Column(Enum(UserRole, name="user_role",), default="user")
+    role = Column(Enum(UserRole, name="user_role", schema="public"), default="user")
+    plan = Column(Enum(UserPlan, name="user_plan", schema="public"), default="free")
     is_verified = Column(Boolean, default=False)
-    plan = Column(Enum(UserPlan,name="user_plan"),default="free")
     blocked = Column(Boolean,default=False)
     model_hit_count=Column(Integer,default=0)
 
