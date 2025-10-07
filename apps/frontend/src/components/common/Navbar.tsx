@@ -28,7 +28,7 @@ import { toast } from "sonner";
 function Navbar() {
   // *********** All States ***********
   const searchParams = useSearch({ from: "__root__" });
-  const oauth = searchParams?.oauth;
+  const { oauth, code } = searchParams;
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const router = useRouter();
@@ -45,13 +45,16 @@ function Navbar() {
   }, []);
 
   useEffect(() => {
-    if (!oauth || getUserInfo()) return;
+    if (!oauth || !code || getUserInfo()) return;
     const fetchUser = async () => {
       try {
-        const url = `${import.meta.env.VITE_API_BASE_URL}/auth/me`;
+        const url = `${import.meta.env.VITE_API_BASE_URL}/auth/exchange`;
         const response = await fetch(url, {
-          method: "GET",
+          method: "POST",
           headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            code,
+          }),
           credentials: "include",
         });
 
@@ -71,14 +74,14 @@ function Navbar() {
 
         const data = await response.json();
         setUserInfo({
-          email: data.data.email,
-          role: data.data.role,
-          username: data.data.username,
+          email: data.data.user.email,
+          role: data.data.user.role,
+          username: data.data.user.user_name,
         });
         setUser({
-          email: data.data.email,
-          role: data.data.role,
-          username: data.data.username,
+          email: data.data.user.email,
+          role: data.data.user.role,
+          username: data.data.user.user_name,
         });
       } catch (err) {
         console.error(err);
@@ -86,7 +89,7 @@ function Navbar() {
     };
 
     fetchUser();
-  }, [oauth]);
+  }, [oauth, code]);
   const mutation = useApiMutation<LogoutResponse>(
     {
       endpoint: "/auth/logout",

@@ -15,6 +15,7 @@ import { Suspense } from "react";
 
 const rootSearchSchema = z.object({
   oauth: z.string().optional(),
+  code: z.string().optional(),
 });
 
 export const Route = createRootRoute({
