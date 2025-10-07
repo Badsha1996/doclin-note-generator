@@ -16,7 +16,6 @@ import {
 import { FaWhatsapp } from "react-icons/fa";
 import { Rating } from "@/components/common/Rating";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import { useApiMutation } from "@/hook/useApi";
 import { useQueryClient } from "@tanstack/react-query";
