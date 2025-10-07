@@ -248,40 +248,79 @@ class LLMProviderManager:
             max_new_tokens=4096
         )
 
-    # ---------------- Fallback Chain ---------------- #
     def get_llm_chain(self) -> List[Tuple[str, Callable]]:
-        """Get prioritized list of LLM providers with fallback"""
         chain = []
-        
-        # Add providers based on configuration
-        if self.gemini_models and self.gemini_keys:
-            chain.append(("gemini", self.get_gemini))
 
+        # ---------------- Gemini (priority 1) ---------------- #
+        if self.gemini_models and self.gemini_keys:
+            for model in self.gemini_models:
+                for key in self.gemini_keys:
+                    def make_gemini_func(m=model, k=key):
+                        return lambda: ChatGoogleGenerativeAI(
+                            model=m,
+                            google_api_key=k,
+                            temperature=0.7,
+                            max_output_tokens=8192
+                        )
+                    chain.append((f"gemini:{model}:{key[:6]}...", make_gemini_func()))
+
+        # ---------------- HuggingFace (priority 2) ---------------- #
         if self.hf_models and self.hf_keys:
-            chain.append(("huggingface", self.get_hf))
-        
-        if self.openrouter_keys or True:  # OpenRouter has free tier
-            chain.append(("openrouter", self.get_openrouter))
-        
-        # Only add Ollama if the library is available
+            for model in self.hf_models:
+                for key in self.hf_keys:
+                    def make_hf_func(m=model, k=key):
+                        return lambda: HuggingFaceEndpoint(
+                            repo_id=m,
+                            huggingfacehub_api_token=k,
+                            task="text-generation",
+                            max_new_tokens=4096
+                        )
+                    chain.append((f"huggingface:{model}", make_hf_func()))
+
+        # ---------------- OpenRouter (priority 3) ---------------- #
+        if self.openrouter_keys or True:  # has free tier
+            for model in self.free_openrouter_models:
+                for key in (self.openrouter_keys or [None]):
+                    def make_openrouter_func(m=model, k=key):
+                        return lambda: ChatOpenAI(
+                            model=m,
+                            api_key=k,
+                            base_url=self.openrouter_base_url,
+                            temperature=0.7,
+                            max_tokens=4096
+                        )
+                    chain.append((f"openrouter:{model}", make_openrouter_func()))
+
+        # ---------------- Ollama (priority 4) ---------------- #
         if _OLLAMA_AVAILABLE and (self.ollama_models or self.ollama_urls):
-            chain.append(("ollama", self.get_ollama))
-        
-        # Add paid models if allowed
+            for i in range(max(len(self.ollama_models), len(self.ollama_urls))):
+                def make_ollama_func(i=i):
+                    model = self.ollama_models[min(i, len(self.ollama_models)-1)]
+                    url = self.ollama_urls[min(i, len(self.ollama_urls)-1)]
+                    return lambda: OllamaLLM(base_url=url, model=model)
+                chain.append((f"ollama:{self.ollama_models[min(i, len(self.ollama_models)-1)]}", make_ollama_func()))
+
+        # ---------------- Paid models (optional) ---------------- #
         if self.allow_paid_models:
             if self.gemini_keys:
-                chain.append(("gemini_paid", lambda: ChatGoogleGenerativeAI(
-                    model="gemini-2.5-pro", 
-                    google_api_key=self.gemini_keys[self.current_gemini_key_index]
-                )))
-            
+                for key in self.gemini_keys:
+                    def make_gemini_paid_func(k=key):
+                        return lambda: ChatGoogleGenerativeAI(
+                            model="gemini-2.5-pro",
+                            google_api_key=k
+                        )
+                    chain.append(("gemini_paid", make_gemini_paid_func()))
+
             if self.openrouter_keys:
-                chain.append(("openrouter_paid", lambda: ChatOpenAI(
-                    model="anthropic/claude-3-5-sonnet",
-                    api_key=self.openrouter_keys[self.current_openrouter_key_index],
-                    base_url=self.openrouter_base_url
-                )))
-        
+                for key in self.openrouter_keys:
+                    def make_openrouter_paid_func(k=key):
+                        return lambda: ChatOpenAI(
+                            model="anthropic/claude-3-5-sonnet",
+                            api_key=k,
+                            base_url=self.openrouter_base_url
+                        )
+                    chain.append(("openrouter_paid", make_openrouter_paid_func()))
+
         return chain
 
     # ---------------- Error Handling ---------------- #
