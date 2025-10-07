@@ -105,6 +105,28 @@ function HomePage() {
   const [webglError, setWebglError] = useState(false);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Handle responsive check
+  useEffect(() => {
+    const checkDevice = () => {
+      const width = window.innerWidth;
+      const isMobileDevice = width < 768;
+
+      // Check for low-end devices
+      const isLowEndDevice =
+        (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) ||
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent
+        );
+
+      setIsMobile(isMobileDevice || isLowEndDevice);
+    };
+
+    checkDevice();
+    window.addEventListener("resize", checkDevice);
+    return () => window.removeEventListener("resize", checkDevice);
+  }, []);
 
   const { data: rawFeedbackData, isLoading: testimonialsLoading } =
     useApi<FeedbackListResponse>({
@@ -288,39 +310,43 @@ function HomePage() {
                     </div>
                   </div>
                 )}
-                {!modelLoaded && !webglError && (
+
+                {!modelLoaded && !webglError && !isMobile && (
                   <GlassmorphicLoader size="md" message="Loading 3D model..." />
                 )}
-                <Suspense
-                  fallback={
-                    <div className="flex items-center justify-center h-full">
-                      <GlassmorphicLoader
-                        size="md"
-                        message="Loading 3D model..."
-                      />
-                    </div>
-                  }
-                >
-                  <Canvas
-                    key={canvasKey}
-                    className="w-full h-full"
-                    style={{ pointerEvents: "none" }}
-                    onCreated={(state) => {
-                      setModelLoaded(true);
-                      state.gl.setClearColor(0x000000, 0);
-                    }}
-                    dpr={Math.min(window.devicePixelRatio, 2)}
-                    gl={{
-                      powerPreference: "high-performance",
-                      antialias: true,
-                      alpha: true,
-                      preserveDrawingBuffer: false,
-                      failIfMajorPerformanceCaveat: false,
-                    }}
+
+                {!isMobile && (
+                  <Suspense
+                    fallback={
+                      <div className="flex items-center justify-center h-full">
+                        <GlassmorphicLoader
+                          size="md"
+                          message="Loading 3D model..."
+                        />
+                      </div>
+                    }
                   >
-                    <Scene />
-                  </Canvas>
-                </Suspense>
+                    <Canvas
+                      key={canvasKey}
+                      className="w-full h-full"
+                      style={{ pointerEvents: "none" }}
+                      onCreated={(state) => {
+                        setModelLoaded(true);
+                        state.gl.setClearColor(0x000000, 0);
+                      }}
+                      dpr={Math.min(window.devicePixelRatio, 2)}
+                      gl={{
+                        powerPreference: "high-performance",
+                        antialias: true,
+                        alpha: true,
+                        preserveDrawingBuffer: false,
+                        failIfMajorPerformanceCaveat: false,
+                      }}
+                    >
+                      <Scene />
+                    </Canvas>
+                  </Suspense>
+                )}
               </div>
 
               <h1

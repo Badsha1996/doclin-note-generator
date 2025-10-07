@@ -58,9 +58,6 @@ type GLTFResult = GLTF & {
   };
 };
 
-// type ActionName = 'Main';
-// type GLTFActions = Record<ActionName, THREE.AnimationAction>;
-
 // Crystal glass materials
 const crystalCornerMaterial = new THREE.MeshPhysicalMaterial({
   transmission: 0.9,
@@ -224,7 +221,6 @@ export function Model(
       >
     >
 ) {
-  // const instances = useContext(context);
   const group = useRef<THREE.Group>(null);
   const { nodes, animations } = useGLTF(
     "/models/dodekaden_orb.glb"
@@ -240,11 +236,10 @@ export function Model(
 
   useFrame((state) => {
     if (group.current) {
-      // Gentle floating animation
-      group.current.rotation.y += 0.008;
-      group.current.position.y = Math.sin(state.clock.elapsedTime * 0.8) * 0.15;
-      group.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.4) * 0.1;
-      group.current.rotation.z = Math.cos(state.clock.elapsedTime * 0.6) * 0.05;
+      // Simplified animation with less calculation
+      const time = state.clock.elapsedTime;
+      group.current.rotation.y = time * 0.008;
+      group.current.position.y = Math.sin(time * 0.8) * 0.15;
     }
   });
 
@@ -275,22 +270,36 @@ export function Model(
   );
 }
 
-// Preload the GLTF
-useGLTF.preload("/models/dodekaden_orb.glb");
+// Conditionally preload only on desktop - check at module initialization
+let hasPreloaded = false;
+if (typeof window !== 'undefined' && !hasPreloaded) {
+  const isDesktop = window.innerWidth >= 768 && 
+    (navigator.hardwareConcurrency ? navigator.hardwareConcurrency > 4 : true) &&
+    !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  
+  if (isDesktop) {
+    useGLTF.preload("/models/dodekaden_orb.glb");
+    hasPreloaded = true;
+  }
+}
 
 export function Scene() {
   return (
     <>
       <PerspectiveCamera makeDefault position={[0, 0, 8]} />
-      <OrbitControls enableZoom={false} enablePan={false} />
-      {/* Lighting */}
-      <ambientLight intensity={0.2} />
-      <directionalLight position={[10, 10, 5]} intensity={1} />
-      <pointLight position={[-10, -10, -10]} intensity={0.5} color="#4f46e5" />
-      <pointLight position={[10, -10, 10]} intensity={0.5} color="#ec4899" />
+      <OrbitControls 
+        enableZoom={false} 
+        enablePan={false} 
+        enableRotate={false}
+        enableDamping={false}
+      />
+      {/* Reduced lighting complexity */}
+      <ambientLight intensity={0.3} />
+      <directionalLight position={[10, 10, 5]} intensity={0.8} />
+      <pointLight position={[-10, -10, -10]} intensity={0.3} color="#4f46e5" />
 
-      {/* Environment for reflections */}
-      <Environment preset="city" />
+      {/* Simplified environment */}
+      <Environment preset="city" background={false} />
 
       <Instances>
         <Model />

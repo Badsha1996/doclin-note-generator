@@ -45,14 +45,7 @@ class LLMProviderManager:
         self.openrouter_base_url = "https://openrouter.ai/api/v1"
         
         self.free_openrouter_models = [
-            "google/gemma-7b-it:free",
-            "mistralai/mistral-7b-instruct:free",
-            "huggingfaceh4/zephyr-7b-beta:free",
-            "meta-llama/llama-2-13b-chat:free",
-            "gryphe/mythomax-l2-13b:free",
-            "nousresearch/nous-hermes-llama2-13b:free",
-            "deepseek/deepseek-chat-v3.1:free",
-            "x-ai/grok-4-fast:free"
+            "google/gemini-2.0-flash-exp:free","meta-llama/llama-3.1-8b-instruct:free","mistralai/mistral-7b-instruct:free"
         ]
         self.current_openrouter_model_index = 0
         self.failed_openrouter_combinations = set()
@@ -77,13 +70,6 @@ class LLMProviderManager:
         )
         self.current_hf_model_index = 0
         self.current_hf_key_index = 0
-
-        # ---------------- Google Colab Configuration ---------------- #
-        self.colab_urls: List[str] = self._parse_array_env(
-            getattr(settings, "COLAB_MISTRAL_URL", ["http://localhost:5000/generate"]),
-            "COLAB_MISTRAL_URL"
-        )
-        self.current_colab_index = 0
 
         # ---------------- Provider Configuration ---------------- #
         self.provider = getattr(settings, "LLM_PROVIDER", "auto")
@@ -162,9 +148,9 @@ class LLMProviderManager:
     # ---------------- Rotation Logic ---------------- #
     def _rotate_gemini(self):
         """Rotate to next Gemini model/key combination"""
-        # Try next key with same model first
-        self.current_gemini_key_index = (self.current_gemini_key_index + 1) % len(self.gemini_keys)
-        
+        if self.gemini_keys:
+            self.current_gemini_key_index = (self.current_gemini_key_index + 1) % len(self.gemini_keys)
+
         # If we've cycled through all keys, try next model
         if self.current_gemini_key_index == 0:
             self.current_gemini_model_index = (self.current_gemini_model_index + 1) % len(self.gemini_models)
@@ -187,9 +173,6 @@ class LLMProviderManager:
         if self.current_hf_key_index == 0:
             self.current_hf_model_index = (self.current_hf_model_index + 1) % len(self.hf_models)
 
-    def _rotate_colab(self):
-        """Rotate to next Colab endpoint"""
-        self.current_colab_index = (self.current_colab_index + 1) % len(self.colab_urls)
 
     # ---------------- LLM Getters ---------------- #
     def get_gemini(self) -> ChatGoogleGenerativeAI:
@@ -245,38 +228,6 @@ class LLMProviderManager:
         
         return OllamaLLM(base_url=url, model=model)
 
-    def get_colab_mistral(self):
-        """Get Colab Mistral LLM instance"""
-        import requests
-        
-        class ColabMistralLLM:
-            def __init__(self, endpoint: str):
-                self.endpoint = endpoint
-            
-            def invoke(self, prompt: str):
-                try:
-                    resp = requests.post(
-                        self.endpoint, 
-                        json={"prompt": prompt, "max_tokens": 4000},
-                        timeout=120
-                    )
-                    resp.raise_for_status()
-                    return resp.json().get("output")
-                except requests.RequestException as e:
-                    raise HTTPException(
-                        status_code=500, 
-                        detail=f"Colab Mistral error: {str(e)}"
-                    )
-            
-            async def ainvoke(self, prompt: str):
-                import asyncio
-                return await asyncio.to_thread(self.invoke, prompt)
-        
-        endpoint = self.colab_urls[self.current_colab_index] if self.colab_urls else "http://localhost:5000/generate"
-        logger.info(f"Using Colab endpoint: {endpoint}")
-        
-        return ColabMistralLLM(endpoint)
-
     def get_hf(self) -> HuggingFaceEndpoint:
         """Get HuggingFace LLM instance"""
         if not self.hf_models or not self.hf_keys:
@@ -312,9 +263,6 @@ class LLMProviderManager:
         if self.openrouter_keys or True:  # OpenRouter has free tier
             chain.append(("openrouter", self.get_openrouter))
         
-        if self.colab_urls:
-            chain.append(("colab_mistral", self.get_colab_mistral))
-          
         # Only add Ollama if the library is available
         if _OLLAMA_AVAILABLE and (self.ollama_models or self.ollama_urls):
             chain.append(("ollama", self.get_ollama))
@@ -367,15 +315,9 @@ class LLMProviderManager:
             self._rotate_ollama()
         elif provider_name == "huggingface":
             self._rotate_hf()
-        elif provider_name == "colab_mistral":
-            self._rotate_colab()
 
     # ---------------- Safe Generation ---------------- #
     async def safe_generate(self, prompt: str, **kwargs) -> Any:
-        """
-        Safely generate response with automatic fallback across providers.
-        Tries all configured providers until one succeeds.
-        """
         chain = self.get_llm_chain()
         
         if not chain:
@@ -394,8 +336,11 @@ class LLMProviderManager:
                 # Generate response
                 if hasattr(llm, "ainvoke"):
                     result = await llm.ainvoke(prompt)
-                else:
+                elif hasattr(llm, "invoke"):
                     result = llm.invoke(prompt)
+                else:
+                    raise HTTPException(status_code=500, detail="LLM does not support invoke or ainvoke")
+
                 
                 # Track success
                 self.provider_success_count[provider_name] = self.provider_success_count.get(provider_name, 0) + 1
@@ -424,10 +369,6 @@ class LLMProviderManager:
         )
 
     def get_llm(self):
-        """
-        Get LLM instance based on configured provider.
-        If provider is 'auto', returns the first available provider.
-        """
         if self.provider == "auto":
             chain = self.get_llm_chain()
             if not chain:
@@ -441,7 +382,6 @@ class LLMProviderManager:
         provider_map = {
             "gemini": self.get_gemini,
             "openrouter": self.get_openrouter,
-            "colab_mistral": self.get_colab_mistral,
             "huggingface": self.get_hf,
         }
         
@@ -471,7 +411,7 @@ class LLMProviderManager:
                 "openrouter_key": self.current_openrouter_key_index,
                 "ollama": self.current_ollama_index,
                 "hf_model": self.current_hf_model_index,
-                "hf_key": self.current_hf_key_index,
-                "colab": self.current_colab_index,
+                "hf_key": self.current_hf_key_index
+                
             }
         }
