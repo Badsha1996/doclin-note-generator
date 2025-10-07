@@ -10,7 +10,7 @@ const variantClasses: Record<InputVariant, string> = {
     "bg-transparent border-[2px] border-[var(--primary)] focus-visible:border-[var(--accent)]",
   filled: "bg-[var(--input)] border-[var(--border)] text-[var(--foreground)]",
   custom:
-    "w-full px-4 py-2 rounded-md bg-white/10 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-pink-500",
+    "w-full px-4 py-2 rounded-md  bg-white/10 border-white/30 text-white placeholder:text-white/50 outline-none focus:ring-2 focus:ring-pink-500",
 };
 
 function Input({
