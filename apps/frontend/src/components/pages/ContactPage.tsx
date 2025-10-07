@@ -1,6 +1,6 @@
 import PageHeader from "@/components/common/PageHeader";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,7 +32,8 @@ import {
   type ReportFormValues,
 } from "@/types/type";
 import { getUserInfo } from "@/lib/auth";
-import { useRouter } from "@tanstack/react-router";
+import { IoClose } from "react-icons/io5";
+import { useRouter, useSearch } from "@tanstack/react-router";
 const tabContent = {
   feedback: {
     title: "Share Your Feedback 📝",
@@ -91,7 +92,7 @@ const tabContent = {
     ),
     animation: { x: -200, y: 150, rotate: -30, opacity: 0 },
   },
-  "Join Team": {
+  "join-team": {
     title: "Join Our Team 🖇️",
     description:
       "Love what we do? Collaborate with us, contribute your skills, and help build something amazing together!",
@@ -132,9 +133,18 @@ const tabContent = {
 
 function ContactPage() {
   // *************** All States ***************
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const search = useSearch({ from: "/contact/" });
   const [activeTab, setActiveTab] = useState<
-    "feedback" | "report" | "Join Team"
-  >("feedback");
+    "feedback" | "report" | "join-team"
+  >((search.tab as "feedback" | "report" | "join-team") || "feedback");
+
+  useEffect(() => {
+    if (search.tab) {
+      setActiveTab(search.tab as "feedback" | "report" | "join-team");
+    }
+  }, [search.tab]);
+
   const [isFlying, setIsFlying] = useState(false);
   const router = useRouter();
   const feedbackForm = useForm<FeedbackFormValues>({
@@ -227,9 +237,9 @@ function ContactPage() {
 
     const files = data.attachment as FileList | undefined;
     if (files?.length) {
-      const maxSize = 10 * 1024 * 1024;
+      const maxSize = 5 * 1024 * 1024;
       if (files[0].size > maxSize) {
-        toast.error("Attachment is too large (max 10MB)");
+        toast.error("Attachment is too large (max 5MB)");
         return;
       }
     }
@@ -304,9 +314,9 @@ function ContactPage() {
                 </button>
                 <button
                   role="tab"
-                  onClick={() => setActiveTab("Join Team")}
+                  onClick={() => setActiveTab("join-team")}
                   className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300
-        ${activeTab === "Join Team" ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md" : "text-slate-800 hover:bg-[#6a1b9a]/30 hover:text-white"}`}
+        ${activeTab === "join-team" ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md" : "text-slate-800 hover:bg-[#6a1b9a]/30 hover:text-white"}`}
                 >
                   Join Team
                 </button>
@@ -435,17 +445,38 @@ function ContactPage() {
                     <FormItem>
                       <FormLabel>Attachment (optional)</FormLabel>
                       <FormControl>
-                        <input
-                          type="file"
-                          className="block w-full text-sm text-slate-700 file:border-0 file:bg-slate-300 file:py-2 file:px-3 file:rounded-md"
-                          onChange={(e) => {
-                            reportForm.setValue("attachment", e.target.files);
-                          }}
-                          aria-describedby="attachment-desc"
-                        />
+                        <div className="flex flex-col space-y-2">
+                          <input
+                            type="file"
+                            className="block w-50 text-sm text-slate-700 file:border-0 file:bg-slate-300 file:py-2 file:px-3 file:rounded-md"
+                            onChange={(e) => {
+                              reportForm.setValue("attachment", e.target.files);
+                            }}
+                            aria-describedby="attachment-desc"
+                            ref={fileInputRef}
+                          />
+
+                          {/* Show uploaded file with remove option */}
+                          {reportForm.watch("attachment")?.length > 0 && (
+                            <div className="flex items-center justify-between bg-gray-100 px-3 py-1 rounded-md text-sm">
+                              <span className="truncate">
+                                {reportForm.watch("attachment")![0].name}
+                              </span>
+
+                              <IoClose
+                                onClick={() => {
+                                  reportForm.setValue("attachment", undefined);
+                                  if (fileInputRef.current)
+                                    fileInputRef.current.value = "";
+                                }}
+                                className="ml-2 text-red-500 hover:text-red-700 font-semibold"
+                              />
+                            </div>
+                          )}
+                        </div>
                       </FormControl>
                       <FormDescription id="attachment-desc">
-                        Screenshots or logs help us debug faster. Max 10MB.
+                        Screenshots or logs help us debug faster. Max 5MB.
                       </FormDescription>
                     </FormItem>
                     <div className="flex items-center">
@@ -465,7 +496,7 @@ function ContactPage() {
                   </form>
                 </Form>
               )}
-              {activeTab === "Join Team" && (
+              {activeTab === "join-team" && (
                 <div className="flex flex-col items-center justify-center space-y-4 p-6">
                   <h3 className="text-xl font-semibold">
                     Join Our Team on WhatsApp
