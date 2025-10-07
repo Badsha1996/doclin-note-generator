@@ -414,10 +414,6 @@ const ExamPaperPage = () => {
     return <NoPayloadState />;
   }
 
-  // Debug logging - you can remove this in production
-  console.log("Exam Data:", examData);
-  console.log("Sections:", sections);
-
   // No data state
   if (!examData || !sections || sections.length === 0) {
     return (

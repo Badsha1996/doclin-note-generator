@@ -43,6 +43,7 @@ class TokenRefreshMiddleware(BaseHTTPMiddleware):
                         "user_id": refresh_payload.user_id,
                         "email": refresh_payload.email,
                         "role": refresh_payload.role,
+                        "username":refresh_payload.user_name
                     },
                     expires_delta=timedelta(hours=1),
                 )
@@ -64,6 +65,7 @@ class TokenRefreshMiddleware(BaseHTTPMiddleware):
                                 "user_id": payload.user_id,
                                 "email": payload.email,
                                 "role": payload.role,
+                                "username":payload.user_name
                             },
                              expires_delta=timedelta(hours=1),
                         )
@@ -121,5 +123,7 @@ def setup_middleware(app: FastAPI):
             "/api/auth/verify",
             "/api/otp/generate",
             "/api/feedback/all",
+            "/api/auth/logout",
+            "/api/auth/exchange"
         ]
     )

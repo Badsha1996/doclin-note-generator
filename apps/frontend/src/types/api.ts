@@ -290,6 +290,7 @@ export const feedbackItemSchema = z.object({
   id: z.uuid(),
   user_id: z.uuid(),
   rating: z.number(),
+  username: z.string().optional(),
   feedback_text: z.string().nullable(),
   created_at: z.coerce.date(),
 });
