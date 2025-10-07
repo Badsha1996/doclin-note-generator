@@ -29,3 +29,6 @@ class LoginSchema(BaseModel):
 class VerifySchema(BaseModel):
     id:str
 
+class AccessCodeSchema(BaseModel):
+    code:str
+

@@ -9,6 +9,7 @@ export const Route = createFileRoute("/")({
     if (!search) return {};
     return {
       oauth: search?.oauth?.toString() || undefined,
+      code: search?.code?.toString() || undefined,
     };
   },
   component: HomePage,

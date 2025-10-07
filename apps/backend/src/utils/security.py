@@ -15,6 +15,7 @@ class TokenData(BaseModel):
     email: str
     role: str
     exp: int
+    user_name:str
 
 class SecurityManager:
     def __init__(self, secret_key: str, algorithm: str):
@@ -59,7 +60,8 @@ class SecurityManager:
                 user_id=payload.get("user_id"),
                 email=payload.get("email"),
                 role=payload.get("role"),
-                exp=payload.get("exp")
+                exp=payload.get("exp"),
+                user_name=payload.get("username")
             )
         except JWTError:
             raise AuthExceptionError("Invalid or expired token")
