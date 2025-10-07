@@ -1,4 +1,5 @@
 import * as React from "react";
+
 import { cn } from "@/lib/utils";
 
 type InputVariant = "default" | "outline" | "filled" | "custom";
@@ -10,7 +11,7 @@ const variantClasses: Record<InputVariant, string> = {
     "bg-transparent border-[2px] border-[var(--primary)] focus-visible:border-[var(--accent)]",
   filled: "bg-[var(--input)] border-[var(--border)] text-[var(--foreground)]",
   custom:
-    "w-full px-4 py-2 rounded-md bg-white/10 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-pink-500",
+    "w-full px-4 py-2 rounded-md  bg-white/10 border-white/30 text-white placeholder:text-white/50 outline-none focus:ring-2 focus:ring-pink-500",
 };
 
 function Input({
@@ -19,8 +20,6 @@ function Input({
   variant = "default",
   ...props
 }: React.ComponentProps<"input"> & { variant?: InputVariant }) {
-  const isCustom = variant === "custom";
-
   return (
     <input
       type={type}
@@ -31,20 +30,9 @@ function Input({
         "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
         className
       )}
-      style={
-        isCustom
-          ? {
-              WebkitBoxShadow: "0 0 0px 1000px rgba(255, 255, 255, 0.1) inset",
-              WebkitTextFillColor: "white",
-              caretColor: "white",
-              transition: "background-color 5000s ease-in-out 0s",
-            }
-          : undefined
-      }
       {...props}
     />
   );
 }
-
 
 export { Input };

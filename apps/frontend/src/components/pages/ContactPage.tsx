@@ -34,9 +34,11 @@ import {
 import { getUserInfo } from "@/lib/auth";
 import { IoClose } from "react-icons/io5";
 import { useRouter, useSearch } from "@tanstack/react-router";
+import { Card } from "../ui/card";
+import { fadeInUp, scaleIn, transition, transitionSlow } from "@/lib/motion";
 const tabContent = {
   feedback: {
-    title: "Share Your Feedback 📝",
+    title: "Rate Your Experience 📝",
     description:
       "Help us improve! Rate your experience and leave your comments so we can make our service even better.",
     svg: (
@@ -197,6 +199,9 @@ function ContactPage() {
       onSuccess: () => {
         toast.success("Issue reported. We'll look into it.");
         reportForm.reset();
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
       },
       onError: (error) => {
         console.error(error);
@@ -262,13 +267,17 @@ function ContactPage() {
         title="Contact Us"
         subTitle="Have questions or feedback? We’re here to provide the right support for your learning needs."
       />
-      <div className="relative flex justify-center items-center px-6 py-12">
-        <div
-          className="w-full max-w-4xl backdrop-blur-md 
-        shadow-xl grid md:grid-cols-2 rounded-xl
-        overflow-hidden"
+      <div className="relative w-full h-screen flex justify-center items-center overflow-hidden">
+        <motion.div
+          variants={fadeInUp}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          transition={transitionSlow}
+          className="flex w-full max-w-5xl min-h-[500px] rounded-2xl shadow-lg overflow-hidden bg-white/5 backdrop-blur-md border border-white/10"
+          style={{ height: "auto" }}
         >
-          <div className="hidden md:flex flex-col items-center justify-center bg-card/60 text-white p-10 relative">
+          <div className="hidden lg:flex flex-col w-1/2 bg-transparent text-white p-8 lg:p-14 mx-auto items-center justify-center">
             <h2 className="text-3xl font-bold mb-4">
               {tabContent[activeTab].title}
             </h2>
@@ -292,233 +301,291 @@ function ContactPage() {
               {tabContent[activeTab].svg}
             </motion.div>
           </div>
-
-          <div className="bg-white/80 p-6">
-            <div className="flex mb-6">
-              <div className="inline-flex w-full rounded-2xl backdrop-blur-lg bg-[#6a1b9a]/20 border border-[#6a1b9a]/30 shadow-lg p-2 justify-between items-center">
-                <button
-                  role="tab"
-                  onClick={() => setActiveTab("feedback")}
-                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 
-        ${activeTab === "feedback" ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md" : "text-slate-800 hover:bg-[#6a1b9a]/30 hover:text-white"}`}
-                >
-                  Feedback
-                </button>
-                <button
-                  role="tab"
-                  onClick={() => setActiveTab("report")}
-                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300
-        ${activeTab === "report" ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md" : "text-slate-800 hover:bg-[#6a1b9a]/30 hover:text-white"}`}
-                >
-                  Report an Issue
-                </button>
-                <button
-                  role="tab"
-                  onClick={() => setActiveTab("join-team")}
-                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300
-        ${activeTab === "join-team" ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md" : "text-slate-800 hover:bg-[#6a1b9a]/30 hover:text-white"}`}
-                >
-                  Join Team
-                </button>
-              </div>
-            </div>
-            <div>
-              {activeTab === "feedback" && (
-                <Form {...feedbackForm}>
-                  <form
-                    onSubmit={feedbackForm.handleSubmit(onSubmitFeedback)}
-                    className="space-y-6"
+          <motion.div
+            variants={scaleIn}
+            initial="initial"
+            animate="animate"
+            whileHover="whileHover"
+            transition={transition}
+            className="flex w-full lg:w-1/2 justify-center items-center p-6 sm:p-8"
+          >
+            <Card className="w-full max-w-md rounded-2xl bg-white/10 backdrop-blur-lg p-5 sm:p-6 border-none">
+              <div className="flex mb-6">
+                <div className="inline-flex w-full rounded-2xl backdrop-blur-lg bg-[#6a1b9a]/20 border border-[#6a1b9a]/30 shadow-lg p-2 justify-between items-center">
+                  <button
+                    role="tab"
+                    onClick={() => setActiveTab("feedback")}
+                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 
+        ${activeTab === "feedback" ? "bg-white/10 text-white shadow-md" : "text-white hover:bg-[#6a1b9a]/30 hover:text-white"}`}
                   >
-                    <FormField
-                      control={feedbackForm.control}
-                      name="rating"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Rating</FormLabel>
-                          <FormControl>
-                            <Rating
-                              value={field.value ?? 3}
-                              onChange={(val) => field.onChange(val)}
-                            />
-                          </FormControl>
-                          <FormDescription className="text-slate-600">
-                            Please provide your rating.
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={feedbackForm.control}
-                      name="feedback_text"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Feedback</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              placeholder="Share your experience..."
-                              className="resize-none border border-slate-400"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormDescription className="text-slate-600">
-                            You can @mention other users and organizations.
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <div className="flex items-center">
-                      <Button
-                        className="bg-gradient-to-r from-card/60 to-card/90  text-white hover:bg-card/90 transition-all duration-300"
-                        type="submit"
-                        disabled={feedbackForm.formState.isSubmitting}
-                      >
-                        {feedbackForm.formState.isSubmitting
-                          ? "Submitting..."
-                          : "Submit"}
-                      </Button>
-                      <div className="ml-4 text-sm text-slate-600">
-                        Thank you — your feedback helps us improve.
-                      </div>
-                    </div>
-                  </form>
-                </Form>
-              )}
-
-              {activeTab === "report" && (
-                <Form {...reportForm}>
-                  <form
-                    onSubmit={reportForm.handleSubmit(onSubmitReport)}
-                    className="space-y-6"
+                    Feedback
+                  </button>
+                  <button
+                    role="tab"
+                    onClick={() => setActiveTab("report")}
+                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300
+        ${activeTab === "report" ? "bg-white/10 text-white shadow-md" : "text-white hover:bg-[#6a1b9a]/30 hover:text-white"}`}
                   >
-                    <FormField
-                      control={reportForm.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Your name" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={reportForm.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input placeholder="you@example.com" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={reportForm.control}
-                      name="description"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Description</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              placeholder="Describe the bug or issue..."
-                              className="resize-none"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            Please include steps to reproduce, expected vs
-                            actual behavior, and any relevant URLs.
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormItem>
-                      <FormLabel>Attachment (optional)</FormLabel>
-                      <FormControl>
-                        <div className="flex flex-col space-y-2">
-                          <input
-                            type="file"
-                            className="block w-50 text-sm text-slate-700 file:border-0 file:bg-slate-300 file:py-2 file:px-3 file:rounded-md"
-                            onChange={(e) => {
-                              reportForm.setValue("attachment", e.target.files);
-                            }}
-                            aria-describedby="attachment-desc"
-                            ref={fileInputRef}
-                          />
-
-                          {/* Show uploaded file with remove option */}
-                          {reportForm.watch("attachment")?.length > 0 && (
-                            <div className="flex items-center justify-between bg-gray-100 px-3 py-1 rounded-md text-sm">
-                              <span className="truncate">
-                                {reportForm.watch("attachment")![0].name}
-                              </span>
-
-                              <IoClose
-                                onClick={() => {
-                                  reportForm.setValue("attachment", undefined);
-                                  if (fileInputRef.current)
-                                    fileInputRef.current.value = "";
-                                }}
-                                className="ml-2 text-red-500 hover:text-red-700 font-semibold"
-                              />
-                            </div>
-                          )}
-                        </div>
-                      </FormControl>
-                      <FormDescription id="attachment-desc">
-                        Screenshots or logs help us debug faster. Max 5MB.
-                      </FormDescription>
-                    </FormItem>
-                    <div className="flex items-center">
-                      <Button
-                        type="submit"
-                        className="bg-gradient-to-r from-card/60 to-card/90  text-white hover:bg-card/90 transition-all duration-300"
-                        disabled={reportForm.formState.isSubmitting}
-                      >
-                        {reportForm.formState.isSubmitting
-                          ? "Reporting..."
-                          : "Report Issue"}
-                      </Button>
-                      <div className="ml-4 text-sm text-slate-500">
-                        We'll respond as soon as we can.
-                      </div>
-                    </div>
-                  </form>
-                </Form>
-              )}
-              {activeTab === "join-team" && (
-                <div className="flex flex-col items-center justify-center space-y-4 p-6">
-                  <h3 className="text-xl font-semibold">
-                    Join Our Team on WhatsApp
-                  </h3>
-                  <p className="text-center text-slate-600">
-                    Click the button below to join our team chat and start
-                    collaborating!
-                  </p>
-                  <a
-                    href="https://chat.whatsapp.com/FlZQTmQBK9EKuUSHg3JvPB?mode=ems_copy_t"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block font-semibold px-6 py-3 rounded-md  bg-gradient-to-r from-card/60 to-card/90  text-white hover:bg-card/90  transition-all duration-300"
+                    Report an Issue
+                  </button>
+                  <button
+                    role="tab"
+                    onClick={() => setActiveTab("join-team")}
+                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300
+        ${activeTab === "join-team" ? "bbg-white/10 text-white shadow-md" : "text-white hover:bg-[#6a1b9a]/30 hover:text-white"}`}
                   >
-                    <FaWhatsapp className="inline mr-2 text-lg" />
-                    Join WhatsApp Group
-                  </a>
+                    Join Team
+                  </button>
                 </div>
-              )}
-            </div>
-          </div>
-        </div>
+              </div>
+              <div>
+                {activeTab === "feedback" && (
+                  <Form {...feedbackForm}>
+                    <form
+                      onSubmit={feedbackForm.handleSubmit(onSubmitFeedback)}
+                      className="space-y-6"
+                    >
+                      <FormField
+                        control={feedbackForm.control}
+                        name="rating"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel htmlFor="rating" className="text-white">
+                              Rating
+                            </FormLabel>
+                            <FormControl>
+                              <Rating
+                                value={field.value ?? 3}
+                                onChange={(val) => field.onChange(val)}
+                              />
+                            </FormControl>
+                            <FormDescription className="text-slate-300">
+                              Please provide your rating.
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={feedbackForm.control}
+                        name="feedback_text"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel
+                              htmlFor="feedback_text"
+                              className="text-white"
+                            >
+                              Feedback
+                            </FormLabel>
+                            <FormControl>
+                              <Textarea
+                                placeholder="Share your experience..."
+                                className="resize-none bg-white/10 border-white/30 placeholder:text-white/50"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormDescription className="text-slate-300">
+                              You can @mention other users and organizations.
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <div className="flex items-center">
+                        <Button
+                          className=" text-white bg-indigo-500 hover:opacity-90 shadow-lg  transition-all duration-300 flex items-center gap-2"
+                          type="submit"
+                          disabled={
+                            feedbackMutation.isPending ||
+                            feedbackForm.formState.isSubmitting
+                          }
+                        >
+                          {feedbackMutation.isPending ? (
+                            <>
+                              <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                              Submitting...
+                            </>
+                          ) : (
+                            "Submit"
+                          )}
+                        </Button>
+
+                        <div className="ml-4 text-sm text-slate-50">
+                          Thank you — your feedback helps us improve.
+                        </div>
+                      </div>
+                    </form>
+                  </Form>
+                )}
+
+                {activeTab === "report" && (
+                  <Form {...reportForm}>
+                    <form
+                      onSubmit={reportForm.handleSubmit(onSubmitReport)}
+                      className="space-y-6"
+                    >
+                      <FormField
+                        control={reportForm.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel htmlFor="name" className="text-white">
+                              Name
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Your name"
+                                variant="custom"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={reportForm.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel htmlFor="email" className="text-white">
+                              Email
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="you@example.com"
+                                variant="custom"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={reportForm.control}
+                        name="description"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel
+                              htmlFor="description"
+                              className="text-white"
+                            >
+                              Description
+                            </FormLabel>
+                            <FormControl>
+                              <Textarea
+                                placeholder="Describe the bug or issue..."
+                                className="resize-none bg-white/10 border-white/30 placeholder:text-white/50"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormDescription className="text-slate-300">
+                              Please include steps to reproduce, expected vs
+                              actual behavior, and any relevant URLs.
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormItem>
+                        <FormLabel>Attachment (optional)</FormLabel>
+                        <FormControl>
+                          <div className="flex flex-col space-y-2">
+                            <input
+                              type="file"
+                              className="block w-50 text-sm text-slate-200 file:border-0 file:bg-white/10 file:py-2 file:px-3 file:rounded-md"
+                              onChange={(e) => {
+                                reportForm.setValue(
+                                  "attachment",
+                                  e.target.files
+                                );
+                              }}
+                              aria-describedby="attachment-desc"
+                              ref={fileInputRef}
+                            />
+                            {reportForm.watch("attachment")?.length > 0 && (
+                              <div className="flex items-center justify-between bg-gray-100 px-3 py-1 rounded-md text-sm">
+                                <span className="truncate">
+                                  {reportForm.watch("attachment")![0].name}
+                                </span>
+
+                                <IoClose
+                                  onClick={() => {
+                                    reportForm.setValue(
+                                      "attachment",
+                                      undefined
+                                    );
+                                    if (fileInputRef.current)
+                                      fileInputRef.current.value = "";
+                                  }}
+                                  className="ml-2 text-red-500 hover:text-red-700 font-semibold"
+                                />
+                              </div>
+                            )}
+                          </div>
+                        </FormControl>
+                        <FormDescription
+                          id="attachment-desc"
+                          className="text-slate-300"
+                        >
+                          Screenshots or logs help us debug faster. Max 5MB.
+                        </FormDescription>
+                      </FormItem>
+                      <div className="flex items-center">
+                        <Button
+                          type="submit"
+                          className="text-white bg-purple-500 hover:opacity-90 shadow-lg  transition-all duration-300 flex items-center gap-2"
+                          disabled={
+                            reportMutation.isPending ||
+                            reportForm.formState.isSubmitting
+                          }
+                        >
+                          {reportMutation.isPending ? (
+                            <>
+                              <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                              Reporting...
+                            </>
+                          ) : (
+                            "Report Issue"
+                          )}
+                        </Button>
+
+                        <div className="ml-4 text-sm text-slate-300">
+                          We'll respond as soon as we can.
+                        </div>
+                      </div>
+                    </form>
+                  </Form>
+                )}
+                {activeTab === "join-team" && (
+                  <div className="flex flex-col items-center justify-center space-y-4 p-6">
+                    <h3 className="text-xl font-semibold">
+                      Join Our Team on WhatsApp
+                    </h3>
+                    <p className="text-center text-slate-100">
+                      Click the button below to join our team chat and start
+                      collaborating!
+                    </p>
+                    <a
+                      href="https://chat.whatsapp.com/FlZQTmQBK9EKuUSHg3JvPB?mode=ems_copy_t"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block font-semibold px-6 py-3 rounded-md bg-blue-500 text-white shadow-md 
+             hover:opacity-90 transitionduration-300"
+                    >
+                      <FaWhatsapp className="inline mr-2 text-lg" />
+                      Join WhatsApp Group
+                    </a>
+                  </div>
+                )}
+              </div>
+            </Card>
+          </motion.div>
+        </motion.div>
       </div>
     </div>
   );
