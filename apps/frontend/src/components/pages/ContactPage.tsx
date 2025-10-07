@@ -158,8 +158,6 @@ function ContactPage() {
   const reportForm = useForm<ReportFormValues>({
     resolver: zodResolver(reportFormSchema),
     defaultValues: {
-      name: "",
-      email: "",
       description: "",
       attachment: undefined,
     },
@@ -427,46 +425,6 @@ function ContactPage() {
                     >
                       <FormField
                         control={reportForm.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel htmlFor="name" className="text-white">
-                              Name
-                            </FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="Your name"
-                                variant="custom"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={reportForm.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel htmlFor="email" className="text-white">
-                              Email
-                            </FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="you@example.com"
-                                variant="custom"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={reportForm.control}
                         name="description"
                         render={({ field }) => (
                           <FormItem>
@@ -508,7 +466,7 @@ function ContactPage() {
                               ref={fileInputRef}
                             />
                             {reportForm.watch("attachment")?.length > 0 && (
-                              <div className="flex items-center justify-between bg-gray-100 px-3 py-1 rounded-md text-sm">
+                              <div className="flex items-center justify-between bg-white/10 px-3 py-1 rounded-md text-sm">
                                 <span className="truncate">
                                   {reportForm.watch("attachment")![0].name}
                                 </span>
@@ -522,7 +480,7 @@ function ContactPage() {
                                     if (fileInputRef.current)
                                       fileInputRef.current.value = "";
                                   }}
-                                  className="ml-2 text-red-500 hover:text-red-700 font-semibold"
+                                  className="ml-2 text-white font-semibold"
                                 />
                               </div>
                             )}
