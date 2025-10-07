@@ -1,15 +1,17 @@
 from fastapi import APIRouter, Depends,HTTPException
 from sqlalchemy.orm import Session
 
-from ...utils.exceptions import AuthExceptionError
-from ...interfaces.schemas.response_schemas import APIResponseSchema
-from ...core.services.email_service import EmailService
-from ...core.services.otp_service import OTPService
-from ...infrastructure.repo.otp_repo import SQLOTPRepo
-from ...interfaces.schemas.otp_schemas import OTPGenerateSchema,OTPVerifySchema
 from ...database.database import get_DB
 from ...utils.security import SecurityManager
+from ...utils.exceptions import AuthExceptionError
+from ...core.services.otp_service import OTPService
+from ...core.services.user_service import UserService
+from ...infrastructure.repo.otp_repo import SQLOTPRepo
+from ...core.services.email_service import EmailService
+from ...infrastructure.repo.user_repo import SQLUserRepo
+from ...interfaces.schemas.response_schemas import APIResponseSchema
 from ...infrastructure.providers.auth_provider import get_security_manager
+from ...interfaces.schemas.otp_schemas import OTPGenerateSchema,OTPVerifySchema
 
 
 otp_router=APIRouter(prefix="/otp", tags=["otp"])
@@ -23,6 +25,15 @@ async def generate_otp(
 ):
     try:
         otp_repo=SQLOTPRepo(db)
+        user_repo=SQLUserRepo(db)
+        user_service=UserService(user_repo,security_manager)
+
+
+        user= await user_service.get_user_by_email(user_data.email)
+        if user:
+            raise AuthExceptionError("User with this email already exists")
+
+
         otp_service=OTPService(otp_repo,security=security_manager)
         email_service=EmailService()
         otp,otp_entry=await otp_service.generate_otp(user_data.email)
