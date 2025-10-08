@@ -17,14 +17,14 @@ class SQLExamPaperRepo:
         if model is None:
             self.cohere_client = CohereEmbeddingClient(api_keys=cohere_api_keys)
 
-    def _get_embeddings(self, texts: List[str], batch_size: int = 32) -> List[List[float]]:
+    def _get_embeddings(self, texts: List[str]) -> List[List[float]]:
         """Generate embeddings for a list of texts"""
         if not texts:
             return []
 
         # ① Local model 🐺
         if self.model is not None:
-            embeddings = self.model.encode(texts, batch_size=batch_size)
+            embeddings = self.model.encode(texts)
             embeddings = [(e / np.linalg.norm(e)).tolist() for e in embeddings]
 
         # ② Cohere fallback 👍
@@ -118,7 +118,7 @@ class SQLExamPaperRepo:
             # generate embeddings for subparts
             if subpart_texts:
                 print(f"Generating embeddings for {len(subpart_texts)} subparts...")
-                embeddings = self._get_embeddings(subpart_texts, batch_size=32)
+                embeddings = self._get_embeddings(subpart_texts)
                 
                 if len(embeddings) != len(subpart_refs):
                     raise Exception(

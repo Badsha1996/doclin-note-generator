@@ -47,6 +47,7 @@ class Settings(BaseSettings):
 
     # OpenRouter
     OPENROUTER_KEY: Optional[str] = None
+    OPENROUTER_FREE_MODELS: Optional[List[str]] = None
 
     # Colab Mistral
     COLAB_MISTRAL_URL: Optional[str] = "http://localhost:5000/generate"
