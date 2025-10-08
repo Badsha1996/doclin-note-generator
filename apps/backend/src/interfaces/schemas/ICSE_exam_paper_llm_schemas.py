@@ -4,7 +4,7 @@ from typing import Union
 class FileSchema(BaseModel):
     url : str
 
-class LLMGenQuestionSchema(BaseModel):
+class LLMGenICSEQuestionSchema(BaseModel):
     subject: str
     board: str
     paper: str

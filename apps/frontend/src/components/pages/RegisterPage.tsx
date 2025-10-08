@@ -47,7 +47,7 @@ import {
 } from "@/lib/motion";
 import { useApiMutation } from "@/hook/useApi";
 
-import { EyeClosed, Eye, Loader2 } from "lucide-react";
+import { EyeClosed, Eye } from "lucide-react";
 import { useState } from "react";
 import {
   InputOTP,
@@ -247,9 +247,13 @@ function RegisterPage() {
                   name="username"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-white">Username</FormLabel>
+                      <FormLabel htmlFor="username" className="text-white">
+                        Username
+                      </FormLabel>
                       <FormControl>
                         <Input
+                          id="username"
+                          autoComplete="username"
                           placeholder="Your username"
                           variant="custom"
                           {...field}
@@ -260,16 +264,20 @@ function RegisterPage() {
                     </FormItem>
                   )}
                 />
-                {!otpSent && (
+                {(!otpSent || otpVerified) && (
                   <FormField
                     control={form.control}
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-white">Email</FormLabel>
+                        <FormLabel htmlFor="email" className="text-white">
+                          Email
+                        </FormLabel>
                         <FormControl>
-                          <div className="relative">
+                          <div className="relative flex flex-col gap-2">
                             <Input
+                              id="email"
+                              autoComplete="email"
                               type="email"
                               placeholder="your@email.com"
                               variant="custom"
@@ -285,11 +293,14 @@ function RegisterPage() {
                                 });
                               }}
                             />
+
                             {sendOtpMutation.isPending && (
-                              <div className="absolute inset-y-0 right-3 flex items-center">
-                                <Loader2 className="w-4 h-4 animate-spin text-white" />
+                              <div className="flex items-center gap-2 text-sm text-purple-300">
+                                <div className="w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
+                                <span>Verifying email...</span>
                               </div>
                             )}
+
                             {otpVerified && (
                               <span
                                 className="text-primary hover:underline font-medium text-sm cursor-pointer inline-block"
@@ -305,17 +316,43 @@ function RegisterPage() {
                     )}
                   />
                 )}
-
+                {otpSent && !otpVerified && !sendOtpMutation.isPending && (
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2 text-sm text-green-100">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={2}
+                        stroke="currentColor"
+                        className="w-4 h-4"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M4.5 12.75l6 6 9-13.5"
+                        />
+                      </svg>
+                      <span>
+                        OTP sent successfully! Please check your email.
+                      </span>
+                    </div>
+                  </div>
+                )}
                 {otpSent && !otpVerified && (
                   <FormField
                     control={form.control}
                     name="otp"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-white">Enter OTP</FormLabel>
+                        <FormLabel htmlFor="otp" className="text-white">
+                          Enter OTP
+                        </FormLabel>
                         <FormControl>
-                          <div className="">
+                          <div className="flex flex-col gap-2">
                             <InputOTP
+                              id="otp"
+                              autoComplete="one-time-code"
                               maxLength={6}
                               {...field}
                               className="w-full"
@@ -328,49 +365,79 @@ function RegisterPage() {
                                   });
                                 }
                               }}
-                            >
-                              <InputOTPGroup>
-                                <InputOTPSlot
-                                  index={0}
-                                  className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
-                                />
-                                <InputOTPSlot
-                                  index={1}
-                                  className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
-                                />
-                              </InputOTPGroup>
-                              <InputOTPSeparator />
-                              <InputOTPGroup>
-                                <InputOTPSlot
-                                  index={2}
-                                  className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
-                                />
+                              onPaste={(
+                                e: React.ClipboardEvent<HTMLInputElement>
+                              ) => {
+                                e.preventDefault();
+                                const pasteData = e.clipboardData
+                                  .getData("text")
+                                  .trim()
+                                  .slice(0, 6); // take only first 6 characters
 
-                                <InputOTPSlot
-                                  index={3}
-                                  className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
-                                />
-                              </InputOTPGroup>
-                              <InputOTPSeparator />
-                              <InputOTPGroup>
-                                <InputOTPSlot
-                                  index={4}
-                                  className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
-                                />
-                                <InputOTPSlot
-                                  index={5}
-                                  className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
-                                />
-                              </InputOTPGroup>
+                                field.onChange(pasteData);
+
+                                if (pasteData.length === 6) {
+                                  verifyOtpMutation.mutate({
+                                    email: form.getValues("email"),
+                                    otp: pasteData,
+                                  });
+                                }
+                              }}
+                            >
+                              <>
+                                <InputOTPGroup>
+                                  <InputOTPSlot
+                                    index={0}
+                                    className="bg-white/20 border-white/30 text-white"
+                                  />
+                                  <InputOTPSlot
+                                    index={1}
+                                    className="bg-white/20 border-white/30 text-white"
+                                  />
+                                </InputOTPGroup>
+
+                                <InputOTPSeparator />
+
+                                <InputOTPGroup>
+                                  <InputOTPSlot
+                                    index={2}
+                                    className="bg-white/20 border-white/30 text-white"
+                                  />
+                                  <InputOTPSlot
+                                    index={3}
+                                    className="bg-white/20 border-white/30 text-white"
+                                  />
+                                </InputOTPGroup>
+
+                                <InputOTPSeparator />
+
+                                <InputOTPGroup>
+                                  <InputOTPSlot
+                                    index={4}
+                                    className="bg-white/20 border-white/30 text-white"
+                                  />
+                                  <InputOTPSlot
+                                    index={5}
+                                    className="bg-white/20 border-white/30 text-white"
+                                  />
+                                </InputOTPGroup>
+                              </>
                             </InputOTP>
+                            {verifyOtpMutation.isPending && (
+                              <div className="flex items-center gap-2 text-sm text-purple-300">
+                                <div className="w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
+                                <span>Verifying OTP...</span>
+                              </div>
+                            )}
                             <span
-                              className="text-primary hover:underline font-medium text-sm cursor-pointer inline-block"
+                              className="text-primary hover:underline font-medium text-sm cursor-pointer mt-1 inline-block"
                               onClick={handleEditEmail}
                             >
                               Edit Email?
                             </span>
                           </div>
                         </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -381,10 +448,14 @@ function RegisterPage() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-white">Password</FormLabel>
+                      <FormLabel htmlFor="password" className="text-white">
+                        Password
+                      </FormLabel>
                       <FormControl>
                         <div>
                           <Input
+                            id="password"
+                            autoComplete="new-password"
                             type={showPassword ? "text" : "password"}
                             variant="custom"
                             placeholder="••••••••"
@@ -415,12 +486,17 @@ function RegisterPage() {
                   name="confirmpassword"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-white">
+                      <FormLabel
+                        htmlFor="confirmpassword"
+                        className="text-white"
+                      >
                         Confirm Password
                       </FormLabel>
                       <FormControl>
                         <div>
                           <Input
+                            id="confirmpassword"
+                            autoComplete="new-password"
                             type={confirmPassword ? "text" : "password"}
                             variant="custom"
                             placeholder="••••••••"

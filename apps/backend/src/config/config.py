@@ -1,6 +1,5 @@
 import json
 from typing import List, Optional
-from pydantic import ConfigDict
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -9,7 +8,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str
     SECRET_KEY : str
     ALGORITHM : str
-    BACKEND_CORS_ORIGINS: list = ["http://localhost:3000", "http://localhost:5173"]
+    BACKEND_CORS_ORIGINS: list
 
     GOOGLE_CLIENT_ID:str
     GOOGLE_CLIENT_SECRET:str
@@ -25,13 +24,11 @@ class Settings(BaseSettings):
     META_USER_URL:str
 
     EMAIL:str
-    MAILERSEND_API_KEY: str
+    BREVO_API_KEY: str
     SUPER_ADMIN_EMAIL:str
     MAX_COUNT_FOR_PREVILEGED:int
     MAX_COUNT_FOR_USER:int 
     
-    FRONTEND_DOMAIN:str
-    BACKEND_DOMAIN:str
     FRONTEND_URL:str
     BACKEND_URL:str
 
@@ -43,6 +40,7 @@ class Settings(BaseSettings):
     OLLAMA_MODEL: str
 
     VECTOR_MODEL: str
+    COHERE_API_KEY : Optional[str] = None
 
     # Gemini
     GEMINI_KEYS: Optional[List[str]] = None
@@ -60,16 +58,10 @@ class Settings(BaseSettings):
     # Paid model toggle
     ALLOW_PAID_MODELS: bool = False
 
-    model_config = SettingsConfigDict(env_file=".env")
-
     PORT: int = 8000  
 
-    model_config = ConfigDict(extra="ignore")
-
-    # ---------------- Custom Parsers ---------------- #
     @classmethod
     def _parse_list(cls, value):
-        # parse JSON string lists from .env
         if isinstance(value, str):
             try:
                 return json.loads(value)

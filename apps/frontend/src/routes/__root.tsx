@@ -11,9 +11,11 @@ import BetaBanner from "@/components/common/BetaBanner";
 import { AnimatePresence, motion } from "framer-motion";
 import GlassmorphicLoader from "@/components/common/GlassLoader";
 import { z } from "zod";
+import { Suspense } from "react";
 
 const rootSearchSchema = z.object({
   oauth: z.string().optional(),
+  code: z.string().optional(),
 });
 
 export const Route = createRootRoute({
@@ -65,17 +67,19 @@ function RootComponent() {
       {!isAuthRoute && <BetaBanner />}
 
       <BackgroundLayout>
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={routerState.location.pathname}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-          >
-            <Outlet />
-          </motion.div>
-        </AnimatePresence>
+        <Suspense
+          fallback={<GlassmorphicLoader fullScreen message="Loading..." />}
+        >
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={routerState.location.pathname}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              <Outlet />
+            </motion.div>
+          </AnimatePresence>
+        </Suspense>
       </BackgroundLayout>
     </div>
   );

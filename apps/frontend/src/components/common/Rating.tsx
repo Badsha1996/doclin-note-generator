@@ -43,7 +43,7 @@ export function Rating({
         }
 
         return (
-          <div key={index} className="relative text-2xl text-yellow-600">
+          <div key={index} className="relative text-2xl text-yellow-300">
             {starIcon}
             {!readOnly && (
               <div className="absolute inset-0 flex">
