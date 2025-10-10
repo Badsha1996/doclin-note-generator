@@ -18,13 +18,6 @@ import { useApi } from "@/hook/useApi";
 import { motion, AnimatePresence } from "framer-motion";
 import GlassmorphicLoader from "../common/GlassLoader";
 import React from "react";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "../ui/carousel";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CardContent } from "../ui/card";
 
@@ -93,6 +86,23 @@ const features = [
   "Study Material Creation",
   "Progress Tracking",
 ];
+const avatarPool = [
+  "https://api.dicebear.com/6.x/adventurer/svg?seed=anime1",
+  "https://api.dicebear.com/6.x/adventurer/svg?seed=anime2",
+  "https://api.dicebear.com/6.x/adventurer/svg?seed=anime3",
+  "https://api.dicebear.com/6.x/adventurer/svg?seed=anime4",
+  "https://api.dicebear.com/6.x/adventurer/svg?seed=anime5",
+  "https://api.dicebear.com/6.x/avataaars/svg?seed=anime6",
+  "https://api.dicebear.com/6.x/avataaars/svg?seed=anime7",
+  "https://api.dicebear.com/6.x/avataaars/svg?seed=anime8",
+  "https://api.dicebear.com/6.x/avataaars/svg?seed=anime9",
+  "https://api.dicebear.com/6.x/avataaars/svg?seed=anime10",
+  "https://api.dicebear.com/6.x/micah/svg?seed=anime11",
+  "https://api.dicebear.com/6.x/micah/svg?seed=anime12",
+  "https://api.dicebear.com/6.x/bottts/svg?seed=anime13",
+  "https://api.dicebear.com/6.x/bottts/svg?seed=anime14",
+  "https://api.dicebear.com/6.x/bottts/svg?seed=anime15",
+];
 
 function HomePage() {
   const [currentFeature, setCurrentFeature] = useState(0);
@@ -150,12 +160,23 @@ function HomePage() {
       text: f.feedback_text,
       rating: Math.round(f.rating),
       username: f.username,
-      createdAt: new Date(f.created_at).toLocaleString(),
+      createdAt: new Date(f.created_at).toLocaleDateString(),
       avatarUrl: `https://api.adorable.io/avatars/285/${f.user_id}.png`,
     }));
   }, [rawFeedbackData]);
 
   const showTestimonials = !testimonialsLoading && realTestimonials.length > 0;
+
+  const selectedTestimonials = React.useMemo(() => {
+    if (!realTestimonials.length) return [];
+
+    const shuffled = [...realTestimonials].sort(() => 0.5 - Math.random());
+    const selected = shuffled.slice(0, 4);
+    return selected.map((testimonial) => ({
+      ...testimonial,
+      avatar: avatarPool[Math.floor(Math.random() * avatarPool.length)],
+    }));
+  }, [realTestimonials]);
 
   // Handle WebGL context loss
   useEffect(() => {
@@ -428,7 +449,7 @@ function HomePage() {
                 </div>
                 <div className="text-center">
                   <div className="text-2xl sm:text-3xl font-bold text-pink-400">
-                    0
+                    <AnimatedCounter end={stats.notes} suffix="+" />
                   </div>
                   <div className="text-white/60 text-sm">Notes Created</div>
                 </div>
@@ -531,7 +552,7 @@ function HomePage() {
             </div>
           ) : showTestimonials ? (
             <div className="px-6 sm:px-8 md:px-12 lg:px-16 xl:px-24 py-16 bg-black/20 backdrop-blur-sm">
-              <div className="max-w-4xl mx-auto">
+              <div className="max-w-5xl mx-auto">
                 <div className="text-center mb-16">
                   <h2 className="text-4xl sm:text-5xl font-bold text-white mb-4">
                     What Our{" "}
@@ -541,74 +562,57 @@ function HomePage() {
                   </h2>
                 </div>
 
-                <Carousel
-                  opts={{
-                    align: "start",
-                    loop: true,
-                  }}
-                  className="w-full"
-                >
-                  <CarouselContent>
-                    {realTestimonials.map((testimonial) => (
-                      <CarouselItem
-                        key={testimonial.id}
-                        className="w-full basis-[260px] md:basis-[310px] lg:basis-[320px] p-2 gap-0"
-                      >
-                        <motion.div
-                          initial={{ y: 0 }}
-                          whileHover={{ scale: 1.01, y: -8 }}
-                          className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10"
-                        >
-                          <CardContent className="flex flex-col items-center space-y-4">
-                            <Avatar className="w-24 h-24 border-2 border-primary/20">
-                              <AvatarImage
-                              // src={}
-                              // alt={}
-                              />
-                              <AvatarFallback className="text-xl">
-                                {(testimonial.username ?? "CN")
-                                  .split(" ")
-                                  .map((n) => n[0])
-                                  .join("")}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="text-center space-y-4">
-                              <h3 className="text-xl font-semibold">
-                                {testimonial.username}
-                              </h3>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {selectedTestimonials.map((testimonial) => (
+                    <motion.div
+                      key={testimonial.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      whileHover={{ scale: 1.02 }}
+                      className="bg-white/10 backdrop-blur-sm rounded-2xl px-10 py-4 border border-white/10"
+                    >
+                      <CardContent className="flex flex-col items-center space-y-4">
+                        <Avatar className="w-18 h-18 border-2 border-primary/20">
+                          <AvatarImage
+                            src={testimonial.avatar}
+                            alt={testimonial.username ?? "User"}
+                          />
 
-                              <div className="flex mb-4">
-                                {[...Array(Math.round(testimonial.rating))].map(
-                                  (_, i) => (
-                                    <Star
-                                      key={i}
-                                      className="w-4 h-4 text-yellow-400 fill-current"
-                                    />
-                                  )
-                                )}
-                              </div>
-                              <p className="text-white/80 italic">
-                                "{testimonial.text}"
-                              </p>
-                              <p className="text-sm font-normal text-white">
-                                {new Date(
-                                  testimonial.createdAt
-                                ).toLocaleString()}{" "}
-                              </p>
-                            </div>
-                          </CardContent>
-                        </motion.div>
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
+                          <AvatarFallback className="text-xl">
+                            {(testimonial.username ?? "CN")
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")}
+                          </AvatarFallback>
+                        </Avatar>
 
-                  {realTestimonials.length > 3 && (
-                    <>
-                      <CarouselPrevious className="absolute left-0 -translate-y-1/2 top-1/2" />
-                      <CarouselNext className="absolute right-0 -translate-y-1/2 top-1/2" />
-                    </>
-                  )}
-                </Carousel>
+                        <div className="text-center space-y-4">
+                          <h3 className="text-xl text-white font-semibold">
+                            {testimonial.username}
+                          </h3>
+                          <div className="flex justify-center mb-4">
+                            {[...Array(Math.round(testimonial.rating))].map(
+                              (_, i) => (
+                                <Star
+                                  key={i}
+                                  className="w-4 h-4 text-yellow-400 fill-current"
+                                />
+                              )
+                            )}
+                          </div>
+                          <p className="text-white/80 italic">
+                            "{testimonial.text}"
+                          </p>
+                          <p className="text-sm font-normal text-white">
+                            {new Date(
+                              testimonial.createdAt
+                            ).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </CardContent>
+                    </motion.div>
+                  ))}
+                </div>
               </div>
             </div>
           ) : null}

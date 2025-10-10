@@ -3,10 +3,28 @@ import { z } from "zod";
 // **************** Register File Types ****************
 export const FormSchema = z
   .object({
-    username: z.string().min(2, "Username must be at least 2 characters."),
+    username: z
+      .string()
+      .min(2, "Username must be at least 2 characters.")
+      .regex(/^[A-Za-z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?`~]+$/, {
+        message: "Username cannot contain spaces.",
+      }),
+
     email: z.email("Invalid email address."),
+
     otp: z.string().optional(),
-    password: z.string().min(6, "Password must be at least 6 characters."),
+
+    password: z
+      .string()
+      .min(6, "Password must be at least 6 characters long.")
+      .regex(
+        /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?`~]).+$/,
+        {
+          message:
+            "Password must include at least one letter, one number, and one special character.",
+        }
+      ),
+
     confirmpassword: z.string().min(6, "Please confirm your password."),
   })
   .refine((data) => data.password === data.confirmpassword, {
