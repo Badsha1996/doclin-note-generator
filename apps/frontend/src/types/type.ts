@@ -168,8 +168,6 @@ export const feedbackFormPayloadSchema = z.object({
 });
 export type FeedbackFormValues = z.infer<typeof feedbackFormPayloadSchema>;
 export const reportFormSchema = z.object({
-  name: z.string().optional(),
-  email: z.email().optional(),
   description: z.string().min(10, "Please describe the issue in more detail"),
   attachment: z.any().optional(),
 });

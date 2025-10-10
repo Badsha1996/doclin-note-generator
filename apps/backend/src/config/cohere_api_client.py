@@ -161,12 +161,13 @@ class CohereEmbeddingClient:
                         return embeddings[0]
                     return embeddings
                     
-                except cohere.CohereAPIError as e:
+                except Exception as e:
                     last_error = e
                     error_msg = str(e).lower()
+                    error_type = type(e).__name__
                     
                     # Handle rate limit - try next key immediately
-                    if "rate limit" in error_msg or "429" in error_msg:
+                    if "rate limit" in error_msg or "429" in error_msg or "TooManyRequests" in error_type:
                         logger.warning(
                             f"⚠️ Key {current_key_num} rate limited. "
                             f"Trying next key..."
@@ -182,18 +183,35 @@ class CohereEmbeddingClient:
                         break  # Break retry loop, try next key
                     
                     # Handle invalid API key - try next key immediately
-                    if "invalid" in error_msg or "unauthorized" in error_msg or "401" in error_msg:
+                    if "invalid" in error_msg or "unauthorized" in error_msg or "401" in error_msg or "Unauthorized" in error_type:
                         logger.warning(
-                            f"⚠️ Key {current_key_num} invalid. "
+                            f"⚠️ Key {current_key_num} invalid or unauthorized. "
                             f"Trying next key..."
                         )
                         break  # Break retry loop, try next key
                     
-                    # Handle other API errors with retry
+                    # Handle connection errors with retry
+                    if "connection" in error_msg.lower() or "timeout" in error_msg.lower():
+                        if attempt < self.max_retries - 1:
+                            wait_time = self._get_retry_delay(attempt)
+                            logger.warning(
+                                f"⚠️ Connection error with key {current_key_num}, "
+                                f"retrying in {wait_time:.1f}s... (attempt {attempt + 1}/{self.max_retries})"
+                            )
+                            time.sleep(wait_time)
+                            continue
+                        else:
+                            logger.warning(
+                                f"⚠️ Key {current_key_num} connection failed. "
+                                f"Trying next key..."
+                            )
+                            break  # Try next key
+                    
+                    # Handle other errors with retry
                     if attempt < self.max_retries - 1:
                         wait_time = self._get_retry_delay(attempt)
                         logger.warning(
-                            f"⚠️ Key {current_key_num} error: {str(e)[:100]}, "
+                            f"⚠️ Key {current_key_num} error ({error_type}): {str(e)[:100]}, "
                             f"retrying in {wait_time:.1f}s... (attempt {attempt + 1}/{self.max_retries})"
                         )
                         time.sleep(wait_time)
@@ -201,40 +219,6 @@ class CohereEmbeddingClient:
                     else:
                         logger.warning(
                             f"⚠️ Key {current_key_num} failed after {self.max_retries} attempts. "
-                            f"Trying next key..."
-                        )
-                        break  # Try next key
-                
-                except cohere.CohereConnectionError as e:
-                    last_error = e
-                    if attempt < self.max_retries - 1:
-                        wait_time = self._get_retry_delay(attempt)
-                        logger.warning(
-                            f"⚠️ Connection error with key {current_key_num}, "
-                            f"retrying in {wait_time:.1f}s... (attempt {attempt + 1}/{self.max_retries})"
-                        )
-                        time.sleep(wait_time)
-                        continue
-                    else:
-                        logger.warning(
-                            f"⚠️ Key {current_key_num} connection failed. "
-                            f"Trying next key..."
-                        )
-                        break  # Try next key
-                
-                except Exception as e:
-                    last_error = e
-                    if attempt < self.max_retries - 1:
-                        wait_time = self._get_retry_delay(attempt)
-                        logger.warning(
-                            f"⚠️ Unexpected error with key {current_key_num}: {str(e)[:100]}, "
-                            f"retrying in {wait_time:.1f}s... (attempt {attempt + 1}/{self.max_retries})"
-                        )
-                        time.sleep(wait_time)
-                        continue
-                    else:
-                        logger.warning(
-                            f"⚠️ Key {current_key_num} failed: {str(e)[:100]}. "
                             f"Trying next key..."
                         )
                         break  # Try next key
@@ -298,8 +282,9 @@ class CohereEmbeddingClient:
                     "status": "healthy"
                 })
                 
-            except cohere.CohereAPIError as e:
+            except Exception as e:
                 error_msg = str(e).lower()
+                error_type = type(e).__name__
                 
                 if "rate limit" in error_msg or "429" in error_msg:
                     status = "rate_limited"
@@ -307,26 +292,18 @@ class CohereEmbeddingClient:
                 elif "quota" in error_msg:
                     status = "quota_exceeded"
                     error = "Monthly API quota exceeded"
-                elif "invalid" in error_msg or "unauthorized" in error_msg:
+                elif "invalid" in error_msg or "unauthorized" in error_msg or "401" in error_msg:
                     status = "invalid_key"
                     error = "Invalid API key"
                 else:
                     status = "error"
-                    error = str(e)[:100]
+                    error = f"{error_type}: {str(e)[:100]}"
                 
                 key_statuses.append({
                     "key": key_num,
                     "available": False,
                     "status": status,
                     "error": error
-                })
-                
-            except Exception as e:
-                key_statuses.append({
-                    "key": key_num,
-                    "available": False,
-                    "status": "error",
-                    "error": str(e)[:100]
                 })
         
         # Overall status
