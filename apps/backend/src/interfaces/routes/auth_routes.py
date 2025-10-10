@@ -1,7 +1,7 @@
+from datetime import  timedelta
+from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response,RedirectResponse
-from sqlalchemy.orm import Session
-
 from ..schemas.auth_schemas import AccessCodeSchema, RegisterSchema, LoginSchema, VerifySchema
 from ..schemas.response_schemas import APIResponseSchema
 from ...core.entities.user_entities import User
@@ -117,11 +117,16 @@ async def oauthLogin(
 
         response = RedirectResponse(url=f"""{settings.FRONTEND_URL}?oauth=success&code={access_code}""")
 
-
         
         return response
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))   
+        error_code = getattr(e, "code", "unknown")
+        print(f"OAuth login error: {e}, code: {error_code}")
+        response = RedirectResponse(
+            url=f"{settings.FRONTEND_URL}login?oauth=failure&code={error_code}"
+        )
+
+        return response   
 
 
 @auth_router.post("/verify", dependencies=[])
@@ -183,11 +188,13 @@ async def exchange_tokens(
     try:
         user=security_manager.verify_token(payload.code)
         access_token = security_manager.create_access_token(
-            data={"user_id": user.user_id, "email": user.email, "role": user.role, "username": user.user_name}
+            data={"user_id": user.user_id, "email": user.email, "role": user.role, "username": user.user_name},
+            expires_delta=timedelta(minutes=1)
         )
         
         refresh_token = security_manager.create_refresh_token(
-            data={"user_id": user.user_id, "email": user.email, "role": user.role, "username": user.user_name}
+            data={"user_id": user.user_id, "email": user.email, "role": user.role, "username": user.user_name},
+            expires_delta=timedelta(minutes=2)
         )
         response.set_cookie(
             key="access_token",

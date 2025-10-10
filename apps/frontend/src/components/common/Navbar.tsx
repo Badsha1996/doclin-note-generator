@@ -59,17 +59,8 @@ function Navbar() {
         });
 
         if (!response.ok) {
-          const error: ApiError = {
-            message: `Request failed with status ${response.status}`,
-            status: response.status,
-          };
-
-          try {
-            error.details = await response.json();
-          } catch {
-            console.error("Failed to parse error details");
-          }
-          throw error;
+          toast.error("Failed to fetch user details.");
+          router.navigate({ to: "/login" });
         }
 
         const data = await response.json();
