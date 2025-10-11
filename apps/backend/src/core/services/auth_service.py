@@ -65,11 +65,13 @@ class AuthService:
             raise AuthExceptionError("Invalid credentials")
         
         access_token = self.security.create_access_token(
-            data={"user_id": str(user.id), "email": user.email, "role": user.role, "username": user.username}
+            data={"user_id": str(user.id), "email": user.email, "role": user.role, "username": user.username},
+            expires_delta=timedelta(minutes=1)
         )
         
         refresh_token = self.security.create_refresh_token(
-            data={"user_id": str(user.id), "email": user.email, "role": user.role, "username": user.username}
+            data={"user_id": str(user.id), "email": user.email, "role": user.role, "username": user.username},
+            expires_delta=timedelta(minutes=2)
         )
         
         return access_token, refresh_token, user

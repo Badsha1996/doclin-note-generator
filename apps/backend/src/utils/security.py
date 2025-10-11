@@ -52,7 +52,7 @@ class SecurityManager:
         if expires_delta:
             expire = datetime.now(timezone.utc) + expires_delta
         else:
-            expire = datetime.now(timezone.utc) + timedelta(day=7)
+            expire = datetime.now(timezone.utc) + timedelta(days=7)
         to_encode.update({"exp": expire, "type": "refresh"})
         return jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm)
     

@@ -43,7 +43,14 @@ function Navbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
+  useEffect(() => {
+    if (user && new Date(user.expiry) < new Date()) {
+      clearUserInfo();
+      setUser(null);
+      toast.error("Session expired. Please login again.");
+      router.navigate({ to: "/login" });
+    }
+  }, [router, user]);
   useEffect(() => {
     if (!oauth || !code || getUserInfo()) return;
     const fetchUser = async () => {
@@ -68,11 +75,13 @@ function Navbar() {
           email: data.data.user.email,
           role: data.data.user.role,
           username: data.data.user.user_name,
+          expiry: data.data.refresh_expiry,
         });
         setUser({
           email: data.data.user.email,
           role: data.data.user.role,
           username: data.data.user.user_name,
+          expiry: data.data.refresh_expiry,
         });
       } catch (err) {
         console.error(err);
@@ -80,7 +89,7 @@ function Navbar() {
     };
 
     fetchUser();
-  }, [oauth, code]);
+  }, [oauth, code, router]);
   const mutation = useApiMutation<LogoutResponse>(
     {
       endpoint: "/auth/logout",

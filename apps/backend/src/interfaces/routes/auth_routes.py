@@ -1,4 +1,4 @@
-from datetime import  timedelta
+from datetime import  datetime, timedelta,timezone
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response,RedirectResponse
@@ -56,13 +56,12 @@ async def login_user(
         user_repo = SQLUserRepo(db)
         auth_service = AuthService(user_repo=user_repo,
                                    security=security_manager)
-        
+
         access_token, refresh_token, user = await auth_service.login_user(
             email=user_data.email,
             username=user_data.username,
             password=user_data.password,
         )
-
         response.set_cookie(
             key="access_token",
             value=access_token,
@@ -79,13 +78,13 @@ async def login_user(
             samesite="None",
             max_age=60*60*24*7
         )
-
+        refresh_expiry = datetime.now(timezone.utc) + timedelta(minutes=2)
         return APIResponseSchema(
             success=True,
                 data={
                     "user": user,
                     "access_token": access_token,
-                    "refresh_token": refresh_token
+                    "refresh_expiry":refresh_expiry.isoformat(),
                 },
                 message="User logged in successfully"
             )
@@ -121,7 +120,6 @@ async def oauthLogin(
         return response
     except Exception as e:
         error_code = getattr(e, "code", "unknown")
-        print(f"OAuth login error: {e}, code: {error_code}")
         response = RedirectResponse(
             url=f"{settings.FRONTEND_URL}login?oauth=failure&code={error_code}"
         )
@@ -212,12 +210,13 @@ async def exchange_tokens(
             samesite="None",
             max_age=60*60*24*7
         )
+        refresh_expiry = datetime.now(timezone.utc) + timedelta(minutes=2)
         return APIResponseSchema(
             success=True,
                 data={
                     "user": user,
                     "access_token": access_token,
-                    "refresh_token": refresh_token
+                    "refresh_expiry":refresh_expiry.isoformat(),
                 },
                 message="User logged in successfully"
             )

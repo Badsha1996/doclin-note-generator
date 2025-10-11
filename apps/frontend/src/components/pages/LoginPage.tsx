@@ -57,11 +57,12 @@ function LoginPage() {
     },
     {
       onSuccess: (data) => {
-        const { user } = data.data;
+        const { user, refresh_expiry } = data.data;
         setUserInfo({
           email: user.email,
           role: user.role,
           username: user.username,
+          expiry: refresh_expiry,
         });
         toast.success(data.message || "Login successful!");
         router.navigate({ to: "/" });

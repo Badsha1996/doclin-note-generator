@@ -60,7 +60,7 @@ export const fetchApi = async <TResponse, TPayload = undefined>(
   //   body: payload ? JSON.stringify(payload) : undefined,
   //   credentials: "include",
   // });
- const isFormData = payload instanceof FormData;
+  const isFormData = payload instanceof FormData;
 
   const finalHeaders = {
     ...(isFormData ? {} : { "Content-Type": "application/json" }),

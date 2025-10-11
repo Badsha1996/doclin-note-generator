@@ -20,7 +20,8 @@ class UserService:
 
     async def get_user_by_email(self,email)->Optional[User]:
         existing_email = await self.user_repo.get_user_by_email(email)
-
+        if not existing_email:
+            return None
         return User.model_validate(existing_email)
 
 

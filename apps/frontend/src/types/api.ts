@@ -55,7 +55,7 @@ export type RegisterResponse = z.infer<typeof registerResponseSchema>;
 export const loginDataSchema = z.object({
   user: userSchema,
   access_token: z.string(),
-  refresh_token: z.string(),
+  refresh_expiry: z.string(),
 });
 
 export const loginResponseSchema = apiResponseSchema(loginDataSchema);
