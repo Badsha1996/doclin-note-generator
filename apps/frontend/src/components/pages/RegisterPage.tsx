@@ -48,7 +48,7 @@ import {
 import { useApiMutation } from "@/hook/useApi";
 
 import { EyeClosed, Eye } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   InputOTP,
   InputOTPGroup,
@@ -76,6 +76,7 @@ function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [otpVerified, setOtpVerified] = useState(false);
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const navigate = useNavigate();
 
@@ -174,6 +175,16 @@ function RegisterPage() {
     setConfirmPassword(!confirmPassword);
   }
 
+  function debounceVerifyOtp(otp: string, email: string) {
+    if (debounceTimeoutRef.current) clearTimeout(debounceTimeoutRef.current);
+
+    debounceTimeoutRef.current = setTimeout(() => {
+      verifyOtpMutation.mutate({
+        email,
+        otp,
+      });
+    }, 2000);
+  }
   return (
     <div className="relative w-full h-screen flex justify-center items-center overflow-hidden">
       <motion.div
@@ -377,10 +388,10 @@ function RegisterPage() {
                                 field.onChange(pasteData);
 
                                 if (pasteData.length === 6) {
-                                  verifyOtpMutation.mutate({
-                                    email: form.getValues("email"),
-                                    otp: pasteData,
-                                  });
+                                  debounceVerifyOtp(
+                                    pasteData,
+                                    form.getValues("email")
+                                  );
                                 }
                               }}
                             >
