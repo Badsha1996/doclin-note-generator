@@ -49,12 +49,7 @@ import { useApiMutation } from "@/hook/useApi";
 
 import { EyeClosed, Eye } from "lucide-react";
 import { useRef, useState } from "react";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSeparator,
-  InputOTPSlot,
-} from "@/components/ui/input-otp";
+import { InputOTP } from "../InputOTP";
 
 type ApiResponse = RegisterResponse;
 
@@ -178,6 +173,7 @@ function RegisterPage() {
   function debounceVerifyOtp(otp: string, email: string) {
     if (debounceTimeoutRef.current) clearTimeout(debounceTimeoutRef.current);
 
+    if (!/^[A-Za-z0-9]{6}$/.test(otp) || otp.length !== 6) return;
     debounceTimeoutRef.current = setTimeout(() => {
       verifyOtpMutation.mutate({
         email,
@@ -361,7 +357,7 @@ function RegisterPage() {
                         </FormLabel>
                         <FormControl>
                           <div className="flex flex-col gap-2">
-                            <InputOTP
+                            {/* <InputOTP
                               id="otp"
                               autoComplete="one-time-code"
                               maxLength={6}
@@ -433,7 +429,14 @@ function RegisterPage() {
                                   />
                                 </InputOTPGroup>
                               </>
-                            </InputOTP>
+                            </InputOTP> */}
+                            <InputOTP
+                              value={field.value || ""}
+                              onChange={(val) => {
+                                field.onChange(val);
+                                debounceVerifyOtp(val, form.getValues("email"));
+                              }}
+                            />
                             {verifyOtpMutation.isPending && (
                               <div className="flex items-center gap-2 text-sm text-purple-300">
                                 <div className="w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
