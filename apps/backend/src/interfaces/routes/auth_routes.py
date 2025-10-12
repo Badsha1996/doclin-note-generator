@@ -78,7 +78,7 @@ async def login_user(
             samesite="None",
             max_age=60*60*24*7
         )
-        refresh_expiry = datetime.now(timezone.utc) + timedelta(minutes=2)
+        refresh_expiry = datetime.now(timezone.utc) + timedelta(days=7)
         return APIResponseSchema(
             success=True,
                 data={
@@ -210,7 +210,7 @@ async def exchange_tokens(
             samesite="None",
             max_age=60*60*24*7
         )
-        refresh_expiry = datetime.now(timezone.utc) + timedelta(minutes=2)
+        refresh_expiry = datetime.now(timezone.utc) + timedelta(days=7)
         return APIResponseSchema(
             success=True,
                 data={
