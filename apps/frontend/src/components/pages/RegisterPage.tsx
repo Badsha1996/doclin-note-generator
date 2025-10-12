@@ -49,7 +49,7 @@ import { useApiMutation } from "@/hook/useApi";
 
 import { EyeClosed, Eye } from "lucide-react";
 import { useRef, useState } from "react";
-import { InputOTP } from "../InputOTP";
+import { InputOTP } from "../common/InputOTP";
 
 type ApiResponse = RegisterResponse;
 
