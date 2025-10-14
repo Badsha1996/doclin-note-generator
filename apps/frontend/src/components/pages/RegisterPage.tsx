@@ -48,13 +48,8 @@ import {
 import { useApiMutation } from "@/hook/useApi";
 
 import { EyeClosed, Eye } from "lucide-react";
-import { useState } from "react";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSeparator,
-  InputOTPSlot,
-} from "@/components/ui/input-otp";
+import { useRef, useState } from "react";
+import { InputOTP } from "../common/InputOTP";
 
 type ApiResponse = RegisterResponse;
 
@@ -76,6 +71,7 @@ function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [otpVerified, setOtpVerified] = useState(false);
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const navigate = useNavigate();
 
@@ -174,6 +170,17 @@ function RegisterPage() {
     setConfirmPassword(!confirmPassword);
   }
 
+  function debounceVerifyOtp(otp: string, email: string) {
+    if (debounceTimeoutRef.current) clearTimeout(debounceTimeoutRef.current);
+
+    if (!/^[A-Za-z0-9]{6}$/.test(otp) || otp.length !== 6) return;
+    debounceTimeoutRef.current = setTimeout(() => {
+      verifyOtpMutation.mutate({
+        email,
+        otp,
+      });
+    }, 2000);
+  }
   return (
     <div className="relative w-full h-screen flex justify-center items-center overflow-hidden">
       <motion.div
@@ -351,78 +358,12 @@ function RegisterPage() {
                         <FormControl>
                           <div className="flex flex-col gap-2">
                             <InputOTP
-                              id="otp"
-                              autoComplete="one-time-code"
-                              maxLength={6}
-                              {...field}
-                              className="w-full"
-                              onChange={(val: string) => {
+                              value={field.value || ""}
+                              onChange={(val) => {
                                 field.onChange(val);
-                                if (val.length === 6) {
-                                  verifyOtpMutation.mutate({
-                                    email: form.getValues("email"),
-                                    otp: val,
-                                  });
-                                }
+                                debounceVerifyOtp(val, form.getValues("email"));
                               }}
-                              onPaste={(
-                                e: React.ClipboardEvent<HTMLInputElement>
-                              ) => {
-                                e.preventDefault();
-                                const pasteData = e.clipboardData
-                                  .getData("text")
-                                  .trim()
-                                  .slice(0, 6); // take only first 6 characters
-
-                                field.onChange(pasteData);
-
-                                if (pasteData.length === 6) {
-                                  verifyOtpMutation.mutate({
-                                    email: form.getValues("email"),
-                                    otp: pasteData,
-                                  });
-                                }
-                              }}
-                            >
-                              <>
-                                <InputOTPGroup>
-                                  <InputOTPSlot
-                                    index={0}
-                                    className="bg-white/20 border-white/30 text-white"
-                                  />
-                                  <InputOTPSlot
-                                    index={1}
-                                    className="bg-white/20 border-white/30 text-white"
-                                  />
-                                </InputOTPGroup>
-
-                                <InputOTPSeparator />
-
-                                <InputOTPGroup>
-                                  <InputOTPSlot
-                                    index={2}
-                                    className="bg-white/20 border-white/30 text-white"
-                                  />
-                                  <InputOTPSlot
-                                    index={3}
-                                    className="bg-white/20 border-white/30 text-white"
-                                  />
-                                </InputOTPGroup>
-
-                                <InputOTPSeparator />
-
-                                <InputOTPGroup>
-                                  <InputOTPSlot
-                                    index={4}
-                                    className="bg-white/20 border-white/30 text-white"
-                                  />
-                                  <InputOTPSlot
-                                    index={5}
-                                    className="bg-white/20 border-white/30 text-white"
-                                  />
-                                </InputOTPGroup>
-                              </>
-                            </InputOTP>
+                            />
                             {verifyOtpMutation.isPending && (
                               <div className="flex items-center gap-2 text-sm text-purple-300">
                                 <div className="w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />

@@ -43,7 +43,14 @@ function Navbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
+  useEffect(() => {
+    if (user && new Date(user.expiry) < new Date()) {
+      clearUserInfo();
+      setUser(null);
+      toast.error("Session expired. Please login again.");
+      router.navigate({ to: "/login" });
+    }
+  }, [router, user]);
   useEffect(() => {
     if (!oauth || !code || getUserInfo()) return;
     const fetchUser = async () => {
@@ -59,17 +66,8 @@ function Navbar() {
         });
 
         if (!response.ok) {
-          const error: ApiError = {
-            message: `Request failed with status ${response.status}`,
-            status: response.status,
-          };
-
-          try {
-            error.details = await response.json();
-          } catch {
-            console.error("Failed to parse error details");
-          }
-          throw error;
+          toast.error("Failed to fetch user details.");
+          router.navigate({ to: "/login" });
         }
 
         const data = await response.json();
@@ -77,11 +75,13 @@ function Navbar() {
           email: data.data.user.email,
           role: data.data.user.role,
           username: data.data.user.user_name,
+          expiry: data.data.refresh_expiry,
         });
         setUser({
           email: data.data.user.email,
           role: data.data.user.role,
           username: data.data.user.user_name,
+          expiry: data.data.refresh_expiry,
         });
       } catch (err) {
         console.error(err);
@@ -89,7 +89,7 @@ function Navbar() {
     };
 
     fetchUser();
-  }, [oauth, code]);
+  }, [oauth, code, router]);
   const mutation = useApiMutation<LogoutResponse>(
     {
       endpoint: "/auth/logout",

@@ -1,8 +1,8 @@
-import { Link, useRouter } from "@tanstack/react-router";
+import { Link, useRouter, useSearch } from "@tanstack/react-router";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LoginFormSchema, type loginTypes } from "@/types/type";
 import {
   loginResponseSchema,
@@ -24,9 +24,17 @@ import { Eye, EyeClosed } from "lucide-react";
 
 function LoginPage() {
   const router = useRouter();
+  const { oauth } = useSearch({ from: "__root__" });
   // *************** All States **************
   const [showEmailInput, setShowEmailInput] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  //************Effects **************** */
+  useEffect(() => {
+    if (oauth === "failure") {
+      toast.error("OAuth login failed. Please try again.");
+    }
+  }, [oauth]);
 
   // ********** Hooks *************
   const form = useForm<loginTypes>({
@@ -49,11 +57,12 @@ function LoginPage() {
     },
     {
       onSuccess: (data) => {
-        const { user } = data.data;
+        const { user, refresh_expiry } = data.data;
         setUserInfo({
           email: user.email,
           role: user.role,
           username: user.username,
+          expiry: refresh_expiry,
         });
         toast.success(data.message || "Login successful!");
         router.navigate({ to: "/" });

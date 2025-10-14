@@ -1,14 +1,15 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { getUserInfo } from "@/lib/auth";
 import { lazy } from "react";
 import GlassmorphicLoader from "@/components/common/GlassLoader";
+import { clearUserInfo, getUserInfo } from "@/lib/auth";
 
 const RegisterPage = lazy(() => import("@/components/pages/RegisterPage"));
 export const Route = createFileRoute("/register/")({
   beforeLoad: () => {
-    if (getUserInfo()) {
+    const user = getUserInfo();
+    if (user && new Date(user.expiry) > new Date()) {
       throw redirect({ to: "/" });
-    }
+    } else if (user) clearUserInfo();
   },
   component: RegisterPage,
   pendingComponent: () => (

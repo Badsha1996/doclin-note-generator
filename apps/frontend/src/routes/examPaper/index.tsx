@@ -1,5 +1,5 @@
 import GlassmorphicLoader from "@/components/common/GlassLoader";
-import { getUserInfo } from "@/lib/auth";
+import { clearUserInfo, getUserInfo } from "@/lib/auth";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { lazy } from "react";
 import { toast } from "sonner";
@@ -8,7 +8,12 @@ import z from "zod";
 const ExamPaper = lazy(() => import("@/components/pages/ExamPaperPage"));
 export const Route = createFileRoute("/examPaper/")({
   beforeLoad: () => {
-    if (!getUserInfo()) {
+    const user = getUserInfo();
+    let shouldRedirect = false;
+    if (!user) shouldRedirect = true;
+    else if (user && new Date(user.expiry) < new Date()) shouldRedirect = true;
+    if (shouldRedirect) {
+      clearUserInfo();
       toast.error("You have to login first in order to access this feature.");
       throw redirect({ to: "/login" });
     }
