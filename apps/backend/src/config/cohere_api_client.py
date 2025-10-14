@@ -225,10 +225,6 @@ class CohereEmbeddingClient:
         
         # If we reach here, all keys failed - use fallback
         if self.fallback_enabled:
-            logger.error(
-                f"❌ All {len(self.api_keys)} API key(s) exhausted. "
-                f"Using fallback embeddings (hash-based, deterministic) for {len(text_list)} texts"
-            )
             embeddings = self._generate_fallback_embeddings(text_list)
             
             if is_single_text:
@@ -247,9 +243,6 @@ class CohereEmbeddingClient:
         input_type: str = "search_document",
         normalize: bool = True
     ) -> np.ndarray:
-        """
-        Async version with same key rotation and fallback guarantees.
-        """
         import asyncio
         from concurrent.futures import ThreadPoolExecutor
         
@@ -261,9 +254,6 @@ class CohereEmbeddingClient:
             )
     
     def health_check(self) -> dict:
-        """
-        Check health of all API keys.
-        """
         key_statuses = []
         
         for idx, client in enumerate(self.clients):
@@ -320,9 +310,6 @@ class CohereEmbeddingClient:
         }
     
     def get_usage_info(self) -> dict:
-        """
-        Get information about API usage and limits.
-        """
         return {
             "total_keys": len(self.api_keys),
             "current_key": self.current_key_index + 1,
