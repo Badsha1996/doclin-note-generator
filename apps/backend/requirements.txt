@@ -22,8 +22,6 @@ authlib==1.6.4  # OAuth & JWT handling
 
 # HTTP Client
 httpx==0.28.1
-# Caching / Queuing
-redis==6.4.0
 
 # Environment Variable Management
 python-decouple==3.8
@@ -32,7 +30,6 @@ python-decouple==3.8
 pdfplumber==0.11.7
 requests==2.32.5
 google-genai==1.38.0
-llama-cpp-python==0.3.15
 langchain-openai==0.3.33
 langchain-huggingface==0.3.1
 langchain_community==0.3.29
@@ -44,6 +41,5 @@ langchain_google_genai==2.1.9
 langchain-ollama==0.3.6
 json-repair==0.50.0
 
-# DEV ONLY - COMMENT THIS WHEN PUSHING TO PRODUCTION
-minio==7.2.16
-
+sib-api-v3-sdk==7.6.0
+cohere==5.18.0

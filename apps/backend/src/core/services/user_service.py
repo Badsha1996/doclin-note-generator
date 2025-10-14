@@ -17,6 +17,14 @@ class UserService:
         users = await self.user_repo.get_all_user(skip=skip,limit=limit)
         return [User.model_validate(user) for user in users]
     
+
+    async def get_user_by_email(self,email)->Optional[User]:
+        existing_email = await self.user_repo.get_user_by_email(email)
+        if not existing_email:
+            return None
+        return User.model_validate(existing_email)
+
+
     async def create_user(self, email: str, username: str, password: str, user_role = UserRole.USER)->User:
         # IF email OR username already taken 😋
         existing_email = await self.user_repo.get_user_by_email(email)

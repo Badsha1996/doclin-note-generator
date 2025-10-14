@@ -3,10 +3,28 @@ import { z } from "zod";
 // **************** Register File Types ****************
 export const FormSchema = z
   .object({
-    username: z.string().min(2, "Username must be at least 2 characters."),
+    username: z
+      .string()
+      .min(2, "Username must be at least 2 characters.")
+      .regex(/^[A-Za-z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?`~]+$/, {
+        message: "Username cannot contain spaces.",
+      }),
+
     email: z.email("Invalid email address."),
+
     otp: z.string().optional(),
-    password: z.string().min(6, "Password must be at least 6 characters."),
+
+    password: z
+      .string()
+      .min(6, "Password must be at least 6 characters long.")
+      .regex(
+        /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?`~]).+$/,
+        {
+          message:
+            "Password must include at least one letter, one number, and one special character.",
+        }
+      ),
+
     confirmpassword: z.string().min(6, "Please confirm your password."),
   })
   .refine((data) => data.password === data.confirmpassword, {
@@ -19,7 +37,7 @@ export type registerTypes = z.infer<typeof FormSchema>;
 // **************** Login File Types ****************
 export const LoginFormSchema = z.object({
   email: z.email("Please enter a valid email"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string().min(6, "Please enter your password"),
 });
 
 export type loginTypes = z.infer<typeof LoginFormSchema>;
@@ -160,3 +178,26 @@ export const verifyUserSchema = z.object({
   id: z.uuid(),
 });
 export type VerifyUserType = z.infer<typeof verifyUserSchema>;
+
+// **************** Contact File Types ****************
+export const feedbackFormPayloadSchema = z.object({
+  rating: z.number().min(1, "Please Provide Rating").max(5),
+  feedback_text: z.string().optional(),
+});
+export type FeedbackFormValues = z.infer<typeof feedbackFormPayloadSchema>;
+export const reportFormSchema = z.object({
+  description: z.string().min(10, "Please describe the issue in more detail"),
+  attachment: z.any().optional(),
+});
+
+export type ReportFormValues = z.infer<typeof reportFormSchema>;
+export interface LeadContributorInfo {
+  id: number;
+  name: string;
+  role: string;
+  description: string;
+  avatar: string;
+  linkedin?: string;
+  github?: string;
+  email?: string;
+}

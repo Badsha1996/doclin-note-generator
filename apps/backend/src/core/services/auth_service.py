@@ -1,3 +1,4 @@
+from datetime import timedelta
 from typing import Optional, Tuple
 from ..repo.user_repo import OAuthRepo, UserRepo
 from ...utils.security import SecurityManager
@@ -64,28 +65,29 @@ class AuthService:
             raise AuthExceptionError("Invalid credentials")
         
         access_token = self.security.create_access_token(
-            data={"user_id": str(user.id), "email": user.email, "role": user.role, "username": user.username}
+            data={"user_id": str(user.id), "email": user.email, "role": user.role, "username": user.username},
+            expires_delta=timedelta(minutes=1)
         )
         
         refresh_token = self.security.create_refresh_token(
-            data={"user_id": str(user.id), "email": user.email, "role": user.role, "username": user.username}
+            data={"user_id": str(user.id), "email": user.email, "role": user.role, "username": user.username},
+            expires_delta=timedelta(minutes=2)
         )
         
         return access_token, refresh_token, user
     
-    async def oauth_login(self,oauth_user:OAuthUser)->Tuple[str, str, User]:
+    async def oauth_login(self,oauth_user:OAuthUser)->Tuple[str,  User]:
         user = await self.oauth_repo.create_or_update_oauth_user(oauth_user)
         if not user:
             raise AuthExceptionError("Invalid credentials")
         
-        access_token = self.security.create_access_token(
-            data={"user_id": str(user.id), "email": user.email, "role": user.role, "username": user.username}
+        access_code = self.security.create_access_token(
+            data={"user_id": str(user.id), "email": user.email, "role": user.role, "username": user.username},
+            expires_delta=timedelta(minutes=1)
         )
         
-        refresh_token = self.security.create_refresh_token(
-            data={"user_id": str(user.id), "email": user.email, "role": user.role, "username": user.username}
-        )
-        return access_token, refresh_token, user
+        
+        return access_code, user
     
 
     async def verify_user(self,id:str)->bool:

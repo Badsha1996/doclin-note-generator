@@ -15,6 +15,7 @@ class TokenData(BaseModel):
     email: str
     role: str
     exp: int
+    user_name:str
 
 class SecurityManager:
     def __init__(self, secret_key: str, algorithm: str):
@@ -46,9 +47,12 @@ class SecurityManager:
         to_encode.update({"exp": expire})
         return jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm)
     
-    def create_refresh_token(self, data: Dict[str, Any]) -> str:
+    def create_refresh_token(self, data: Dict[str, Any],expires_delta: Optional[timedelta] = None) -> str:
         to_encode = data.copy()
-        expire = datetime.now(timezone.utc) + timedelta(days=7)
+        if expires_delta:
+            expire = datetime.now(timezone.utc) + expires_delta
+        else:
+            expire = datetime.now(timezone.utc) + timedelta(days=7)
         to_encode.update({"exp": expire, "type": "refresh"})
         return jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm)
     
@@ -59,7 +63,8 @@ class SecurityManager:
                 user_id=payload.get("user_id"),
                 email=payload.get("email"),
                 role=payload.get("role"),
-                exp=payload.get("exp")
+                exp=payload.get("exp"),
+                user_name=payload.get("username")
             )
         except JWTError:
             raise AuthExceptionError("Invalid or expired token")

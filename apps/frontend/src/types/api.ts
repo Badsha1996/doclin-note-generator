@@ -55,7 +55,7 @@ export type RegisterResponse = z.infer<typeof registerResponseSchema>;
 export const loginDataSchema = z.object({
   user: userSchema,
   access_token: z.string(),
-  refresh_token: z.string(),
+  refresh_expiry: z.string(),
 });
 
 export const loginResponseSchema = apiResponseSchema(loginDataSchema);
@@ -264,3 +264,49 @@ export const examPaperResponseSchema = apiResponseSchema(
 
 export type ExamPaper = z.infer<typeof examPaperSchema>;
 export type ExamPaperResponse = z.infer<typeof examPaperResponseSchema>;
+
+export const userKpiDataSchema = z.object({
+  totalUsers: z.number(),
+  blockedUsers: z.number(),
+  paidUsers: z.number(),
+  newUsers: z.number(),
+  trend: z.array(z.record(z.string(), z.number())),
+});
+
+export const userKpiResponseSchema = apiResponseSchema(userKpiDataSchema);
+
+export type UserKPIResponse = z.infer<typeof userKpiResponseSchema>;
+
+//all use end point
+export const allUserDataSchema = z.object({
+  users: z.array(userSchema),
+});
+
+export const allUserResponseSchema = apiResponseSchema(allUserDataSchema);
+
+export type AllUserResponse = z.infer<typeof allUserResponseSchema>;
+
+export const feedbackItemSchema = z.object({
+  id: z.uuid(),
+  user_id: z.uuid(),
+  rating: z.number(),
+  username: z.string().optional(),
+  feedback_text: z.string().nullable(),
+  created_at: z.coerce.date(),
+});
+export const feedbackListResponseSchema = apiResponseSchema(
+  z.object({
+    feedbacks: z.array(feedbackItemSchema),
+  })
+);
+export type FeedbackListResponse = z.infer<typeof feedbackListResponseSchema>;
+// ******Contact Us Types ********
+export const feedbackApiSchema = apiResponseSchema(
+  z.object({
+    feedback: feedbackItemSchema,
+  })
+);
+
+export type FeedbackResponse = z.infer<typeof feedbackApiSchema>;
+
+export const reportDescriptionSchema = z.string().min(10);

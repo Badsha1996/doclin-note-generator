@@ -21,7 +21,10 @@ services:
       - LLM_PROVIDER=ollama
       - OLLAMA_URL=http://ollama:11434
       - OLLAMA_MODEL=llama3:8b
-      - VECTOR_MODEL=all-mpnet-base-v2
+      # UNCOMMNET BELOW LINE FOR PROD
+      # - COHERE_API_KEY=
+      # - VECTOR_MODEL=False
+      - VECTOR_MODEL=sentence-transformers/all-MiniLM-L6-v2
       - NODE_ENV=development
       - PYTHONUNBUFFERED=1
     depends_on:

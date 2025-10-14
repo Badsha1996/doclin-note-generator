@@ -21,7 +21,7 @@ env/
 
 # Environment files (secrets)
 .env
-.env.*
+.env
 
 # Docker volumes
 pgdata/

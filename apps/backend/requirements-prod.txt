@@ -1,0 +1,43 @@
+# Web Framework and Server
+fastapi==0.117.1
+uvicorn[standard]==0.36.0
+
+# Data Validation and Settings Management
+pydantic==2.11.9
+pydantic-settings==2.10.1
+pydantic[email]
+
+# Database ORM and Migration
+sqlalchemy==2.0.43
+alembic==1.16.5
+psycopg2-binary==2.9.10  # PostgreSQL driver
+
+# Authentication and Security
+python-jose[cryptography]==3.5.0
+passlib[bcrypt]==1.7.4
+bcrypt==4.0.1 # 🔧 Pinning due to issues with newer versions (>4.0) (__about__ module separation)
+itsdangerous==2.2.0
+python-multipart==0.0.20 # For handling form data
+authlib==1.6.4  # OAuth & JWT handling
+
+# HTTP Client
+httpx==0.28.1
+
+# Environment Variable Management
+python-decouple==3.8
+
+# Libraries needed
+pdfplumber==0.11.7
+requests==2.32.5
+google-genai==1.38.0
+langchain-openai==0.3.33
+langchain-huggingface==0.3.1
+langchain_community==0.3.29
+langchain==0.3.27
+pgvector==0.4.1
+psycopg2==2.9.10
+langchain_google_genai==2.1.9
+json-repair==0.50.0
+
+sib-api-v3-sdk==7.6.0
+cohere==5.18.0

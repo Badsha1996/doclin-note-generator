@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
@@ -6,6 +6,8 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from datetime import datetime, timedelta,timezone
 from jose import jwt, JWTError, ExpiredSignatureError
 from starlette.middleware.sessions import SessionMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
+from datetime import datetime, timedelta, timezone
 
 from ..config.config import settings
 from ..utils.security import SecurityManager
@@ -17,7 +19,7 @@ class TokenRefreshMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
         self.excluded_paths = excluded_paths or []
 
-    async def dispatch(self, request, call_next):
+    async def dispatch(self, request: Request, call_next):
         if request.url.path in self.excluded_paths or request.method == "OPTIONS":
             return await call_next(request)
 
@@ -33,90 +35,95 @@ class TokenRefreshMiddleware(BaseHTTPMiddleware):
                 refresh_payload = security.verify_token(refresh_token)
                 refresh_exp = refresh_payload.exp
                 refresh_exp_datetime = datetime.fromtimestamp(refresh_exp, tz=timezone.utc)
-                if refresh_exp_datetime > datetime.now(timezone.utc):
-                    # Issue new access token from refresh token
-                    new_access_token = security.create_access_token(
-                        data={
-                            "user_id": refresh_payload.user_id,
-                            "email": refresh_payload.email,
-                            "role": refresh_payload.role,
-                        },
-                        expires_delta=timedelta(hours=1),
-                    )
+                if refresh_exp_datetime <= datetime.now(timezone.utc):
+                    return JSONResponse({"detail": "Refresh token expired"}, status_code=401)
+                
+                new_access_token = security.create_access_token(
+                    data={
+                        "user_id": refresh_payload.user_id,
+                        "email": refresh_payload.email,
+                        "role": refresh_payload.role,
+                        "username":refresh_payload.user_name
+                    },
+                    expires_delta=timedelta(hours=1),
+                )
             except Exception as e:
-                return JSONResponse({"detail": f"""{str(e)}"""}, status_code=401)
+                return JSONResponse({"detail": str(e)}, status_code=401)
+
         elif access_token:
             try:
                 payload = security.verify_token(access_token)
-                exp = payload.exp
+                exp_datetime = datetime.fromtimestamp(payload.exp, tz=timezone.utc)
 
-                if exp:
-                    exp_datetime = datetime.fromtimestamp(exp, tz=timezone.utc)
-                    # Refresh if expiring in less than 5 mins
-                    if exp_datetime - datetime.now(timezone.utc) < timedelta(minutes=5):
-                        if refresh_token:
-                                refresh_payload = security.verify_token(refresh_token)
-                                refresh_exp = refresh_payload.exp
-                                refresh_exp_datetime = datetime.fromtimestamp(refresh_exp, tz=timezone.utc)
-                                if refresh_exp_datetime > datetime.now(timezone.utc):
-                                    new_access_token = security.create_access_token(
-                                        data={
-                                            "user_id": payload.user_id,
-                                            "email": payload.email,
-                                            "role": payload.role,
-                                        },
-                                        expires_delta=timedelta(hours=1),
-                                    )
+                if exp_datetime - datetime.now(timezone.utc) < timedelta(minutes=5) and refresh_token:
+                    refresh_payload = security.verify_token(refresh_token)
+                    refresh_exp = refresh_payload.exp
+                    refresh_exp_datetime = datetime.fromtimestamp(refresh_exp, tz=timezone.utc)
+                    if refresh_exp_datetime > datetime.now(timezone.utc):
+                        new_access_token = security.create_access_token(
+                            data={
+                                "user_id": payload.user_id,
+                                "email": payload.email,
+                                "role": payload.role,
+                                "username":payload.user_name
+                            },
+                             expires_delta=timedelta(hours=1),
+                        )
             except Exception as e:
-                return JSONResponse({"detail": f"""{str(e)}"""}, status_code=401)
+                return JSONResponse({"detail": str(e)}, status_code=401)
 
         response = await call_next(request)
 
+        # Set new access token in cookie if refreshed
         if new_access_token:
             response.set_cookie(
                 key="access_token",
                 value=new_access_token,
                 httponly=True,
                 secure=True,
-                samesite="None",
-                domain=settings.BACKEND_DOMAIN,
+                samesite="None",    
                 max_age=3600,
             )
 
-        return response        
+        return response
+
 
 def setup_middleware(app: FastAPI):
-    # CORS
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.BACKEND_CORS_ORIGINS,
+        allow_origins=settings.BACKEND_CORS_ORIGINS,  
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    
+
     # Session middleware
     app.add_middleware(
         SessionMiddleware,
         secret_key=settings.SECRET_KEY
     )
-    
-    # Trusted hosts
+
     app.add_middleware(
         TrustedHostMiddleware,
-        allowed_hosts=["localhost", "127.0.0.1", "*.yourdomain.com"]
+        allowed_hosts=["*"]
     )
+
     app.add_middleware(
         TokenRefreshMiddleware,
         excluded_paths=[
-            "/api/auth/login",
-            "/api/auth/register",
-            "/docs",
+            "/",                       
+            "/favicon.ico",            
+            "/health",                 
+            "/api/auth/login",         
+            "/api/auth/register",      
+            "/docs",                   
+            "/openapi.json",           
             "/api/otp/verify",
             "/api/auth/oauth/login",
-            "/health",
             "/api/auth/verify",
             "/api/otp/generate",
-            "/openapi.json"
-            ] 
+            "/api/feedback/all",
+            "/api/auth/logout",
+            "/api/auth/exchange"
+        ]
     )

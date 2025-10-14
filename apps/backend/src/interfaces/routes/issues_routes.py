@@ -10,6 +10,8 @@ from ...interfaces.schemas.issues_schemas import ReportIssueSchema
 from ...interfaces.dependencies.dependencies import get_current_user
 
 issue_router=APIRouter(prefix="/issue", tags=["issues","bugs"])
+ALLOWED_FILE_TYPES = {"image/png", "image/jpeg", "application/pdf"}
+
 
 @issue_router.post("/report")
 async def report_issue(
@@ -27,7 +29,8 @@ async def report_issue(
             file_bytes = await report_data.file.read()
             filename = report_data.file.filename
             content_type = report_data.file.content_type
-
+            if content_type not in ALLOWED_FILE_TYPES:
+                raise HTTPException(status_code=400, detail="Unsupported file type")
         reported= await issue_service.report_issue(
             description=report_data.description,
             user=current_user,

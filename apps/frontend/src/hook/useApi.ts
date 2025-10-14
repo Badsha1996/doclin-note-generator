@@ -49,26 +49,54 @@ export const fetchApi = async <TResponse, TPayload = undefined>(
     : `/${endpoint}`;
   const url = buildUrl(`${API_BASE_URL}${normalizedEndpoint}`, queryParams);
 
-  const defaultHeaders = {
-    "Content-Type": "application/json",
+  // const defaultHeaders = {
+  //   "Content-Type": "application/json",
+  //   ...headers,
+  // };
+
+  // const response = await fetch(url, {
+  //   method,
+  //   headers: defaultHeaders,
+  //   body: payload ? JSON.stringify(payload) : undefined,
+  //   credentials: "include",
+  // });
+  const isFormData = payload instanceof FormData;
+
+  const finalHeaders = {
+    ...(isFormData ? {} : { "Content-Type": "application/json" }),
     ...headers,
   };
 
   const response = await fetch(url, {
     method,
-    headers: defaultHeaders,
-    body: payload ? JSON.stringify(payload) : undefined,
+    headers: finalHeaders,
+    body: isFormData ? payload : payload ? JSON.stringify(payload) : undefined,
     credentials: "include",
   });
-
   if (!response.ok) {
+    const fallbackMessages: Record<number, string> = {
+      400: "Invalid request. Please check your input.",
+      401: "Invalid credentials. Please log in again.",
+      403: "You don’t have permission to perform this action.",
+      404: "The requested resource was not found.",
+      500: "Server error. Please try again later.",
+    };
+
     const error: ApiError = {
-      message: `Request failed with status ${response.status}`,
+      message:
+        fallbackMessages[response.status] ??
+        "Something went wrong. Please try again.",
       status: response.status,
     };
 
     try {
-      error.details = await response.json();
+      const data = await response.json();
+      if (data.detail) {
+        error.message = data.detail;
+      } else if (data.message) {
+        error.message = data.message;
+      }
+      error.details = data;
     } catch {
       console.error("Failed to parse error response as JSON");
     }

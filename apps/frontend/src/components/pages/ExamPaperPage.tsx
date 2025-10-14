@@ -1,13 +1,28 @@
 import PageHeader from "@/components/common/PageHeader";
 import { useApi } from "@/hook/useApi";
-import { examPaperResponseSchema, type ExamPaper } from "@/types/api";
 import { useLocation } from "@tanstack/react-router";
 import { useMemo, useRef } from "react";
+import { Button } from "../ui/button";
+import GlassDropdown from "../common/GlassDropdown";
+import GlassmorphicLoader from "../common/GlassLoader";
 
 const ExamPaperPage = () => {
   const location = useLocation();
 
-  const searchParams = new URLSearchParams(location.search);
+  const searchString =
+    typeof location.search === "string"
+      ? location.search
+      : new URLSearchParams(
+          Object.entries(location.search).reduce(
+            (acc, [key, value]) => {
+              acc[key] = String(value);
+              return acc;
+            },
+            {} as Record<string, string>
+          )
+        ).toString();
+
+  const searchParams = new URLSearchParams(searchString);
   const prevShow = searchParams.get("prev") === "true";
 
   const apiPayload = useMemo(() => {
@@ -73,7 +88,13 @@ const ExamPaperPage = () => {
       };
     },
     | { subject: string; year: number }
-    | { subject: string; board: string; paper: string; code: string; year: number }
+    | {
+        subject: string;
+        board: string;
+        paper: string;
+        code: string;
+        year: number;
+      }
   >(
     {
       endpoint,
@@ -106,19 +127,18 @@ const ExamPaperPage = () => {
   // Helper function to extract question text from any nested structure
   const getQuestionText = (questionPart: any): string => {
     if (!questionPart) return "";
-    
+
     // Check main question field first
     if (questionPart.question) return questionPart.question;
-    
+
     // Check description field
     if (questionPart.description) return questionPart.description;
-    
+
     // Check if there are sub_parts with questions
     if (questionPart.sub_parts && questionPart.sub_parts.length > 0) {
       const firstSubPart = questionPart.sub_parts[0];
       if (firstSubPart.question) return firstSubPart.question;
     }
-    
     return "";
   };
 
@@ -127,9 +147,12 @@ const ExamPaperPage = () => {
     return parts.map((part, index) => {
       const questionText = getQuestionText(part);
       const hasSubParts = part.sub_parts && part.sub_parts.length > 0;
-      
+
       return (
-        <div key={part.number || part.letter || index} className={`mb-4 ${level > 0 ? 'ml-6' : ''}`}>
+        <div
+          key={part.number || part.letter || index}
+          className={`mb-4 ${level > 0 ? "ml-6" : ""}`}
+        >
           {/* Question header with number/letter */}
           {(part.number || part.letter) && questionText && (
             <div className="mb-2">
@@ -163,16 +186,17 @@ const ExamPaperPage = () => {
           )}
 
           {/* Constants given */}
-          {part.constants_given && Object.keys(part.constants_given).length > 0 && (
-            <div className="mt-2 p-3 border border-gray-300 bg-gray-50 text-sm">
-              <div className="font-medium mb-1">Given:</div>
-              {Object.entries(part.constants_given).map(([key, value]) => (
-                <div key={key}>
-                  {key} = {String(value)}
-                </div>
-              ))}
-            </div>
-          )}
+          {part.constants_given &&
+            Object.keys(part.constants_given).length > 0 && (
+              <div className="mt-2 p-3 border border-gray-300 bg-gray-50 text-sm">
+                <div className="font-medium mb-1">Given:</div>
+                {Object.entries(part.constants_given).map(([key, value]) => (
+                  <div key={key}>
+                    {key} = {String(value)}
+                  </div>
+                ))}
+              </div>
+            )}
 
           {/* Equation template */}
           {part.equation_template && (
@@ -212,18 +236,10 @@ const ExamPaperPage = () => {
   const SimpleLoader = () => (
     <div className="flex items-center justify-center min-h-screen px-4">
       <div className="text-center p-8">
-        <div className="relative mb-6">
-          <div className="w-16 h-16 border-4 border-gray-200 rounded-full animate-spin mx-auto"></div>
-          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 h-16 border-4 border-transparent border-t-blue-600 rounded-full animate-spin"></div>
-        </div>
-        <h3 className="text-lg font-medium text-gray-800 mb-2">
-          {prevShow ? "Loading Exam Paper..." : "Generating Your Exam Paper"}
-        </h3>
-        <p className="text-gray-600">
-          {prevShow
-            ? "Please wait while we fetch your paper..."
-            : "Please wait while we create your assessment..."}
-        </p>
+        <GlassmorphicLoader
+          size="lg"
+          message="Loading Exam Paper for ICSE..."
+        />
       </div>
     </div>
   );
@@ -321,14 +337,18 @@ const ExamPaperPage = () => {
       <div className="font-bold text-base mb-3">
         Question {question.number}.
         {question.instruction && (
-          <span className="font-normal italic ml-2">{question.instruction}</span>
+          <span className="font-normal italic ml-2">
+            {question.instruction}
+          </span>
         )}
         <span className="float-right">[{question.total_marks} marks]</span>
       </div>
 
       {/* Main question text if exists */}
       {question.question_text && (
-        <div className="mb-4 italic text-gray-700">{question.question_text}</div>
+        <div className="mb-4 italic text-gray-700">
+          {question.question_text}
+        </div>
       )}
 
       {renderQuestionParts(question.parts || [])}
@@ -340,14 +360,18 @@ const ExamPaperPage = () => {
       <div className="font-bold text-base mb-3">
         Question {question.number}.
         {question.instruction && (
-          <span className="font-normal italic ml-2">{question.instruction}</span>
+          <span className="font-normal italic ml-2">
+            {question.instruction}
+          </span>
         )}
         <span className="float-right">[{question.total_marks} marks]</span>
       </div>
 
       {/* Main question text if exists */}
       {question.question_text && (
-        <div className="mb-4 italic text-gray-700">{question.question_text}</div>
+        <div className="mb-4 italic text-gray-700">
+          {question.question_text}
+        </div>
       )}
 
       {renderQuestionParts(question.parts || [])}
@@ -388,10 +412,6 @@ const ExamPaperPage = () => {
   if (!isEnabled) {
     return <NoPayloadState />;
   }
-
-  // Debug logging - you can remove this in production
-  console.log("Exam Data:", examData);
-  console.log("Sections:", sections);
 
   // No data state
   if (!examData || !sections || sections.length === 0) {
@@ -434,30 +454,38 @@ const ExamPaperPage = () => {
       <div className="pt-24 pb-12">
         <PageHeader
           title={prevShow ? "Exam Paper Loaded" : "Exam Paper Generated"}
-          subTitle="Preview below or download in .pdf / .doc format"
+          subTitle="Preview below or download in Any format of your choising"
         />
 
         {/* Download buttons */}
         <div className="no-print max-w-4xl mx-auto mb-6 px-4">
-          <div className="flex gap-4 justify-center">
-            <button
+          <div className="flex gap-4 justify-center items-center">
+            <Button
+              className="mt-2"
+              variant={"glass"}
               onClick={() => window.print()}
-              className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition-colors"
             >
               Print Paper
-            </button>
-            <button
-              onClick={() => alert("PDF download would be implemented here")}
-              className="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700 transition-colors"
+            </Button>
+            <Button
+              className="mt-2"
+              variant={"glass"}
+              onClick={() => window.print()}
             >
-              Download PDF
-            </button>
-            <button
-              onClick={() => alert("DOC download would be implemented here")}
-              className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition-colors"
-            >
-              Download DOC
-            </button>
+              Download
+            </Button>
+            <GlassDropdown
+              options={[
+                { label: "Select type", value: "Select" },
+                { label: "Doc", value: "doc" },
+                { label: "PDF", value: "pdf" },
+              ]}
+              label={""}
+              value={"Select"}
+              onChange={function (): void {
+                throw new Error("Function not implemented.");
+              }}
+            />
           </div>
         </div>
 
@@ -519,7 +547,7 @@ const ExamPaperPage = () => {
                   • This paper consists of {sections.length} section
                   {sections.length > 1 ? "s" : ""}.
                 </div>
-                {sections.map((section: any, index: number) => (
+                {sections.map((section: any) => (
                   <div key={section.name}>
                     • {section.name}{" "}
                     {section.is_compulsory
@@ -547,7 +575,7 @@ const ExamPaperPage = () => {
           </div>
 
           {/* Question Sections - ICSE Style */}
-          {sections.map((section: any, sectionIndex: number) => (
+          {sections.map((section: any) => (
             <div key={section.name} className="exam-page p-12 text-black">
               <div className=" p-8">
                 {/* Section Header */}
