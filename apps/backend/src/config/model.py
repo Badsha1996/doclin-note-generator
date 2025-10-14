@@ -11,8 +11,8 @@ _model = None
 def get_embedding_model():
     global _model
     # UNCOMMMENT FOR PROD
-    # if settings.COHERE_API_KEY:
-    #     return CohereEmbeddingClient(api_keys=settings.COHERE_API_KEY)
+    if settings.COHERE_API_KEY:
+        return CohereEmbeddingClient(api_keys=settings.COHERE_API_KEY)
     if SentenceTransformer is None:
         return None  
     if settings.VECTOR_MODEL == False:
