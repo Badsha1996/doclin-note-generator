@@ -66,12 +66,12 @@ class AuthService:
         
         access_token = self.security.create_access_token(
             data={"user_id": str(user.id), "email": user.email, "role": user.role, "username": user.username},
-            expires_delta=timedelta(minutes=1)
+            expires_delta=timedelta(hours=1)
         )
         
         refresh_token = self.security.create_refresh_token(
             data={"user_id": str(user.id), "email": user.email, "role": user.role, "username": user.username},
-            expires_delta=timedelta(minutes=2)
+            expires_delta=timedelta(days=7)
         )
         
         return access_token, refresh_token, user
