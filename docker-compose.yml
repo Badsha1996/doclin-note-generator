@@ -20,7 +20,7 @@ services:
       - PYTHONPATH=/app/apps/backend/src
       - LLM_PROVIDER=ollama
       - OLLAMA_URL=http://ollama:11434
-      - OLLAMA_MODEL=llama3:8b
+      - OLLAMA_MODEL=mistral:7b-instruct
       # UNCOMMNET BELOW LINE FOR PROD
       # - COHERE_API_KEY=
       # - VECTOR_MODEL=False
@@ -69,7 +69,7 @@ services:
     restart: unless-stopped
     environment:
       - OLLAMA_ORIGINS=http://localhost:5173,http://localhost:8000
-      - OLLAMA_MODEL=llama3:8b
+      - OLLAMA_MODEL=mistral:7b-instruct
       - OLLAMA_NUM_PREDICT=1024
       - OLLAMA_CTX=4096
     deploy:

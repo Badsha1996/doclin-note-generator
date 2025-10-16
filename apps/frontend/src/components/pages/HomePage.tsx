@@ -86,6 +86,7 @@ const features = [
   "Study Material Creation",
   "Progress Tracking",
 ];
+
 const avatarPool = [
   "https://api.dicebear.com/6.x/adventurer/svg?seed=anime1",
   "https://api.dicebear.com/6.x/adventurer/svg?seed=anime2",
@@ -121,16 +122,8 @@ function HomePage() {
   useEffect(() => {
     const checkDevice = () => {
       const width = window.innerWidth;
-      const isMobileDevice = width < 768;
-
-      // Check for low-end devices
-      const isLowEndDevice =
-        (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) ||
-        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-          navigator.userAgent
-        );
-
-      setIsMobile(isMobileDevice || isLowEndDevice);
+      const isMobileDevice = width < 1024; // Changed from 768 to 1024
+      setIsMobile(isMobileDevice);
     };
 
     checkDevice();
@@ -178,14 +171,16 @@ function HomePage() {
     }));
   }, [realTestimonials]);
 
-  // Handle WebGL context loss
   useEffect(() => {
+    if (isMobile) {
+      return;
+    }
+
     const handleContextLost = (event: Event) => {
       event.preventDefault();
       console.warn("WebGL context lost, attempting to restore...");
       setWebglError(true);
 
-      // Attempt to restore after a delay
       setTimeout(() => {
         setCanvasKey((prev) => prev + 1);
         setWebglError(false);
@@ -213,50 +208,69 @@ function HomePage() {
         );
       }
     };
-  }, [canvasKey]);
+  }, [canvasKey, isMobile]);
 
-  // Main page loading effect
+  // Reduced page loading time
   useEffect(() => {
-    const minLoadTime = setTimeout(() => {
-      setPageLoading(false);
-    }, 2000);
+    const minLoadTime = setTimeout(
+      () => {
+        setPageLoading(false);
+      },
+      isMobile ? 1000 : 2000
+    ); // Faster on mobile
 
     return () => clearTimeout(minLoadTime);
-  }, []);
+  }, [isMobile]);
 
-  // Content animations after loading
+  // Optimized content animations
   useEffect(() => {
     if (!pageLoading) {
       setIsVisible(true);
 
       const text =
         "A single AI-driven platform that transforms the way students and teachers prepare effective study materials";
-      let index = 0;
-      const timer = setInterval(() => {
-        if (index <= text.length) {
-          setTypewriterText(text.slice(0, index));
-          index++;
-        } else {
-          clearInterval(timer);
-        }
-      }, 50);
 
-      const featureTimer = setInterval(() => {
-        setCurrentFeature((prev) => (prev + 1) % features.length);
-      }, 3000);
+      // Instant text on mobile, typewriter on desktop
+      if (isMobile) {
+        setTypewriterText(text);
+      } else {
+        let index = 0;
+        const timer = setInterval(() => {
+          if (index <= text.length) {
+            setTypewriterText(text.slice(0, index));
+            index++;
+          } else {
+            clearInterval(timer);
+          }
+        }, 50);
 
-      const statsTimer = setTimeout(() => {
-        setStats({ users: 25000, questions: 500000, notes: 150000 });
-      }, 1500);
+        return () => clearInterval(timer);
+      }
+
+      // Slower feature rotation on mobile
+      const featureTimer = setInterval(
+        () => {
+          setCurrentFeature((prev) => (prev + 1) % features.length);
+        },
+        isMobile ? 5000 : 3000
+      );
+
+      // Instant stats on mobile
+      const statsTimer = setTimeout(
+        () => {
+          setStats({ users: 25000, questions: 500000, notes: 150000 });
+        },
+        isMobile ? 500 : 1500
+      );
 
       return () => {
-        clearInterval(timer);
         clearInterval(featureTimer);
         clearTimeout(statsTimer);
       };
     }
-  }, [pageLoading]);
+  }, [pageLoading, isMobile]);
 
+  // Optimized counter for mobile
   const AnimatedCounter: React.FC<{
     end: number;
     duration?: number;
@@ -266,6 +280,13 @@ function HomePage() {
 
     useEffect(() => {
       if (end === 0) return;
+
+      // Instant on mobile
+      if (isMobile) {
+        setCount(end);
+        return;
+      }
+
       let startTime: number;
       const animate = (timestamp: number) => {
         if (!startTime) startTime = timestamp;
@@ -274,7 +295,7 @@ function HomePage() {
         if (progress < 1) requestAnimationFrame(animate);
       };
       requestAnimationFrame(animate);
-    }, [end, duration]);
+    }, [end, duration, isMobile]);
 
     return (
       <span>
@@ -302,41 +323,44 @@ function HomePage() {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="fixed inset-0 overflow-hidden pointer-events-none">
-          <div
-            className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-bounce"
-            style={{ animationDuration: "6s" }}
-          ></div>
-          <div
-            className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-bounce"
-            style={{ animationDuration: "8s", animationDelay: "2s" }}
-          ></div>
-          <div
-            className="absolute top-40 left-40 w-60 h-60 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-bounce"
-            style={{ animationDuration: "10s", animationDelay: "4s" }}
-          ></div>
-        </div>
+        {/* Simplified floating blobs - static on mobile */}
+        {!isMobile && (
+          <div className="fixed inset-0 overflow-hidden pointer-events-none">
+            <div
+              className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-10"
+              style={{ animation: "none" }}
+            ></div>
+            <div
+              className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-10"
+              style={{ animation: "none" }}
+            ></div>
+          </div>
+        )}
 
         <div className="relative z-10 w-full pointer-events-auto">
           <div className="flex flex-col justify-center items-center lg:items-start p-6 sm:p-8 md:p-12 lg:p-16 xl:p-24 text-center lg:text-left min-h-screen">
             <div className="max-w-4xl lg:max-w-2xl xl:max-w-4xl mx-auto lg:mx-0">
-              <div
-                ref={canvasContainerRef}
-                className="hidden md:block absolute left-[400px] top-[-200px] inset-0 w-full h-[40%]"
-              >
-                {webglError && (
-                  <div className="flex items-center justify-center h-full">
-                    <div className="text-white/60 text-sm">
-                      Restoring 3D view...
+              {/* 3D Model - Desktop only */}
+              {!isMobile && (
+                <div
+                  ref={canvasContainerRef}
+                  className="hidden md:block absolute left-[400px] top-[-200px] inset-0 w-full h-[40%]"
+                >
+                  {webglError && (
+                    <div className="flex items-center justify-center h-full">
+                      <div className="text-white/60 text-sm">
+                        Restoring 3D view...
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {!modelLoaded && !webglError && !isMobile && (
-                  <GlassmorphicLoader size="md" message="Loading 3D model..." />
-                )}
+                  {!modelLoaded && !webglError && (
+                    <GlassmorphicLoader
+                      size="md"
+                      message="Loading 3D model..."
+                    />
+                  )}
 
-                {!isMobile && (
                   <Suspense
                     fallback={
                       <div className="flex items-center justify-center h-full">
@@ -367,14 +391,14 @@ function HomePage() {
                       <Scene />
                     </Canvas>
                   </Suspense>
-                )}
-              </div>
+                </div>
+              )}
 
               <h1
                 className={`text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-8xl xl:text-8xl font-black text-white mb-4 sm:mb-6 leading-tight tracking-tighter transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
-                style={{ transitionDelay: "0.2s" }}
+                style={{ transitionDelay: isMobile ? "0s" : "0.2s" }}
               >
-                <span className="block bg-gradient-to-r from-blue-300 via-purple-300 to-pink-300 bg-clip-text text-transparent drop-shadow-xl animate-pulse">
+                <span className="block bg-gradient-to-r from-blue-300 via-purple-300 to-pink-300 bg-clip-text text-transparent drop-shadow-xl">
                   DOCLIN NOTE
                 </span>
                 <span className="block text-white drop-shadow-xl">
@@ -385,38 +409,38 @@ function HomePage() {
               <div className="mb-8 h-16">
                 <p
                   className={`text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl text-white/90 max-w-sm sm:max-w-md lg:max-w-xl mx-auto lg:mx-0 leading-relaxed font-light drop-shadow-md transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
-                  style={{ transitionDelay: "0.4s" }}
+                  style={{ transitionDelay: isMobile ? "0s" : "0.4s" }}
                 >
                   {typewriterText}
-                  <span className="animate-pulse text-blue-400">|</span>
+                  {!isMobile && (
+                    <span className="animate-pulse text-blue-400">|</span>
+                  )}
                 </p>
               </div>
 
               <div className="mb-8">
                 <p
                   className={`text-blue-300 text-lg font-semibold mb-4 transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
-                  style={{ transitionDelay: "0.6s" }}
+                  style={{ transitionDelay: isMobile ? "0s" : "0.6s" }}
                 >
                   Currently featuring:{" "}
-                  <span className="text-white animate-pulse">
-                    {features[currentFeature]}
-                  </span>
+                  <span className="text-white">{features[currentFeature]}</span>
                 </p>
               </div>
 
               <div
                 className={`flex flex-row xs:flex-row gap-3 sm:gap-4 justify-center lg:justify-start mb-12 transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
-                style={{ transitionDelay: "0.8s" }}
+                style={{ transitionDelay: isMobile ? "0s" : "0.8s" }}
               >
                 <button
-                  className="group px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl text-sm sm:text-base transform hover:scale-105 hover:shadow-2xl transition-all duration-300 backdrop-blur-sm border border-white/20 shadow-lg flex items-center gap-2"
+                  className="group px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl text-sm sm:text-base transform hover:scale-105 hover:shadow-2xl transition-all duration-300 backdrop-blur-sm border border-white/20 shadow-lg flex items-center gap-2 active:scale-95"
                   onClick={() => navigate({ to: "/config" })}
                 >
                   <Play className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   Generate Questions
                 </button>
                 <button
-                  className="group px-6 sm:px-8 py-3 sm:py-4 bg-white/10 text-white font-semibold rounded-xl text-sm sm:text-base transform hover:scale-105 hover:shadow-2xl transition-all duration-300 backdrop-blur-sm border border-white/10 shadow-lg flex items-center gap-2"
+                  className="group px-6 sm:px-8 py-3 sm:py-4 bg-white/10 text-white font-semibold rounded-xl text-sm sm:text-base transform hover:scale-105 hover:shadow-2xl transition-all duration-300 backdrop-blur-sm border border-white/10 shadow-lg flex items-center gap-2 active:scale-95"
                   onClick={() =>
                     navigate({
                       to: "/contact",
@@ -431,7 +455,7 @@ function HomePage() {
 
               <div
                 className={`grid grid-cols-3 gap-6 mb-12 transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
-                style={{ transitionDelay: "1s" }}
+                style={{ transitionDelay: isMobile ? "0s" : "1s" }}
               >
                 <div className="text-center">
                   <div className="text-2xl sm:text-3xl font-bold text-blue-400">
@@ -457,6 +481,7 @@ function HomePage() {
             </div>
           </div>
 
+          {/* Features Section */}
           <div className="px-6 sm:px-8 md:px-12 lg:px-16 xl:px-24 py-16 bg-black/20 backdrop-blur-sm">
             <div className="max-w-6xl mx-auto">
               <div className="text-center mb-16">
@@ -498,6 +523,7 @@ function HomePage() {
             </div>
           </div>
 
+          {/* Use Cases Section */}
           <div className="px-6 sm:px-8 md:px-12 lg:px-16 xl:px-24 py-16">
             <div className="max-w-6xl mx-auto">
               <div className="text-center mb-16">
@@ -541,6 +567,7 @@ function HomePage() {
             </div>
           </div>
 
+          {/* Testimonials Section */}
           {testimonialsLoading ? (
             <div className="px-6 sm:px-8 md:px-12 lg:px-16 xl:px-24 py-16 bg-black/20 backdrop-blur-sm">
               <div className="flex justify-center">
@@ -568,7 +595,7 @@ function HomePage() {
                       key={testimonial.id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      whileHover={{ scale: 1.02 }}
+                      whileHover={isMobile ? {} : { scale: 1.02 }}
                       className="bg-white/10 backdrop-blur-sm rounded-2xl px-10 py-4 border border-white/10"
                     >
                       <CardContent className="flex flex-col items-center space-y-4">
@@ -577,7 +604,6 @@ function HomePage() {
                             src={testimonial.avatar}
                             alt={testimonial.username ?? "User"}
                           />
-
                           <AvatarFallback className="text-xl">
                             {(testimonial.username ?? "CN")
                               .split(" ")

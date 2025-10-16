@@ -139,7 +139,6 @@ const ExamPaperPage = () => {
       const firstSubPart = questionPart.sub_parts[0];
       if (firstSubPart.question) return firstSubPart.question;
     }
-
     return "";
   };
 
