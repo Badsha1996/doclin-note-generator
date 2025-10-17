@@ -5,7 +5,6 @@ from typing import Dict, List, Tuple, Callable, Optional, Any
 from fastapi import HTTPException
 from json_repair import repair_json
 
-
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_openai import ChatOpenAI  
 from langchain_huggingface import HuggingFaceEndpoint
@@ -25,9 +24,13 @@ except ImportError:
 class LLMProviderManager:
     def __init__(self):
         # ---------------- Gemini Configuration ---------------- #
+        # FIX: Updated to valid Gemini model names
         self.gemini_models: List[str] = self._parse_array_env(
             settings.LLM_MODELS, "LLM_MODELS"
         )
+        # Validate and update model names
+        self.gemini_models = self._validate_gemini_models(self.gemini_models)
+        
         self.gemini_keys: List[str] = self._parse_array_env(
             getattr(settings, "GEMINI_KEYS", []), "GEMINI_KEYS"
         )
@@ -44,8 +47,16 @@ class LLMProviderManager:
         self.current_openrouter_key_index = 0
         self.openrouter_base_url = "https://openrouter.ai/api/v1"
         
-        self.free_openrouter_models = [
-            "google/gemini-2.0-flash-exp:free","meta-llama/llama-3.1-8b-instruct:free","mistralai/mistral-7b-instruct:free"
+        # Updated with October 2025 working free models
+        # Allow custom list from env, fallback to defaults
+        self.free_openrouter_models: List[str] = self._parse_array_env(
+            getattr(settings, "OPENROUTER_FREE_MODELS", []),
+            "OPENROUTER_FREE_MODELS"
+        ) or [
+            "deepseek/deepseek-r1:free",
+            "meta-llama/llama-3.1-8b-instruct:free",
+            "mistralai/mistral-7b-instruct:free",
+            "deepseek/deepseek-r1-distill-llama-70b:free"
         ]
         self.current_openrouter_model_index = 0
         self.failed_openrouter_combinations = set()
@@ -78,6 +89,24 @@ class LLMProviderManager:
         # Performance tracking
         self.provider_success_count = {}
         self.provider_failure_count = {}
+
+    def _validate_gemini_models(self, models: List[str]) -> List[str]:
+        """Validate and correct Gemini model names"""
+        # Map of potentially incorrect names to correct ones
+        model_mapping = {
+            "gemini-1.5-flash": "gemini-1.5-flash-latest",
+            "gemini-1.5-flash-8b": "gemini-1.5-flash-8b-latest",
+            "gemini-2.0-flash-exp": "gemini-2.0-flash-exp"
+        }
+        
+        validated = []
+        for model in models:
+            corrected = model_mapping.get(model, model)
+            if corrected != model:
+                logger.info(f"Correcting model name: {model} -> {corrected}")
+            validated.append(corrected)
+        
+        return validated or ["gemini-1.5-flash-latest"]  # Default fallback
 
     def _parse_array_env(self, value: Any, name: str) -> List[str]:
         """Parse environment variable that can be string, list, or JSON array"""
@@ -173,7 +202,6 @@ class LLMProviderManager:
         if self.current_hf_key_index == 0:
             self.current_hf_model_index = (self.current_hf_model_index + 1) % len(self.hf_models)
 
-
     # ---------------- LLM Getters ---------------- #
     def get_gemini(self) -> ChatGoogleGenerativeAI:
         """Get Gemini LLM instance with current model and key"""
@@ -245,81 +273,98 @@ class LLMProviderManager:
             repo_id=model,
             huggingfacehub_api_token=api_key,
             task="text-generation",
-            max_new_tokens=4096
+            max_new_tokens=4096,
+            temperature=0.7
         )
 
     def get_llm_chain(self) -> List[Tuple[str, Callable]]:
+        """FIX: Properly capture variables in closures"""
         chain = []
 
         # ---------------- Gemini (priority 1) ---------------- #
         if self.gemini_models and self.gemini_keys:
             for model in self.gemini_models:
                 for key in self.gemini_keys:
-                    def make_gemini_func(m=model, k=key):
-                        return lambda: ChatGoogleGenerativeAI(
+                    # FIX: Use functools.partial or default arguments for proper closure
+                    chain.append((
+                        f"gemini:{model}:{key[:10]}...",
+                        lambda m=model, k=key: ChatGoogleGenerativeAI(
                             model=m,
                             google_api_key=k,
                             temperature=0.7,
                             max_output_tokens=8192
                         )
-                    chain.append((f"gemini:{model}:{key[:6]}...", make_gemini_func()))
+                    ))
 
-        # ---------------- HuggingFace (priority 2) ---------------- #
-        if self.hf_models and self.hf_keys:
-            for model in self.hf_models:
-                for key in self.hf_keys:
-                    def make_hf_func(m=model, k=key):
-                        return lambda: HuggingFaceEndpoint(
-                            repo_id=m,
-                            huggingfacehub_api_token=k,
-                            task="text-generation",
-                            max_new_tokens=4096
-                        )
-                    chain.append((f"huggingface:{model}", make_hf_func()))
-
-        # ---------------- OpenRouter (priority 3) ---------------- #
+        # ---------------- OpenRouter (priority 2 - before HF for better reliability) ---------------- #
         if self.openrouter_keys or True:  # has free tier
             for model in self.free_openrouter_models:
                 for key in (self.openrouter_keys or [None]):
-                    def make_openrouter_func(m=model, k=key):
-                        return lambda: ChatOpenAI(
+                    chain.append((
+                        f"openrouter:{model}",
+                        lambda m=model, k=key: ChatOpenAI(
                             model=m,
                             api_key=k,
                             base_url=self.openrouter_base_url,
                             temperature=0.7,
                             max_tokens=4096
                         )
-                    chain.append((f"openrouter:{model}", make_openrouter_func()))
+                    ))
+
+        # ---------------- HuggingFace (priority 3) ---------------- #
+        if self.hf_models and self.hf_keys:
+            for model in self.hf_models:
+                for key in self.hf_keys:
+                    chain.append((
+                        f"huggingface:{model}",
+                        lambda m=model, k=key: HuggingFaceEndpoint(
+                            repo_id=m,
+                            huggingfacehub_api_token=k,
+                            task="text-generation",
+                            max_new_tokens=4096,
+                            temperature=0.7
+                        )
+                    ))
 
         # ---------------- Ollama (priority 4) ---------------- #
         if _OLLAMA_AVAILABLE and (self.ollama_models or self.ollama_urls):
-            for i in range(max(len(self.ollama_models), len(self.ollama_urls))):
-                def make_ollama_func(i=i):
-                    model = self.ollama_models[min(i, len(self.ollama_models)-1)]
-                    url = self.ollama_urls[min(i, len(self.ollama_urls)-1)]
-                    return lambda: OllamaLLM(base_url=url, model=model)
-                chain.append((f"ollama:{self.ollama_models[min(i, len(self.ollama_models)-1)]}", make_ollama_func()))
+            max_instances = max(len(self.ollama_models), len(self.ollama_urls))
+            for i in range(max_instances):
+                model_idx = min(i, len(self.ollama_models) - 1) if self.ollama_models else 0
+                url_idx = min(i, len(self.ollama_urls) - 1) if self.ollama_urls else 0
+                
+                model = self.ollama_models[model_idx] if self.ollama_models else "mistral:7b-instruct"
+                url = self.ollama_urls[url_idx] if self.ollama_urls else "http://localhost:11434"
+                
+                chain.append((
+                    f"ollama:{model}@{url}",
+                    lambda m=model, u=url: OllamaLLM(base_url=u, model=m)
+                ))
 
         # ---------------- Paid models (optional) ---------------- #
         if self.allow_paid_models:
             if self.gemini_keys:
                 for key in self.gemini_keys:
-                    def make_gemini_paid_func(k=key):
-                        return lambda: ChatGoogleGenerativeAI(
-                            model="gemini-2.5-pro",
-                            google_api_key=k
+                    chain.append((
+                        "gemini_paid:gemini-2.0-flash-thinking-exp",
+                        lambda k=key: ChatGoogleGenerativeAI(
+                            model="gemini-2.0-flash-thinking-exp",
+                            google_api_key=k,
+                            temperature=0.7
                         )
-                    chain.append(("gemini_paid", make_gemini_paid_func()))
+                    ))
 
             if self.openrouter_keys:
                 for key in self.openrouter_keys:
-                    def make_openrouter_paid_func(k=key):
-                        return lambda: ChatOpenAI(
+                    chain.append((
+                        "openrouter_paid:anthropic/claude-3-5-sonnet",
+                        lambda k=key: ChatOpenAI(
                             model="anthropic/claude-3-5-sonnet",
                             api_key=k,
-                            base_url=self.openrouter_base_url
+                            base_url=self.openrouter_base_url,
+                            temperature=0.7
                         )
-                    chain.append(("openrouter_paid", make_openrouter_paid_func()))
+                    ))
 
         return chain
 
@@ -328,14 +373,23 @@ class LLMProviderManager:
         """Check if error is a rate limit error"""
         err_str = str(error).lower()
         return any(keyword in err_str for keyword in [
-            "429", "rate limit", "quota", "too many requests", "resource exhausted"
+            "429", "rate limit", "quota", "too many requests", "resource exhausted",
+            "temporarily rate-limited"
         ])
 
     def _is_auth_error(self, error: Exception) -> bool:
         """Check if error is an authentication error"""
         err_str = str(error).lower()
         return any(keyword in err_str for keyword in [
-            "401", "403", "unauthorized", "forbidden", "invalid api key", "authentication"
+            "401", "403", "unauthorized", "forbidden", "invalid api key", 
+            "authentication", "invalid or unauthorized"
+        ])
+
+    def _is_model_not_found_error(self, error: Exception) -> bool:
+        """Check if error is a model not found error"""
+        err_str = str(error).lower()
+        return any(keyword in err_str for keyword in [
+            "404", "not found", "model not found", "is not found for api version"
         ])
 
     def _handle_provider_error(self, provider_name: str, error: Exception):
@@ -350,13 +404,14 @@ class LLMProviderManager:
             self._rotate_gemini()
         elif provider_name.startswith("openrouter"):
             self._rotate_openrouter()
-        elif provider_name == "ollama":
+        elif provider_name.startswith("ollama"):
             self._rotate_ollama()
-        elif provider_name == "huggingface":
+        elif provider_name.startswith("huggingface"):
             self._rotate_hf()
 
     # ---------------- Safe Generation ---------------- #
     async def safe_generate(self, prompt: str, **kwargs) -> Any:
+        """Generate response with automatic fallback across providers"""
         chain = self.get_llm_chain()
         
         if not chain:
@@ -366,6 +421,12 @@ class LLMProviderManager:
             )
         
         last_error = None
+        errors_by_type = {
+            'rate_limit': [],
+            'auth': [],
+            'model_not_found': [],
+            'other': []
+        }
         
         for provider_name, llm_func in chain:
             try:
@@ -378,36 +439,61 @@ class LLMProviderManager:
                 elif hasattr(llm, "invoke"):
                     result = llm.invoke(prompt)
                 else:
-                    raise HTTPException(status_code=500, detail="LLM does not support invoke or ainvoke")
-
+                    raise HTTPException(
+                        status_code=500, 
+                        detail=f"LLM {provider_name} does not support invoke or ainvoke"
+                    )
                 
                 # Track success
-                self.provider_success_count[provider_name] = self.provider_success_count.get(provider_name, 0) + 1
-                logger.info(f"Successfully generated response using {provider_name}")
+                self.provider_success_count[provider_name] = \
+                    self.provider_success_count.get(provider_name, 0) + 1
+                logger.info(f"✓ Successfully generated response using {provider_name}")
                 
                 return result
                 
             except Exception as e:
                 last_error = e
+                error_msg = str(e)
+                
+                # Categorize error
+                if self._is_rate_limit_error(e):
+                    errors_by_type['rate_limit'].append(provider_name)
+                    logger.warning(f"✗ Rate limit hit on {provider_name}")
+                elif self._is_auth_error(e):
+                    errors_by_type['auth'].append(provider_name)
+                    logger.error(f"✗ Auth error on {provider_name}")
+                elif self._is_model_not_found_error(e):
+                    errors_by_type['model_not_found'].append(provider_name)
+                    logger.error(f"✗ Model not found on {provider_name}")
+                else:
+                    errors_by_type['other'].append(provider_name)
+                    logger.error(f"✗ Error on {provider_name}: {error_msg[:200]}")
+                
                 self._handle_provider_error(provider_name, e)
                 
-                # Don't retry if it's an auth error
-                if self._is_auth_error(e):
-                    logger.error(f"Authentication error with {provider_name}, skipping...")
-                    continue
-                
                 # Continue to next provider
-                logger.info(f"Falling back from {provider_name} to next provider...")
                 continue
         
-        # All providers failed
-        logger.error("All LLM providers failed")
+        # All providers failed - provide detailed error
+        error_summary = []
+        if errors_by_type['rate_limit']:
+            error_summary.append(f"Rate limited: {', '.join(errors_by_type['rate_limit'])}")
+        if errors_by_type['auth']:
+            error_summary.append(f"Auth failed: {', '.join(errors_by_type['auth'])}")
+        if errors_by_type['model_not_found']:
+            error_summary.append(f"Model not found: {', '.join(errors_by_type['model_not_found'])}")
+        if errors_by_type['other']:
+            error_summary.append(f"Other errors: {', '.join(errors_by_type['other'])}")
+        
+        logger.error(f"All LLM providers failed. {' | '.join(error_summary)}")
+        
         raise HTTPException(
-            status_code=500, 
-            detail=f"All LLM providers failed. Last error: {str(last_error)}"
+            status_code=503,  # Service Unavailable
+            detail=f"All LLM providers failed. {' | '.join(error_summary)}. Last error: {str(last_error)[:200]}"
         )
 
     def get_llm(self):
+        """Get a single LLM instance"""
         if self.provider == "auto":
             chain = self.get_llm_chain()
             if not chain:
@@ -432,7 +518,7 @@ class LLMProviderManager:
             available_providers = ", ".join(provider_map.keys())
             raise HTTPException(
                 status_code=500, 
-                detail=f"Unknown or unavailable provider: {self.provider}. Available providers: {available_providers}"
+                detail=f"Unknown or unavailable provider: {self.provider}. Available: {available_providers}"
             )
         
         return provider_map[self.provider]()
@@ -443,6 +529,14 @@ class LLMProviderManager:
             "success_count": self.provider_success_count,
             "failure_count": self.provider_failure_count,
             "ollama_available": _OLLAMA_AVAILABLE,
+            "configured_providers": {
+                "gemini_models": len(self.gemini_models),
+                "gemini_keys": len(self.gemini_keys),
+                "openrouter_keys": len(self.openrouter_keys),
+                "hf_models": len(self.hf_models),
+                "hf_keys": len(self.hf_keys),
+                "ollama_instances": max(len(self.ollama_models), len(self.ollama_urls))
+            },
             "current_indices": {
                 "gemini_model": self.current_gemini_model_index,
                 "gemini_key": self.current_gemini_key_index,
@@ -451,6 +545,5 @@ class LLMProviderManager:
                 "ollama": self.current_ollama_index,
                 "hf_model": self.current_hf_model_index,
                 "hf_key": self.current_hf_key_index
-                
             }
         }
