@@ -579,7 +579,7 @@ function HomePage() {
             </div>
           ) : showTestimonials ? (
             <div className="px-6 sm:px-8 md:px-12 lg:px-16 xl:px-24 py-16 bg-black/20 backdrop-blur-sm">
-              <div className="max-w-5xl mx-auto">
+              <div className="max-w-6xl mx-auto">
                 <div className="text-center mb-16">
                   <h2 className="text-4xl sm:text-5xl font-bold text-white mb-4">
                     What Our{" "}
