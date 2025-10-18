@@ -187,12 +187,12 @@ async def exchange_tokens(
         user=security_manager.verify_token(payload.code)
         access_token = security_manager.create_access_token(
             data={"user_id": user.user_id, "email": user.email, "role": user.role, "username": user.user_name},
-            expires_delta=timedelta(minutes=1)
+            expires_delta=timedelta(hours=1)
         )
         
         refresh_token = security_manager.create_refresh_token(
             data={"user_id": user.user_id, "email": user.email, "role": user.role, "username": user.user_name},
-            expires_delta=timedelta(minutes=2)
+            expires_delta=timedelta(days=7)
         )
         response.set_cookie(
             key="access_token",
