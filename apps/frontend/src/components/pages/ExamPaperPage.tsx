@@ -49,10 +49,8 @@ const ExamPaperPage = () => {
   // Create stable enabled condition based on payload values
   const isEnabled = useMemo(() => {
     if (prevShow) {
-      // For prev=true, only need subject
       return !!apiPayload.subject;
     } else {
-      // For new generation, need more fields
       return !!(
         apiPayload.subject ||
         apiPayload.board ||
@@ -71,7 +69,6 @@ const ExamPaperPage = () => {
   // Track successful API calls
   const hasSuccessfullyLoaded = useRef(false);
 
-  // Single API call with conditional endpoint - DISABLE SCHEMA VALIDATION TEMPORARILY
   const {
     data: examPaperData,
     isLoading: isLoadingExamPaper,
@@ -119,119 +116,6 @@ const ExamPaperPage = () => {
   const examPaperResponse = examPaperData?.data?.exam_paper;
   const examData = examPaperResponse?.exam;
   const sections = examPaperResponse?.sections;
-
-  /* ---------------------------------- */
-  /*           Helper Functions         */
-  /* ---------------------------------- */
-
-  // Helper function to extract question text from any nested structure
-  const getQuestionText = (questionPart: any): string => {
-    if (!questionPart) return "";
-
-    // Check main question field first
-    if (questionPart.question) return questionPart.question;
-
-    // Check description field
-    if (questionPart.description) return questionPart.description;
-
-    // Check if there are sub_parts with questions
-    if (questionPart.sub_parts && questionPart.sub_parts.length > 0) {
-      const firstSubPart = questionPart.sub_parts[0];
-      if (firstSubPart.question) return firstSubPart.question;
-    }
-    return "";
-  };
-
-  // Helper function to render all parts of a question
-  const renderQuestionParts = (parts: any[], level = 0) => {
-    return parts.map((part, index) => {
-      const questionText = getQuestionText(part);
-      const hasSubParts = part.sub_parts && part.sub_parts.length > 0;
-
-      return (
-        <div
-          key={part.number || part.letter || index}
-          className={`mb-4 ${level > 0 ? "ml-6" : ""}`}
-        >
-          {/* Question header with number/letter */}
-          {(part.number || part.letter) && questionText && (
-            <div className="mb-2">
-              <span className="font-medium">
-                {level === 0 ? `(${part.number})` : part.letter}{" "}
-              </span>
-              {questionText}
-              {part.marks && (
-                <span className="float-right text-sm">[{part.marks}]</span>
-              )}
-            </div>
-          )}
-
-          {/* Description only (when no direct question but has description) */}
-          {part.description && !questionText && (
-            <div className="italic text-gray-700 mb-3">{part.description}</div>
-          )}
-
-          {/* Options for multiple choice */}
-          {part.options && part.options.length > 0 && (
-            <div className="ml-6 space-y-1 mt-2">
-              {part.options.map((option: any, optIndex: number) => (
-                <div key={optIndex} className="flex items-start">
-                  <span className="font-medium mr-3 min-w-6">
-                    {option.option_letter}
-                  </span>
-                  <span>{option.text}</span>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Constants given */}
-          {part.constants_given &&
-            Object.keys(part.constants_given).length > 0 && (
-              <div className="mt-2 p-3 border border-gray-300 bg-gray-50 text-sm">
-                <div className="font-medium mb-1">Given:</div>
-                {Object.entries(part.constants_given).map(([key, value]) => (
-                  <div key={key}>
-                    {key} = {String(value)}
-                  </div>
-                ))}
-              </div>
-            )}
-
-          {/* Equation template */}
-          {part.equation_template && (
-            <div className="mt-2 p-3 border border-gray-300 bg-yellow-50 text-sm">
-              <div className="font-medium mb-1">Complete the equation:</div>
-              <div className="font-mono bg-white p-2 border">
-                {part.equation_template}
-              </div>
-            </div>
-          )}
-
-          {/* Diagram */}
-          {part.diagram && (
-            <div className="mt-2 p-3 border border-gray-300 bg-gray-50 text-sm">
-              <div className="italic mb-1">
-                <strong>Diagram:</strong> {part.diagram.description}
-              </div>
-              {part.diagram.labels && part.diagram.labels.length > 0 && (
-                <div>
-                  <strong>Labels:</strong> {part.diagram.labels.join(", ")}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Recursively render sub-parts */}
-          {hasSubParts && renderQuestionParts(part.sub_parts, level + 1)}
-        </div>
-      );
-    });
-  };
-
-  /* ---------------------------------- */
-  /*           UI Components            */
-  /* ---------------------------------- */
 
   const SimpleLoader = () => (
     <div className="flex items-center justify-center min-h-screen px-4">
@@ -311,88 +195,6 @@ const ExamPaperPage = () => {
       </div>
     </div>
   );
-
-  /* ---------------------------------- */
-  /*        Question Renderers          */
-  /* ---------------------------------- */
-
-  const renderMultipleChoiceQuestion = (question: any) => (
-    <div key={question.number} className="mb-8">
-      <div className="font-bold text-base mb-3">
-        Question {question.number}.
-        {question.instruction && (
-          <span className="font-normal italic ml-2">
-            {question.instruction}
-          </span>
-        )}
-        <span className="float-right">[{question.total_marks} marks]</span>
-      </div>
-
-      {renderQuestionParts(question.parts || [])}
-    </div>
-  );
-
-  const renderShortAnswerQuestion = (question: any) => (
-    <div key={question.number} className="mb-8">
-      <div className="font-bold text-base mb-3">
-        Question {question.number}.
-        {question.instruction && (
-          <span className="font-normal italic ml-2">
-            {question.instruction}
-          </span>
-        )}
-        <span className="float-right">[{question.total_marks} marks]</span>
-      </div>
-
-      {/* Main question text if exists */}
-      {question.question_text && (
-        <div className="mb-4 italic text-gray-700">
-          {question.question_text}
-        </div>
-      )}
-
-      {renderQuestionParts(question.parts || [])}
-    </div>
-  );
-
-  const renderLongAnswerQuestion = (question: any) => (
-    <div key={question.number} className="mb-8">
-      <div className="font-bold text-base mb-3">
-        Question {question.number}.
-        {question.instruction && (
-          <span className="font-normal italic ml-2">
-            {question.instruction}
-          </span>
-        )}
-        <span className="float-right">[{question.total_marks} marks]</span>
-      </div>
-
-      {/* Main question text if exists */}
-      {question.question_text && (
-        <div className="mb-4 italic text-gray-700">
-          {question.question_text}
-        </div>
-      )}
-
-      {renderQuestionParts(question.parts || [])}
-    </div>
-  );
-
-  const renderQuestion = (question: any) => {
-    switch (question.type) {
-      case "multiple_choice":
-        return renderMultipleChoiceQuestion(question);
-      case "short_answer":
-      case "calculation":
-      case "diagram_based":
-      case "complete_equation":
-        return renderShortAnswerQuestion(question);
-      case "long_answer":
-        return renderLongAnswerQuestion(question);
-      default:
-        return renderShortAnswerQuestion(question);
-    }
-  };
 
   if (isLoadingExamPaper) {
     return <SimpleLoader />;
