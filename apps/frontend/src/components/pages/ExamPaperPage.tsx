@@ -4,6 +4,7 @@ import { useMemo, useRef } from "react";
 import GlassmorphicLoader from "../common/GlassLoader";
 import ExamPaperPDFViewer from "../common/ExamPaperPDFViewer";
 import PageHeader from "../common/PageHeader";
+import GlassLayout from "@/layouts/GlassLayout";
 
 const ExamPaperPage = () => {
   const location = useLocation();
@@ -443,9 +444,11 @@ const ExamPaperPage = () => {
   }
 
   return (
-    <div className="">
-      <PageHeader title="kkk" subTitle="uyiy"/>
-      <ExamPaperPDFViewer examData={examData} sections={sections} />
+    <div className="space-y-8 mt-24">
+      <PageHeader title="AI Generated Paper" subTitle="" />
+      <GlassLayout>
+        <ExamPaperPDFViewer examData={examData} sections={sections} />
+      </GlassLayout>
     </div>
   );
 };

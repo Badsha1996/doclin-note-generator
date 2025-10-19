@@ -12,17 +12,25 @@ import {
   BookOpen,
   FileText,
 } from "lucide-react";
-
-const ExamPaperPDFViewer = ({ examData, sections }) => {
+import { Button } from "../ui/button";
+type ExamPaperPDFViewerProps = {
+  examData: any;
+  sections: any;
+};
+const ExamPaperPDFViewer = ({
+  examData,
+  sections,
+}: ExamPaperPDFViewerProps) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [zoom, setZoom] = useState(1);
   const [isFlipping, setIsFlipping] = useState(false);
+  const [flipDirection, setFlipDirection] = useState(null);
   const [pdfUrl, setPdfUrl] = useState(null);
   const [isGenerating, setIsGenerating] = useState(true);
   const [error, setError] = useState(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [viewMode, setViewMode] = useState("double"); // 'single' or 'double'
+  const [viewMode, setViewMode] = useState("double");
   const leftCanvasRef = useRef(null);
   const rightCanvasRef = useRef(null);
   const pdfDocRef = useRef(null);
@@ -47,6 +55,7 @@ const ExamPaperPDFViewer = ({ examData, sections }) => {
           document.head.appendChild(script);
         });
 
+        // @ts-ignore
         const { jsPDF } = window.jspdf;
 
         const doc = new jsPDF({
@@ -60,7 +69,7 @@ const ExamPaperPDFViewer = ({ examData, sections }) => {
         const margin = 20;
         const maxWidth = 170;
 
-        const checkPageBreak = (needed) => {
+        const checkPageBreak = (needed: number) => {
           if (yPos + needed > pageHeight - margin) {
             doc.addPage();
             yPos = margin;
@@ -69,7 +78,7 @@ const ExamPaperPDFViewer = ({ examData, sections }) => {
           return false;
         };
 
-        // ============ FIRST PAGE - Paper Info ============
+        // ============ FIRST PAGE - ICSE Style Header ============
         doc.setFontSize(9);
         doc.setFont("times", "normal");
         doc.text(
@@ -77,12 +86,11 @@ const ExamPaperPDFViewer = ({ examData, sections }) => {
           margin,
           yPos
         );
-        yPos += 15;
+        yPos += 10;
 
-        doc.setFontSize(9);
         doc.text(`T23 ${examData.paper_code}`, margin, yPos);
         doc.text("Turn Over", 190, yPos, { align: "right" });
-        yPos += 15;
+        yPos += 10;
 
         doc.text("© Copyright reserved.", 105, yPos, { align: "center" });
         yPos += 15;
@@ -95,61 +103,92 @@ const ExamPaperPDFViewer = ({ examData, sections }) => {
         yPos += 10;
 
         doc.setFontSize(12);
-        doc.setFont("times", "normal");
+        doc.setFont("times", "italic");
         doc.text(`(${examData.paper_name || "SCIENCE PAPER 1"})`, 105, yPos, {
           align: "center",
         });
-        yPos += 15;
+        yPos += 8;
 
-        doc.setFontSize(11);
-        doc.setFont("times", "bold");
+        // Horizontal line
+        doc.setLineWidth(0.5);
+        doc.line(margin, yPos, 190, yPos);
+        yPos += 8;
+
+        doc.setFontSize(10);
+        doc.setFont("times", "italic");
         doc.text(`Maximum Marks: ${examData.maximum_marks}`, 105, yPos, {
           align: "center",
         });
         yPos += 6;
+        doc.setFont("times", "bold");
         doc.text(`Time allowed: ${examData.time_allowed}`, 105, yPos, {
           align: "center",
         });
-        yPos += 15;
+        yPos += 8;
 
-        doc.setFont("times", "normal");
-        doc.setFontSize(10);
-        const instructions = [
+        doc.setFont("times", "italic");
+        doc.setFontSize(9);
+        const headerInstructions = [
           "Answers to this Paper must be written on the paper provided separately.",
           "",
           "You will not be allowed to write during first 15 minutes.",
           "This time is to be spent in reading the question paper.",
-          "The time given at the head of this Paper is the time allowed for writing the answers.",
           "",
-          "Section A is compulsory. Attempt any four questions from Section B.",
-          "The intended marks for questions or parts of questions are given in brackets [ ].",
+          "The time given at the head of this Paper is the time allowed for writing the answers.",
         ];
 
-        instructions.forEach((instruction) => {
+        headerInstructions.forEach((instruction) => {
           if (instruction === "") {
-            yPos += 4;
+            yPos += 3;
           } else {
-            checkPageBreak(8);
+            checkPageBreak(6);
             const lines = doc.splitTextToSize(instruction, maxWidth);
-            doc.text(lines, margin, yPos);
+            doc.text(lines, 105, yPos, { align: "center" });
             yPos += lines.length * 5;
           }
         });
 
-        // ============ SECTIONS ============
-        sections.forEach((section) => {
-          doc.addPage();
-          yPos = 15;
+        yPos += 5;
+        doc.setLineWidth(0.5);
+        doc.line(margin, yPos, 190, yPos);
+        yPos += 8;
 
-          doc.setFontSize(9);
-          doc.setFont("times", "normal");
-          doc.text(`T23 ${examData.paper_code}`, margin, yPos);
-          const pageNum = doc.internal.pages.length - 1;
-          doc.text(`${pageNum}`, 105, yPos, { align: "center" });
-          if (pageNum < doc.internal.pages.length) {
+        doc.setFont("times", "bold");
+        doc.setFontSize(10);
+        const sectionInstruction =
+          "Section A is compulsory. Attempt any four questions from Section B.";
+        const sectionLines = doc.splitTextToSize(sectionInstruction, maxWidth);
+        doc.text(sectionLines, 105, yPos, { align: "center" });
+        yPos += sectionLines.length * 5 + 5;
+
+        doc.setFont("times", "italic");
+        doc.setFontSize(9);
+        const marksInstruction =
+          "The intended marks for questions or parts of questions are given in brackets [ ].";
+        const marksLines = doc.splitTextToSize(marksInstruction, maxWidth);
+        doc.text(marksLines, 105, yPos, { align: "center" });
+        yPos += marksLines.length * 5 + 5;
+
+        doc.setLineWidth(0.5);
+        doc.line(margin, yPos, 190, yPos);
+        yPos += 15;
+
+        // ============ SECTIONS (Continue on same page if space available) ============
+        sections.forEach((section: any, sectionIndex: any) => {
+          // Only add new page if not the first section or if no space
+          if (sectionIndex > 0 || yPos > pageHeight - 80) {
+            doc.addPage();
+            yPos = 15;
+
+            // Add page header
+            doc.setFontSize(9);
+            doc.setFont("times", "normal");
+            doc.text(`T23 ${examData.paper_code}`, margin, yPos);
+            const pageNum = doc.internal.pages.length - 1;
+            doc.text(`${pageNum}`, 105, yPos, { align: "center" });
             doc.text("Turn Over", 190, yPos, { align: "right" });
+            yPos += 10;
           }
-          yPos += 10;
 
           doc.setFontSize(11);
           doc.setFont("times", "bold");
@@ -173,7 +212,7 @@ const ExamPaperPDFViewer = ({ examData, sections }) => {
           }
           yPos += 8;
 
-          (section.questions || []).forEach((question) => {
+          (section.questions || []).forEach((question: any) => {
             checkPageBreak(20);
 
             if (yPos === margin) {
@@ -207,7 +246,7 @@ const ExamPaperPDFViewer = ({ examData, sections }) => {
               yPos += instrLines.length * 5 + 3;
             }
 
-            (question.parts || []).forEach((part) => {
+            (question.parts || []).forEach((part: any) => {
               checkPageBreak(15);
 
               if (yPos === margin) {
@@ -244,7 +283,6 @@ const ExamPaperPDFViewer = ({ examData, sections }) => {
                     doc.text(descLines[i], contentIndent, yPos);
                     yPos += 5;
                   }
-                  yPos += 2;
                 } else if (part.question && !part.sub_parts?.length) {
                   doc.text(partLabel, margin, yPos);
                   const qLines = doc.splitTextToSize(
@@ -258,15 +296,14 @@ const ExamPaperPDFViewer = ({ examData, sections }) => {
                     doc.text(qLines[i], contentIndent, yPos);
                     yPos += 5;
                   }
-                  yPos += 2;
                 } else {
                   doc.text(partLabel, margin, yPos);
-                  yPos += 6;
                 }
+                yPos += 3;
               }
 
               if (part.sub_parts && part.sub_parts.length > 0) {
-                part.sub_parts.forEach((subPart) => {
+                part.sub_parts.forEach((subPart: any, idx: number) => {
                   checkPageBreak(10);
 
                   if (yPos === margin) {
@@ -281,20 +318,28 @@ const ExamPaperPDFViewer = ({ examData, sections }) => {
 
                   if (subPart.question) {
                     const subLabel = `${subPart.letter}`;
-                    doc.text(subLabel, margin + 8, yPos);
+                    const subIndent = part.description
+                      ? margin + 8
+                      : margin + 12;
+                    const textIndent = part.description
+                      ? margin + 18
+                      : margin + 22;
+
+                    doc.text(subLabel, subIndent, yPos);
                     const subLines = doc.splitTextToSize(
                       subPart.question,
-                      maxWidth - 18
+                      maxWidth - (textIndent - margin)
                     );
-                    doc.text(subLines, margin + 18, yPos);
-                    yPos += subLines.length * 5 + 2;
+                    doc.text(subLines, textIndent, yPos);
+                    yPos +=
+                      subLines.length * 5 +
+                      (idx < part.sub_parts.length - 1 ? 1 : 2);
                   }
                 });
-                yPos += 2;
               }
 
               if (part.options && part.options.length > 0) {
-                part.options.forEach((option) => {
+                part.options.forEach((option: any) => {
                   checkPageBreak(6);
                   const optText = `${option.option_letter} ${option.text}`;
                   const optLines = doc.splitTextToSize(optText, maxWidth - 12);
@@ -328,11 +373,13 @@ const ExamPaperPDFViewer = ({ examData, sections }) => {
 
         const pdfBlob = doc.output("blob");
         const url = URL.createObjectURL(pdfBlob);
+        // @ts-ignore
         setPdfUrl(url);
         setTotalPages(doc.internal.pages.length - 1);
         setIsGenerating(false);
       } catch (error) {
         console.error("Error generating PDF:", error);
+        // @ts-ignore
         setError(error.message);
         setIsGenerating(false);
       }
@@ -351,6 +398,7 @@ const ExamPaperPDFViewer = ({ examData, sections }) => {
 
     const loadPDF = async () => {
       try {
+        // @ts-ignore
         if (!window["pdfjs-dist/build/pdf"]) {
           const script = document.createElement("script");
           script.src =
@@ -361,7 +409,7 @@ const ExamPaperPDFViewer = ({ examData, sections }) => {
             document.head.appendChild(script);
           });
         }
-
+        // @ts-ignore
         const pdfjsLib = window["pdfjs-dist/build/pdf"];
         pdfjsLib.GlobalWorkerOptions.workerSrc =
           "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
@@ -373,9 +421,11 @@ const ExamPaperPDFViewer = ({ examData, sections }) => {
         if (currentPage > 0 && leftCanvasRef.current) {
           const page = await pdf.getPage(currentPage);
           const viewport = page.getViewport({ scale: zoom * 1.5 });
-
+          // @ts-ignore
           const context = leftCanvasRef.current.getContext("2d");
+          // @ts-ignore
           leftCanvasRef.current.height = viewport.height;
+          // @ts-ignore
           leftCanvasRef.current.width = viewport.width;
 
           await page.render({ canvasContext: context, viewport }).promise;
@@ -389,9 +439,11 @@ const ExamPaperPDFViewer = ({ examData, sections }) => {
         ) {
           const page = await pdf.getPage(currentPage + 1);
           const viewport = page.getViewport({ scale: zoom * 1.5 });
-
+          // @ts-ignore
           const context = rightCanvasRef.current.getContext("2d");
+          // @ts-ignore
           rightCanvasRef.current.height = viewport.height;
+          // @ts-ignore
           rightCanvasRef.current.width = viewport.width;
 
           await page.render({ canvasContext: context, viewport }).promise;
@@ -407,22 +459,28 @@ const ExamPaperPDFViewer = ({ examData, sections }) => {
   const nextPage = () => {
     const increment = viewMode === "double" ? 2 : 1;
     if (currentPage + increment <= totalPages && !isFlipping) {
+      // @ts-ignore
+      setFlipDirection("next");
       setIsFlipping(true);
       setTimeout(() => {
         setCurrentPage((prev) => Math.min(prev + increment, totalPages));
         setIsFlipping(false);
-      }, 400);
+        setFlipDirection(null);
+      }, 800);
     }
   };
 
   const prevPage = () => {
     const decrement = viewMode === "double" ? 2 : 1;
     if (currentPage - decrement >= 1 && !isFlipping) {
+      // @ts-ignore
+      setFlipDirection("prev");
       setIsFlipping(true);
       setTimeout(() => {
         setCurrentPage((prev) => Math.max(prev - decrement, 1));
         setIsFlipping(false);
-      }, 400);
+        setFlipDirection(null);
+      }, 800);
     }
   };
 
@@ -437,10 +495,13 @@ const ExamPaperPDFViewer = ({ examData, sections }) => {
 
   const toggleFullscreen = () => {
     if (!isFullscreen) {
+      // @ts-ignore
       containerRef.current?.requestFullscreen?.() ||
+        // @ts-ignore
         containerRef.current?.webkitRequestFullscreen?.();
       setIsFullscreen(true);
     } else {
+      // @ts-ignore
       document.exitFullscreen?.() || document.webkitExitFullscreen?.();
       setIsFullscreen(false);
     }
@@ -462,7 +523,7 @@ const ExamPaperPDFViewer = ({ examData, sections }) => {
   }, []);
 
   useEffect(() => {
-    const handleKeyPress = (e) => {
+    const handleKeyPress = (e: any) => {
       if (e.key === "ArrowRight" || e.key === "ArrowDown" || e.key === " ") {
         e.preventDefault();
         nextPage();
@@ -518,7 +579,7 @@ const ExamPaperPDFViewer = ({ examData, sections }) => {
   return (
     <div
       ref={containerRef}
-      className={`min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-6 px-4 ${isFullscreen ? "fixed inset-0 z-50" : ""}`}
+      className={` py-6  px-4 ${isFullscreen ? "fixed inset-0 z-50" : ""}`}
     >
       {/* Controls Bar */}
       <div className="max-w-7xl mx-auto mb-6">
@@ -643,27 +704,29 @@ const ExamPaperPDFViewer = ({ examData, sections }) => {
         </div>
       </div>
 
+      <div className="text-center mt-8 mb-6">
+        <p className="text-white/60 text-base">
+          {currentPage === 0
+            ? "Click 'Open Exam Paper' to begin • Use navigation controls above"
+            : "Use arrow keys (← →) or Space to navigate • Press ESC to exit fullscreen"}
+        </p>
+      </div>
+
       {/* PDF Viewer */}
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto perspective-2000">
         {currentPage === 0 ? (
           /* Cover Page */
           <div className="flex justify-center">
-            <div className="bg-gradient-to-br from-purple-50 via-white to-blue-50 rounded-2xl shadow-2xl p-20 w-full max-w-[700px] min-h-[800px] flex items-center justify-center border-4 border-purple-200 transform hover:scale-[1.01] transition-transform duration-300">
-              <div className="text-center space-y-8">
-                <div className="text-xs text-purple-600 font-medium tracking-wide">
-                  © Copyright reserved.
-                </div>
-
+            <div className="bg-gradient-to-br from-purple-50 via-white to-blue-50 rounded-2xl shadow-2xl  w-full max-w-[700px] max-h-max flex justify-center items-center p-4  border-4 border-purple-200 transform hover:scale-[1.01] transition-transform duration-300">
+              <div className="text-center ">
                 <div>
-                  <h1 className="text-6xl font-bold text-purple-900 mb-6 tracking-tight">
+                  <h1 className="text-3xl font-bold  mb-6 tracking-tight">
                     {examData?.subject?.toUpperCase()}
                   </h1>
-                  <p className="text-3xl text-purple-700 font-light">
-                    ({examData?.paper_name})
-                  </p>
+                  <p className="text-xl  font-light">{examData?.paper_name}</p>
                 </div>
 
-                <div className="text-xl text-purple-800 space-y-3 py-6 border-t border-b border-purple-200">
+                <div className="text-xl space-y-3 py-6 border-t border-b border-purple-200">
                   <p>
                     <strong className="font-semibold">Maximum Marks:</strong>{" "}
                     {examData?.maximum_marks}
@@ -673,32 +736,32 @@ const ExamPaperPDFViewer = ({ examData, sections }) => {
                     {examData?.time_allowed}
                   </p>
                 </div>
-
-                <button
-                  onClick={() => setCurrentPage(1)}
-                  className="mt-8 px-12 py-5 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl hover:from-purple-700 hover:to-blue-700 transition-all text-xl font-semibold shadow-2xl hover:shadow-purple-500/50 transform hover:scale-110 duration-300"
-                >
-                  Open Exam Paper
-                </button>
-
-                <p className="text-sm text-purple-600 font-medium pt-4">
+                <p className="text-sm mb-4 font-medium pt-4">
                   Paper Code: {examData?.paper_code} • Year {examData?.year}
                 </p>
+
+                <Button
+                  onClick={() => setCurrentPage(1)}
+                  type="button"
+                  className="w-full py-2 rounded-md font-semibold cursor-pointer 
+                             bg-gradient-to-r from-purple-600 to-pink-500 
+                             text-white shadow-md hover:opacity-90 transition"
+                >
+                  Open Exam Paper
+                </Button>
               </div>
             </div>
           </div>
         ) : (
-          /* PDF Pages */
-          <div
-            className={`flex justify-center gap-6 ${isFlipping ? "animate-fadeIn" : ""}`}
-          >
-            {/* Left Page */}
-            <div className="relative">
+          /* PDF Pages with Realistic Book Flip Animation */
+          <div className="flex justify-center gap-1 relative">
+            {/* Left Page (Static) */}
+            <div className="relative preserve-3d">
               <div
-                className="bg-white rounded-xl shadow-2xl overflow-hidden"
+                className="bg-white rounded-l-xl shadow-2xl overflow-hidden"
                 style={{
                   boxShadow:
-                    "0 25px 50px -12px rgba(0, 0, 0, 0.5), inset -5px 0 15px rgba(0, 0, 0, 0.1)",
+                    "-15px 0 30px -10px rgba(0, 0, 0, 0.3), inset -8px 0 20px rgba(0, 0, 0, 0.05)",
                 }}
               >
                 <canvas
@@ -712,14 +775,22 @@ const ExamPaperPDFViewer = ({ examData, sections }) => {
               </div>
             </div>
 
-            {/* Right Page (only in double mode) */}
+            {/* Right Page (Flipping) - Only in double mode */}
             {viewMode === "double" && currentPage + 1 <= totalPages && (
-              <div className="relative">
+              <div
+                className={`relative preserve-3d origin-left ${
+                  isFlipping && flipDirection === "next"
+                    ? "animate-pageFlipNext"
+                    : isFlipping && flipDirection === "prev"
+                      ? "animate-pageFlipPrev"
+                      : ""
+                }`}
+              >
                 <div
-                  className="bg-white rounded-xl shadow-2xl overflow-hidden"
+                  className="bg-white rounded-r-xl shadow-2xl overflow-hidden"
                   style={{
                     boxShadow:
-                      "0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 5px 0 15px rgba(0, 0, 0, 0.1)",
+                      "15px 0 30px -10px rgba(0, 0, 0, 0.3), inset 8px 0 20px rgba(0, 0, 0, 0.05)",
                   }}
                 >
                   <canvas
@@ -733,33 +804,89 @@ const ExamPaperPDFViewer = ({ examData, sections }) => {
                 </div>
               </div>
             )}
+
+            {/* Center Spine Shadow */}
+            <div
+              className="absolute top-0 left-1/2 transform -translate-x-1/2 w-2 h-full pointer-events-none"
+              style={{
+                background:
+                  "linear-gradient(to right, rgba(0,0,0,0.2), transparent, rgba(0,0,0,0.2))",
+                zIndex: 10,
+              }}
+            />
           </div>
         )}
       </div>
 
-      {/* Help Text */}
-      <div className="text-center mt-8">
-        <p className="text-white/60 text-sm">
-          {currentPage === 0
-            ? "Click 'Open Exam Paper' to begin • Use navigation controls above"
-            : "Use arrow keys (← →) or Space to navigate • Press ESC to exit fullscreen"}
-        </p>
-      </div>
-
       <style>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0.5;
-            transform: scale(0.98);
+        .perspective-2000 {
+          perspective: 2000px;
+        }
+
+        .preserve-3d {
+          transform-style: preserve-3d;
+        }
+
+        .origin-left {
+          transform-origin: left center;
+        }
+
+        @keyframes pageFlipNext {
+          0% {
+            transform: rotateY(0deg);
+            box-shadow: 15px 0 30px -10px rgba(0, 0, 0, 0.3);
           }
-          to {
-            opacity: 1;
-            transform: scale(1);
+          25% {
+            box-shadow: 20px 0 40px -5px rgba(0, 0, 0, 0.5);
+          }
+          50% {
+            transform: rotateY(-90deg);
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.7);
+          }
+          51% {
+            transform: rotateY(-90deg);
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.7);
+          }
+          75% {
+            transform: rotateY(-180deg);
+            box-shadow: -20px 0 40px -5px rgba(0, 0, 0, 0.5);
+          }
+          100% {
+            transform: rotateY(-180deg);
+            box-shadow: -15px 0 30px -10px rgba(0, 0, 0, 0.3);
           }
         }
-        
-        .animate-fadeIn {
-          animation: fadeIn 0.4s ease-out;
+
+        @keyframes pageFlipPrev {
+          0% {
+            transform: rotateY(-180deg);
+            box-shadow: -15px 0 30px -10px rgba(0, 0, 0, 0.3);
+          }
+          25% {
+            transform: rotateY(-90deg);
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.7);
+          }
+          50% {
+            transform: rotateY(-90deg);
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.7);
+          }
+          75% {
+            box-shadow: 20px 0 40px -5px rgba(0, 0, 0, 0.5);
+          }
+          100% {
+            transform: rotateY(0deg);
+            box-shadow: 15px 0 30px -10px rgba(0, 0, 0, 0.3);
+          }
+        }
+
+        .animate-pageFlipNext {
+          animation: pageFlipNext 0.8s cubic-bezier(0.645, 0.045, 0.355, 1);
+          backface-visibility: hidden;
+        }
+
+        .animate-pageFlipPrev {
+          animation: pageFlipPrev 0.8s cubic-bezier(0.645, 0.045, 0.355, 1);
+          backface-visibility: hidden;
         }
 
         canvas {
