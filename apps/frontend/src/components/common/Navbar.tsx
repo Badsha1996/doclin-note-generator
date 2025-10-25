@@ -55,7 +55,7 @@ function Navbar() {
     if (!oauth || !code || getUserInfo()) return;
     const fetchUser = async () => {
       try {
-        const url = `${import.meta.env.VITE_API_BASE_URL}/auth/exchange`;
+        const url = `api/auth/exchange`;
         const response = await fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
