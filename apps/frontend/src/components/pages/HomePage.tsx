@@ -531,7 +531,7 @@ function HomePage() {
             </div>
           ) : showTestimonials ? (
             <div className="px-6 sm:px-8 md:px-12 lg:px-16 xl:px-24 py-16 bg-black/20 backdrop-blur-sm">
-              <div className="max-w-4xl mx-auto">
+              <div className="max-w-5xl mx-auto">
                 <div className="text-center mb-16">
                   <h2 className="text-4xl sm:text-5xl font-bold text-white mb-4">
                     What Our{" "}
@@ -557,7 +557,7 @@ function HomePage() {
                         <motion.div
                           initial={{ y: 0 }}
                           whileHover={{ scale: 1.01, y: -8 }}
-                          className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10"
+                          className="bg-white/5 backdrop-blur-sm rounded-2xl py-4 border border-white/10"
                         >
                           <CardContent className="flex flex-col items-center space-y-4">
                             <Avatar className="w-24 h-24 border-2 border-primary/20">
@@ -577,7 +577,7 @@ function HomePage() {
                                 {testimonial.username}
                               </h3>
 
-                              <div className="flex mb-4">
+                              <div className="flex justify-center mb-4">
                                 {[...Array(Math.round(testimonial.rating))].map(
                                   (_, i) => (
                                     <Star
@@ -587,14 +587,15 @@ function HomePage() {
                                   )
                                 )}
                               </div>
+                                <p className="text-sm font-normal text-white">
+                                {new Date(
+                                  testimonial.createdAt
+                                ).toLocaleString()}
+                              </p>
                               <p className="text-white/80 italic">
                                 "{testimonial.text}"
                               </p>
-                              <p className="text-sm font-normal text-white">
-                                {new Date(
-                                  testimonial.createdAt
-                                ).toLocaleString()}{" "}
-                              </p>
+                            
                             </div>
                           </CardContent>
                         </motion.div>
