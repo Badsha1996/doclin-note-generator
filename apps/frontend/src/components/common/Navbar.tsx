@@ -147,7 +147,6 @@ function Navbar() {
             transition={{ type: "spring", stiffness: 400, damping: 17 }}
           >
             <motion.div
-              whileHover={{ rotate: 360 }}
               transition={{ duration: 0.6 }}
             >
               <img
