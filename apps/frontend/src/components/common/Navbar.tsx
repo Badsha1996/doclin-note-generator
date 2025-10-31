@@ -43,7 +43,14 @@ function Navbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
+  useEffect(() => {
+    if (user && new Date(user.expiry) < new Date()) {
+      clearUserInfo();
+      setUser(null);
+      toast.error("Session expired. Please login again.");
+      router.navigate({ to: "/login" });
+    }
+  }, [router, user]);
   useEffect(() => {
     if (!oauth || !code || getUserInfo()) return;
     const fetchUser = async () => {
@@ -59,17 +66,8 @@ function Navbar() {
         });
 
         if (!response.ok) {
-          const error: ApiError = {
-            message: `Request failed with status ${response.status}`,
-            status: response.status,
-          };
-
-          try {
-            error.details = await response.json();
-          } catch {
-            console.error("Failed to parse error details");
-          }
-          throw error;
+          toast.error("Failed to fetch user details.");
+          router.navigate({ to: "/login" });
         }
 
         const data = await response.json();
@@ -77,11 +75,13 @@ function Navbar() {
           email: data.data.user.email,
           role: data.data.user.role,
           username: data.data.user.user_name,
+          expiry: data.data.refresh_expiry,
         });
         setUser({
           email: data.data.user.email,
           role: data.data.user.role,
           username: data.data.user.user_name,
+          expiry: data.data.refresh_expiry,
         });
       } catch (err) {
         console.error(err);
@@ -89,7 +89,7 @@ function Navbar() {
     };
 
     fetchUser();
-  }, [oauth, code]);
+  }, [oauth, code, router]);
   const mutation = useApiMutation<LogoutResponse>(
     {
       endpoint: "/auth/logout",
@@ -130,12 +130,12 @@ function Navbar() {
         )}
       </AnimatePresence>
 
-      <div className="fixed top-0 left-0 right-0 z-50">
+      <div className="fixed top-0 left-0 right-0 z-50 px-4">
         <motion.div
           initial={{ y: -100 }}
           animate={{ y: 0 }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className={`flex items-center justify-between w-full px-4 lg:px-8 py-3 mx-4 mt-4 transition-all duration-300 ${
+          className={`flex items-center justify-between w-full px-4 lg:px-8 py-3  mt-4 transition-all duration-300 ${
             scrolled
               ? "bg-white/20 backdrop-blur-xl border border-white/30 shadow-2xl"
               : "bg-white/10 backdrop-blur-md border border-white/20 shadow-lg"
@@ -191,7 +191,7 @@ function Navbar() {
                           {item.title}
                         </NavigationMenuTrigger>
 
-                        <NavigationMenuContent className="p-2 !bg-white/50 text-white/90  backdrop-blur-xl border border-white/20 rounded-xl shadow-lg ">
+                        <NavigationMenuContent className="p-2 !bg-white/10 text-white backdrop-blur-xl border border-white/20 rounded-xl shadow-lg ">
                           <ul className="grid gap-3 w-[250px]">
                             {item.children.map((sub) => (
                               <li key={sub.href}>

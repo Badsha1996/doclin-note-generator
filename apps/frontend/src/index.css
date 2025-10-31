@@ -160,6 +160,8 @@ html {
     min-height: 297mm;
   }
 }
+
+/* Autofill styles for input fields */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
@@ -168,4 +170,24 @@ color: white !important ;
 -webkit-text-fill-color: white !important ;
   transition: background-color 9999s ease-in-out 0s !important;
   caret-color: white !important;
+}
+
+/* Custom scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+;
+}
+
+::-webkit-scrollbar-track {
+  background: linear-gradient(180deg, #1e1b4b, #4c1d95, #312e81); 
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--primary));
 }
