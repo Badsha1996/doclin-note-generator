@@ -382,9 +382,7 @@ function ContactPage() {
                                 {...field}
                               />
                             </FormControl>
-                            <FormDescription className="text-slate-300">
-                              You can @mention other users and organizations.
-                            </FormDescription>
+                            <FormDescription className="text-slate-300"></FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
