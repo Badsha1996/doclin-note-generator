@@ -47,7 +47,7 @@ export const fetchApi = async <TResponse, TPayload = undefined>(
   const normalizedEndpoint = endpoint.startsWith("/")
     ? endpoint
     : `/${endpoint}`;
-  const url = buildUrl(`${API_BASE_URL}${normalizedEndpoint}`, queryParams);
+  const url = buildUrl(`api${normalizedEndpoint}`, queryParams);
 
   // const defaultHeaders = {
   //   "Content-Type": "application/json",
