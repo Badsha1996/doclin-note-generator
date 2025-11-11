@@ -1,13 +1,10 @@
 from sqlalchemy.orm import Session
-from fastapi import APIRouter, HTTPException, Depends,UploadFile, File
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, HTTPException, Depends
 from ...database.database import get_DB
 from ...utils.security import SecurityManager
-from ...interfaces.schemas.previous_years_schemas import UploadPDFSchema
 from ...interfaces.schemas.user_schemas import UserDeleteSchema, UserRoleChangeSchema
 from ...core.entities.user_entities import User
 from ...core.services.user_service import UserService
-from ...core.services.file_uplaod_service import FileUploadService
 from ...infrastructure.repo.user_repo import SQLUserRepo
 from ...interfaces.schemas.response_schemas import APIResponseSchema
 from ...infrastructure.providers.auth_provider import get_security_manager
@@ -132,23 +129,5 @@ async def delete_user(
         raise HTTPException(status_code=400, detail=str(e))
     
 
-@user_router.post("/upload",dependencies=[Depends(admin_or_super_admin_only)])
-async def upload_pdf(
-    payload:UploadPDFSchema = Depends(UploadPDFSchema.as_form),
-    current_user: User = Depends(get_current_user)
-    ):
-    try:
-        if not payload.file.filename.lower().endswith(".pdf"):
-            raise HTTPException(status_code=400, detail="Only PDF files are allowed")
 
- 
-        upload_service=FileUploadService()
-        file_url= await upload_service.upload_file(payload.file)
-        return APIResponseSchema(
-            success=True,
-            message="File uploaded successfully",
-            data={"file_url":file_url}
-        )
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
     

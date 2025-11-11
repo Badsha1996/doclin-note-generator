@@ -1,9 +1,10 @@
-from http.client import HTTPException
+
 import os
 import shutil
 import cloudinary
 import cloudinary.uploader
 from fastapi import UploadFile, File
+from ...utils.exceptions import InternelServerException
 from ...config.config import settings
 class FileUploadService:
     def __init__(self):
@@ -34,6 +35,6 @@ class FileUploadService:
             file_url = upload_result.get("secure_url")
             return file_url
         except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+            raise InternelServerException(f"File upload failed: {str(e)}")
         finally:
             os.remove(temp_file_path)

@@ -1,8 +1,7 @@
 from datetime import datetime, timezone
 from uuid import uuid4
-from sqlalchemy import (
-    Column, String, Integer, DateTime,
-)
+from sqlalchemy import Column, String, Integer, DateTime
+
 from sqlalchemy.dialects.postgresql import UUID
  
 

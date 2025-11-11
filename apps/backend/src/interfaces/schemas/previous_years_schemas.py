@@ -8,7 +8,7 @@ class UploadPDFSchema(BaseModel):
     paper_name: str
     paper_code: str
     year: int
-
+    file: Optional[UploadFile] = None 
     @classmethod
     def as_form(
         cls,
@@ -24,5 +24,6 @@ class UploadPDFSchema(BaseModel):
             subject=subject,
             paper_name=paper_name,
             paper_code=paper_code,
-            year=year
-        ), file
+            year=year,
+            file=file
+        )
