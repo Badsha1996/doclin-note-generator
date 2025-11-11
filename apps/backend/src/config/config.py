@@ -59,6 +59,9 @@ class Settings(BaseSettings):
     # Paid model toggle
     ALLOW_PAID_MODELS: bool = False
 
+    CLOUDINARY_CLOUD_NAME : str
+    CLOUDINARY_API_KEY : str
+    CLOUDINARY_API_SECRET : str
     PORT: int = 8000  
 
     @classmethod

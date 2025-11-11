@@ -11,8 +11,8 @@ from ...infrastructure.providers.auth_provider import get_security_manager
 from ...interfaces.schemas.auth_schemas import RegisterSchema, VerifySchema
 from ...interfaces.dependencies.dependencies import admin_or_super_admin_only, get_current_user
 
-user_router = APIRouter(prefix="/user", tags=[""])
 
+user_router = APIRouter(prefix="/user", tags=[""])
 
 @user_router.get("/all",dependencies=[Depends(admin_or_super_admin_only)])
 async def get_all_user(
@@ -127,4 +127,7 @@ async def delete_user(
         )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+    
+
+
     
