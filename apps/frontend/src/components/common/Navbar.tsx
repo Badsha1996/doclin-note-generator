@@ -55,7 +55,7 @@ function Navbar() {
     if (!oauth || !code || getUserInfo()) return;
     const fetchUser = async () => {
       try {
-        const url = `${import.meta.env.VITE_API_BASE_URL}/auth/exchange`;
+        const url = `api/auth/exchange`;
         const response = await fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -265,6 +265,15 @@ function Navbar() {
                       {user.username}
                     </MenubarItem>
                     <MenubarSeparator />
+
+                    {["superAdmin", "admin"].includes(user.role) && (
+                      <>
+                        <MenubarItem inset className="text-white">
+                          <Link to="/dashboard">Dashboard</Link>
+                        </MenubarItem>
+                        <MenubarSeparator />
+                      </>
+                    )}
                     <MenubarItem
                       disabled={mutation.isPending}
                       inset
@@ -385,13 +394,22 @@ function Navbar() {
                   {user ? (
                     <div className="text-white/90 bg-white/20 backdrop-blur-md border border-white/20 shadow-lg p-4 rounded-xl">
                       <div className="flex justify-between items-center mb-2">
-                        <Avatar className="rounded-full">
-                          <AvatarImage
-                            src="https://github.com/shadcn.png"
-                            alt="@shadcn"
-                          />
-                          <AvatarFallback>CN</AvatarFallback>
-                        </Avatar>
+                        <div className="flex items-center ">
+                          <Avatar className="rounded-full">
+                            <AvatarImage
+                              src="https://github.com/shadcn.png"
+                              alt="@shadcn"
+                            />
+                            <AvatarFallback>CN</AvatarFallback>
+                          </Avatar>
+                          {["superAdmin", "admin"].includes(user.role) && (
+                            <Link to="/dashboard" onClick={closeMobileMenu}>
+                              <button className="flex items-center border border-dashed scale-60 p-2 rounded-sm -ml-6">
+                                Go to Dashboard
+                              </button>
+                            </Link>
+                          )}
+                        </div>
                         <button
                           onClick={handleLogout}
                           disabled={mutation.isPending} // disables click

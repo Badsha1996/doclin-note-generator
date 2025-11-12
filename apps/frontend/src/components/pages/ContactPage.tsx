@@ -264,7 +264,7 @@ function ContactPage() {
         title="Contact Us"
         subTitle="Have questions or feedback? We’re here to provide the right support for your learning needs."
       />
-      <div className="relative w-full h-screen flex justify-center items-center overflow-hidden">
+      <div className=" relative top-20 w-full flex justify-center items-center shrink overflow-hidden">
         <motion.div
           variants={fadeInUp}
           initial="initial"
@@ -329,7 +329,7 @@ function ContactPage() {
                     role="tab"
                     onClick={() => setActiveTab("join-team")}
                     className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300
-        ${activeTab === "join-team" ? "bbg-white/10 text-white shadow-md" : "text-white hover:bg-[#6a1b9a]/30 hover:text-white"}`}
+        ${activeTab === "join-team" ? "bg-white/10 text-white shadow-md" : "text-white hover:bg-[#6a1b9a]/30 hover:text-white"}`}
                   >
                     Join Team
                   </button>
@@ -382,7 +382,9 @@ function ContactPage() {
                                 {...field}
                               />
                             </FormControl>
-                            <FormDescription className="text-slate-300"></FormDescription>
+                            <FormDescription className="text-slate-300">
+                              
+                            </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
