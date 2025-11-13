@@ -11,7 +11,7 @@ import BetaBanner from "@/components/common/BetaBanner";
 import { AnimatePresence, motion } from "framer-motion";
 import GlassmorphicLoader from "@/components/common/GlassLoader";
 import { z } from "zod";
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 
 const rootSearchSchema = z.object({
   oauth: z.string().optional(),
@@ -35,6 +35,10 @@ function RootComponent() {
   const isAuthRoute = matches.some(
     (m) => m.routeId === "/login/" || m.routeId === "/register/"
   );
+  useEffect(() => {
+    // Scroll to the top smoothly whenever the path changes
+    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+  }, [routerState.location.pathname]);
 
   return (
     <div className="relative">
