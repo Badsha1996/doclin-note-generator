@@ -1,5 +1,5 @@
 from ...core.entities.otp_entities import OTP, OTPCreate
-from ...infrastructure.models.otp_models import OTPModel
+
 from ...utils.exceptions import InternelServerException, NotFoundExceptionError,ValidationExceptionError
 from ...utils.security import SecurityManager
 from ..repo.otp_repo import OTPRepo
@@ -27,7 +27,7 @@ class OTPService:
             otp_entry:OTP=  await self.otp_repo.create_or_update_otp( otp=otp_)
             return otp,otp_entry
         except Exception as e:
-            raise InternelServerException()
+            raise InternelServerException(detail=str(e))
         
     async def get_otp_entry(self,email:str)->Optional[OTP]:
         otp_data=await self.otp_repo.get_otp_by_email(email)

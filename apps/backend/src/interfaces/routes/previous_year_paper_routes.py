@@ -8,7 +8,7 @@ from ...database.database import get_DB
 from ...infrastructure.repo.previous_year_papers_repo import SQLPreviousYearPaperRepo
 from ...interfaces.schemas.previous_years_schemas import UploadPDFSchema
 from ...interfaces.schemas.response_schemas import APIResponseSchema
-from ...interfaces.dependencies.dependencies import admin_or_super_admin_only
+from ...interfaces.dependencies.dependencies import admin_or_super_admin_only, get_current_user
 
 prev_year_paper_router = APIRouter(prefix="/prev-year-pdf", tags=[""])
 
@@ -16,7 +16,8 @@ prev_year_paper_router = APIRouter(prefix="/prev-year-pdf", tags=[""])
 async def upload_prev_year_pdf(
     payload:UploadPDFSchema = Depends(UploadPDFSchema.as_form),
     db: Session = Depends(get_DB),
-    ):
+    current_user: User = Depends(get_current_user)):
+    
     try:
         if not payload.file.filename.lower().endswith(".pdf"):
             raise HTTPException(status_code=400, detail="Only PDF files are allowed")
@@ -27,18 +28,23 @@ async def upload_prev_year_pdf(
         prev_year_service=previousYearPaperService(prev_year_repo)
 
 
-        file_url= await upload_service.upload_file(payload.file)
-        await prev_year_service.add_pdf_url(PreviousYearPaperAdd(
+        file= await upload_service.upload_file(payload.file)
+        extra_info=await prev_year_service.add_pdf_url(PreviousYearPaperAdd(
             board=payload.board,
             subject=payload.subject,
             paper_code=payload.paper_code,
             paper_name=payload.paper_name,
             year=payload.year,
-            file_url=file_url
+            file_url=file["file_url"],
+            filename=payload.file.filename,
+            public_id=file["public_id"],
+            uploaded_by=current_user.id
+
         ))
+        file["id"]=str(extra_info.id)
         return APIResponseSchema(
             success=True,
-            data={"file_url": file_url},
+            data={"file_info": file},
             message="PDF uploaded successfully"
         )
     except Exception as e:
@@ -60,6 +66,29 @@ async def get_all_prev_year_pdfs(
             success=True,
             data={"pdfs": pdfs},
             message="PDFs fetched successfully"
+        )
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
+
+@prev_year_paper_router.delete("/delete/{id}",dependencies=[Depends(admin_or_super_admin_only)])
+async def delete_file(
+    id:str,
+    public_id:str,
+    db: Session = Depends(get_DB)):
+    try:
+        upload_service=FileUploadService()
+        prev_year_repo=SQLPreviousYearPaperRepo(db)
+        prev_year_service=previousYearPaperService(prev_year_repo)
+        file_removed=await upload_service.delete_file(public_id)
+        entry_removed = await prev_year_service.delete_pdf(id)
+        return APIResponseSchema(
+            success=True,
+            data={
+                "file_deleted":file_removed,
+                "entry_deleted":entry_removed
+            },
+            message="PDFs deleted successfully"
         )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

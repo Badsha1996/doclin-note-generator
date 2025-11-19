@@ -10,6 +10,9 @@ class PreviousYearPaper(BaseModel):
     paper_name:str
     year:int
     file_url:str
+    filename:str
+    public_id:str
+    uploaded_by:UUID
     created_at:datetime
     updated_at:datetime
     class Config:
@@ -22,3 +25,6 @@ class PreviousYearPaperAdd(BaseModel):
     paper_name:str
     year:int
     file_url:str
+    filename:str
+    public_id:str
+    uploaded_by:UUID

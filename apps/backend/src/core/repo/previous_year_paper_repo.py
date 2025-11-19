@@ -10,3 +10,8 @@ class PreviousYearPaperRepo(ABC):
     @abstractmethod
     async def get_all_pdf(self,skip: int, limit: int = 100 )-> List[PreviousYearPaper]:
         ...
+
+    @abstractmethod
+    async def delete_pdf(self,id:str )-> bool:
+        ...
+
