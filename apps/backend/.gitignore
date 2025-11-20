@@ -1,2 +1,5 @@
 .venv
 db-quries.sql
+client_secret_doclin.json
+doclin-note-generator-service.json
+doclin-firebase-service-account.json

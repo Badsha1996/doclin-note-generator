@@ -39,14 +39,12 @@ async def report_issue(
             content_type=content_type)
         
 
-        # if temp_file_path and os.path.exists(temp_file_path):
-        #     os.remove(temp_file_path)
-        #     os.rmdir(temp_dir)
 
         if reported:
             return APIResponseSchema(success=True,
                 data = {"issue":reported},
                 message="issue reported, thanks for your contribution")
-        else: raise HTTPException(status_code=500, detail="Issue is not reported ")
+        else: 
+            raise HTTPException(status_code=500, detail="Issue is not reported ")
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
