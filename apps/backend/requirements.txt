@@ -43,3 +43,5 @@ json-repair==0.50.0
 
 sib-api-v3-sdk==7.6.0
 cohere==5.18.0
+
+cloudinary==1.44.1
