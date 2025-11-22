@@ -285,6 +285,7 @@ export default function PDF() {
                                   <Button
                                     variant="ghost"
                                     size="icon"
+                                    disabled={mutation.isPending}
                                     onClick={() =>
                                       form.setValue("file", null, {
                                         shouldValidate: true,
