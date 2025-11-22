@@ -196,7 +196,20 @@ export default function PDF() {
   const pdfs = data?.data.pdfs || [];
   return (
     <div className="">
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog
+        open={open}
+        onOpenChange={(_open) => {
+          setOpen(_open);
+          form.reset({
+            file: null,
+            board: "",
+            subject: "",
+            paper_code: "",
+            paper_name: "",
+            year: undefined,
+          });
+        }}
+      >
         <DialogTrigger className="  backdrop-blur-md bg-[#e4558d]/70 border border-[#e4558d]/40 text-white hover:bg-[#e4558d]/80 shadow-lg transition-all duration-300 rounded-sm">
           <div className="rounded-sm h-9 px-4 py-1 has-[>svg]:px-3 relative overflow-hidden group shadow-lg ml-auto">
             <motion.div className=""></motion.div>
