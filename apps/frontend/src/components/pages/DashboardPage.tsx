@@ -7,11 +7,13 @@ import {
   // BrainCircuit,
   // LayoutDashboard,
   FileText,
+  NotebookText,
   UserRound,
 } from "lucide-react";
 import { useState } from "react";
 import Syllabus from "@/components/dashboard/SyllabusManagement";
 import { Model } from "../models/PulseModel";
+import PDF from "../dashboard/PDFManagement";
 
 function DashboardPage() {
   const data = [
@@ -25,12 +27,12 @@ function DashboardPage() {
     },
     {
       key: "Exam Papers",
+      icon: <NotebookText />,
+    },
+    {
+      key: "PDFs",
       icon: <FileText />,
     },
-    // {
-    //   key: "Model Selection",
-    //   icon: <BrainCircuit />,
-    // },
   ];
   const [selected, setSelected] = useState("Users");
 
@@ -41,7 +43,7 @@ function DashboardPage() {
     <div className="p-2 space-y-8">
       <PageHeader title="Dashboard" subTitle="sub header" />
       <GlassLayout>
-        <div className="bg-transparent rounded-xl p-2 h-[calc(100svh-8rem)] flex gap-4">
+        <div className="bg-transparent rounded-xl p-2 h-[calc(100svh-8rem)] flex gap-4 flex-col lg:flex-row">
           <DashboardNav
             value={selected}
             onChange={handleChange}
@@ -65,6 +67,7 @@ function DashboardPage() {
             )}
             {selected === "Model Selection" && <Model />}
             {selected === "Exam Papers" && <Syllabus />}
+            {selected === "PDFs" && <PDF />}
           </div>
         </div>
       </GlassLayout>

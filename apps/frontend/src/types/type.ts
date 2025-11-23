@@ -201,3 +201,30 @@ export interface LeadContributorInfo {
   github?: string;
   email?: string;
 }
+
+export const pdfUploadSchema = z.object({
+  board: z.string().min(1, "Board is required"),
+  subject: z.string().min(1, "Subject is required"),
+  paper_code: z.string().min(1, "Paper code is required"),
+  paper_name: z.string().min(1, "Paper name is required"),
+  year: z.number().positive("Year must be positive"),
+  file: z
+    .instanceof(File)
+    .nullable() // <-- this is REQUIRED
+    .refine((f) => f !== null, {
+      message: "File is required",
+    })
+    .refine((f) => !f || f.type === "application/pdf", {
+      message: "Only PDF files are allowed",
+    })
+    .refine((f) => !f || f.size <= 5 * 1024 * 1024, {
+      message: "File must be under 5MB",
+    }),
+});
+export const deletePdfSchema = z.object({
+  id: z.uuid(),
+  public_id: z.string(),
+});
+export type pdfUploadType = z.infer<typeof pdfUploadSchema>;
+
+export type pdfDeleteType = z.infer<typeof deletePdfSchema>;

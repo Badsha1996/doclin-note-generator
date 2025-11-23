@@ -8,7 +8,7 @@ class UploadPDFSchema(BaseModel):
     paper_name: str
     paper_code: str
     year: int
-    file: Optional[UploadFile] = None 
+    file: UploadFile
     @classmethod
     def as_form(
         cls,
@@ -17,7 +17,7 @@ class UploadPDFSchema(BaseModel):
         paper_name: str = Form(...),
         paper_code: str = Form(...),
         year: int = Form(...),
-        file: Optional[UploadFile] = File(None)
+        file: UploadFile = File(...)
     ):
         return cls(
             board=board,
@@ -27,3 +27,6 @@ class UploadPDFSchema(BaseModel):
             year=year,
             file=file
         )
+class DeletePDFSchema(BaseModel):
+    id:str
+    public_id:str

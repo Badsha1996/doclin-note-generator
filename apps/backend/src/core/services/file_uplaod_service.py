@@ -56,7 +56,7 @@ class FileUploadService:
     async def delete_file(self,id:str)->bool:
         try:
             result = cloudinary.uploader.destroy(id)
-            if result != "ok":
+            if result.get("result") != "ok":
                 raise NotFoundExceptionError('File is missing')
             return True
         except Exception as e:

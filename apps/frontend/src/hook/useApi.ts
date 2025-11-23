@@ -91,7 +91,7 @@ export const fetchApi = async <TResponse, TPayload = undefined>(
 
     try {
       const data = await response.json();
-      if (data.detail) {
+      if (typeof data.detail === "string") {
         error.message = data.detail;
       } else if (data.message) {
         error.message = data.message;

@@ -310,3 +310,43 @@ export const feedbackApiSchema = apiResponseSchema(
 export type FeedbackResponse = z.infer<typeof feedbackApiSchema>;
 
 export const reportDescriptionSchema = z.string().min(10);
+
+export const pdfSchema = z.object({
+  id: z.uuid(),
+  board: z.string(),
+  subject: z.string(),
+  paper_code: z.string(),
+  paper_name: z.string(),
+  public_id: z.string(),
+  year: z.int(),
+  file_url: z.string(),
+  filename: z.string(),
+  uploaded_by: z.uuid(),
+  created_at: z.coerce.date(),
+  updated_at: z.coerce.date(),
+});
+export const allPDFDataSchema = z.object({
+  pdfs: z.array(pdfSchema),
+});
+export const uploadPdfDataSchema = z.object({
+  file_info: z.object({
+    file_url: z.string(),
+    asset_id: z.string(),
+    public_id: z.string(),
+    id: z.uuid(),
+  }),
+});
+export const pdfUploadResposeSchema = apiResponseSchema(uploadPdfDataSchema);
+
+export const allPDFResponseSchema = apiResponseSchema(allPDFDataSchema);
+
+export const pdfDeleteDataSchema = z.object({
+  file_deleted: z.boolean(),
+  entry_deleted: z.boolean(),
+});
+export const pdfDeleteResponseSchema = apiResponseSchema(pdfDeleteDataSchema);
+export type AllPDFResponse = z.infer<typeof allPDFResponseSchema>;
+
+export type PDFUploadResponse = z.infer<typeof pdfUploadResposeSchema>;
+
+export type PDFDelteResponse = z.infer<typeof pdfDeleteResponseSchema>;
