@@ -192,7 +192,12 @@ export default function PDF() {
   function handleDelete(data: pdfDeleteType) {
     deleteFile.mutate(data);
   }
-
+  function getFilename(public_id: string): string {
+    const withoutPath = public_id.replace("pdf_uploads/", "");
+    const lastUnderscoreIndex = withoutPath.lastIndexOf("_");
+    const originalFilename = withoutPath.substring(0, lastUnderscoreIndex);
+    return originalFilename;
+  }
   const pdfs = data?.data.pdfs || [];
   return (
     <div className="">
@@ -503,7 +508,7 @@ export default function PDF() {
                       className="border-b border-white/10 hover:bg-white/5 transition"
                     >
                       <td className="px-4 py-2 text-white/80">
-                        {pdf.filename}
+                        {getFilename(pdf.public_id)}
                       </td>
                       <td className="px-4 py-2 text-white/80">
                         {pdf.paper_code}
@@ -532,7 +537,7 @@ export default function PDF() {
                                 setFileToBeDeleted({
                                   id: pdf.id,
                                   publicId: pdf.public_id,
-                                  filename: pdf.filename,
+                                  filename: getFilename(pdf.public_id),
                                 });
                                 setOpenConfirmationPopup(true);
                               }}
@@ -549,7 +554,7 @@ export default function PDF() {
                                 const parts = pdf.file_url.split("/upload/");
                                 const downloadUrl = `${parts[0]}/upload/fl_attachment/${parts[1]}`;
                                 link.href = downloadUrl;
-                                link.download = pdf.filename;
+                                link.download = getFilename(pdf.public_id);
                                 document.body.appendChild(link);
                                 link.click();
                                 document.body.removeChild(link);

@@ -320,7 +320,6 @@ export const pdfSchema = z.object({
   public_id: z.string(),
   year: z.int(),
   file_url: z.string(),
-  filename: z.string(),
   uploaded_by: z.uuid(),
   created_at: z.coerce.date(),
   updated_at: z.coerce.date(),

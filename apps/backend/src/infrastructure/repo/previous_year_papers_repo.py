@@ -18,7 +18,6 @@ class SQLPreviousYearPaperRepo(PreviousYearPaperRepo):
             paper_name=info.paper_name,
             year=info.year,
             file_url=info.file_url,
-            filename=info.filename,
             public_id=info.public_id,
             uploaded_by=info.uploaded_by
         )

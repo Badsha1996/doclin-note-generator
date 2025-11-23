@@ -1,5 +1,4 @@
 from sqlalchemy.orm import Session
-
 from fastapi import APIRouter, HTTPException,Depends,Body
 from ...core.entities.previous_year_paper_entities import PreviousYearPaperAdd
 from ...core.entities.user_entities import User
@@ -30,19 +29,18 @@ async def upload_prev_year_pdf(
 
 
         file= await upload_service.upload_file(payload.file)
-        extra_info=await prev_year_service.add_pdf_url(PreviousYearPaperAdd(
+        entry=await prev_year_service.add_pdf_url(PreviousYearPaperAdd(
             board=payload.board,
             subject=payload.subject,
             paper_code=payload.paper_code,
             paper_name=payload.paper_name,
             year=payload.year,
             file_url=file["file_url"],
-            filename=payload.file.filename,
             public_id=file["public_id"],
             uploaded_by=current_user.id
 
         ))
-        file["id"]=str(extra_info.id)
+        file["id"]=str(entry.id)
         return APIResponseSchema(
             success=True,
             data={"file_info": file},
