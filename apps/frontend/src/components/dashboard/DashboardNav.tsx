@@ -15,14 +15,14 @@ function DashboardNav({ value, onChange, options }: DashboardNavProps) {
   return (
     <div
       className="bg-[linear-gradient(135deg,rgba(255,255,255,0.1)_0%,rgba(255,255,255,0.05)_50%,rgba(255,255,255,0.1)_100%)]
-               rounded-xl w-56 h-full pt-4"
+               rounded-xl w-full lg:w-56 h-12 lg:h-full lg:pt-4"
     >
-      <div className="relative top-[10%]">
+      <div className="relative top-[10%] flex lg:block">
         {options.map((menu_option, idx) => (
           <div
             key={idx}
             onClick={() => onChange(menu_option.key)}
-            className="cursor-pointer relative overflow-hidden mb-2 py-1"
+            className="cursor-pointer relative overflow-hidden mb-2 py-1 flex-1"
           >
             <motion.div
               animate={{
@@ -38,7 +38,7 @@ function DashboardNav({ value, onChange, options }: DashboardNavProps) {
                 stiffness: 300,
                 damping: 20,
               }}
-              className={`text-white p-2 ml-5 relative rounded-l-3xl `}
+              className={`text-white p-2 ml-5 relative rounded-l-3xl`}
             >
               <motion.div
                 animate={{
@@ -55,7 +55,7 @@ function DashboardNav({ value, onChange, options }: DashboardNavProps) {
             {menu_option.key === selectedOption?.key && (
               <motion.div
                 layoutId="sidebar-indicator"
-                className="absolute top-0 left-0 h-full w-2 bg-indigo-200 rounded-r-lg"
+                className="hidden lg:block absolute top-0 left-0 h-full w-2 bg-indigo-200 rounded-r-lg"
               />
             )}
           </div>

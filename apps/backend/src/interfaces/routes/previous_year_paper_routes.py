@@ -1,12 +1,13 @@
 from sqlalchemy.orm import Session
-from fastapi import APIRouter, HTTPException,Depends
+
+from fastapi import APIRouter, HTTPException,Depends,Body
 from ...core.entities.previous_year_paper_entities import PreviousYearPaperAdd
 from ...core.entities.user_entities import User
 from ...core.services.file_uplaod_service import FileUploadService
 from ...core.services.previous_year_paper_service import previousYearPaperService
 from ...database.database import get_DB
 from ...infrastructure.repo.previous_year_papers_repo import SQLPreviousYearPaperRepo
-from ...interfaces.schemas.previous_years_schemas import UploadPDFSchema
+from ...interfaces.schemas.previous_years_schemas import DeletePDFSchema, UploadPDFSchema
 from ...interfaces.schemas.response_schemas import APIResponseSchema
 from ...interfaces.dependencies.dependencies import admin_or_super_admin_only, get_current_user
 
@@ -74,13 +75,14 @@ async def get_all_prev_year_pdfs(
 @prev_year_paper_router.delete("/delete/{id}",dependencies=[Depends(admin_or_super_admin_only)])
 async def delete_file(
     id:str,
-    public_id:str,
+    payload:DeletePDFSchema=Body(...),
     db: Session = Depends(get_DB)):
     try:
+        
         upload_service=FileUploadService()
         prev_year_repo=SQLPreviousYearPaperRepo(db)
         prev_year_service=previousYearPaperService(prev_year_repo)
-        file_removed=await upload_service.delete_file(public_id)
+        file_removed=await upload_service.delete_file(payload.public_id)
         entry_removed = await prev_year_service.delete_pdf(id)
         return APIResponseSchema(
             success=True,
