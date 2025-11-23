@@ -18,11 +18,8 @@ class PreviousYearPaperModel(Base):
     paper_name = Column(String, nullable=False)
     paper_code = Column(String, nullable=False)
     year = Column(Integer, nullable=False)
-
     file_url = Column(String, nullable=False)
-    filename = Column(String, nullable=False)
     public_id = Column(String, nullable=False)
-
     uploaded_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
