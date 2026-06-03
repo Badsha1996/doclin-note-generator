@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from ..schemas.response_schemas import APIResponseSchema
 from ..schemas.ICSE_exam_paper_llm_schemas import LLMGenICSEQuestionSchema
-from ..dependencies.dependencies import get_current_user,admin_or_super_admin_only
+from ..dependencies.dependencies import get_current_user_optional,admin_or_super_admin_only
 
 from ...database.database import get_DB
 from ...infrastructure.repo.user_repo import SQLUserRepo
@@ -21,11 +21,11 @@ from ...config.model import get_embedding_model
 llm_router = APIRouter(prefix="/llm", tags=["llm"])
 
 
-@llm_router.post('/gen-question-paper',dependencies=[Depends(get_current_user)])
+@llm_router.post('/gen-question-paper')
 async def generate_question_paper(
     llm_gen_data : LLMGenICSEQuestionSchema,
     db: Session = Depends(get_DB),
-    current_user: User = Depends(get_current_user),
+    current_user: User | None = Depends(get_current_user_optional),
     security_manager:SecurityManager = Depends(get_security_manager)
 ):
     try:
@@ -40,15 +40,16 @@ async def generate_question_paper(
         user_repo = SQLUserRepo(db=db)
         user_service = UserService(user_repo, security_manager)
         
-        if current_user.role in ["admin", "superAdmin"]:
-            limit = settings.MAX_COUNT_FOR_PREVILEGED
-        else:
-            limit = settings.MAX_COUNT_FOR_USER
+        if current_user:
+            if current_user.role in ["admin", "superAdmin"]:
+                limit = settings.MAX_COUNT_FOR_PREVILEGED
+            else:
+                limit = settings.MAX_COUNT_FOR_USER
 
-        max_limit_reached = current_user.model_hit_count >= limit
+            max_limit_reached = current_user.model_hit_count >= limit
 
-        if max_limit_reached:
-            raise HTTPException(status_code=400, detail="Maximum usage limit reached")
+            if max_limit_reached:
+                raise HTTPException(status_code=400, detail="Maximum usage limit reached")
 
         llm_service = LLMService(
             llm_repo=llm_repo, 
@@ -68,10 +69,11 @@ async def generate_question_paper(
         # Convert to dict explicitly to ensure proper serialization
         exam_paper_dict = exam_paper.model_dump()
         
-        await user_service.update_user(
-            current_user.id,
-            UserUpdate(model_hit_count=current_user.model_hit_count + 1)
-        )
+        if current_user:
+            await user_service.update_user(
+                current_user.id,
+                UserUpdate(model_hit_count=current_user.model_hit_count + 1)
+            )
         
         return APIResponseSchema(
             success=True,

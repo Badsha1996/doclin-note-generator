@@ -35,7 +35,7 @@ async def save_exam_paper(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@exam_paper_router.post("/get",dependencies=[Depends(get_current_user)])
+@exam_paper_router.post("/get")
 async def get_exam_paper(
     exam_paper_details : GetExamPaperSchema,
     db : Session = Depends(get_DB),
@@ -58,7 +58,7 @@ async def get_exam_paper(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
-@exam_paper_router.get("/get/subjects",dependencies=[Depends(get_current_user)])
+@exam_paper_router.get("/get/subjects")
 async def get_all_subjects(
     db : Session = Depends(get_DB),
 ):
@@ -80,7 +80,7 @@ async def get_all_subjects(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@exam_paper_router.get("/get/boards",dependencies=[Depends(get_current_user)])
+@exam_paper_router.get("/get/boards")
 async def get_all_boards(
     db : Session = Depends(get_DB),
 ):
@@ -102,7 +102,7 @@ async def get_all_boards(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
-@exam_paper_router.post("/get/prev-years",dependencies=[Depends(get_current_user)])
+@exam_paper_router.post("/get/prev-years")
 async def get_prev_years(
     exam_paper_details : GetExamPaperYearsSchema,
     db : Session = Depends(get_DB),
@@ -125,7 +125,7 @@ async def get_prev_years(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
-@exam_paper_router.post("/get/prev-exam-paper",dependencies=[Depends(get_current_user)])
+@exam_paper_router.post("/get/prev-exam-paper")
 async def get_prev_exam_paper(
     exam_paper_details : GetExamPaperSchema,
     db : Session = Depends(get_DB),

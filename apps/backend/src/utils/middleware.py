@@ -124,6 +124,12 @@ def setup_middleware(app: FastAPI):
             "/api/otp/generate",
             "/api/feedback/all",
             "/api/auth/logout",
-            "/api/auth/exchange"
+            "/api/auth/exchange",
+            "/api/llm/gen-question-paper",
+            "/api/exam-paper/get",
+            "/api/exam-paper/get/subjects",
+            "/api/exam-paper/get/boards",
+            "/api/exam-paper/get/prev-years",
+            "/api/exam-paper/get/prev-exam-paper"
         ]
     )

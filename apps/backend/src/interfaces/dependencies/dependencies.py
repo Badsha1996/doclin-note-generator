@@ -33,6 +33,28 @@ async def get_current_user(
     except Exception as e:
         raise HTTPException(status_code=401, detail=str(e))
     
+
+async def get_current_user_optional(
+        request: Request,
+        db : Session = Depends(get_DB),
+        security_manager: SecurityManager = Depends(get_security_manager)
+) -> User | None:
+    try:
+        access_token = request.cookies.get("access_token")
+        if not access_token:
+            return None
+        
+        token_data = security_manager.verify_token(access_token)
+        user_repo = SQLUserRepo(db=db)
+        user = await user_repo.get_user_by_id(token_data.user_id)
+
+        if not user:
+            return None
+        
+        return User.model_validate(user)
+    except Exception:
+        return None
+    
 def admin_only(current_user: User = Depends(get_current_user)) -> User:
     if current_user.role != "admin":
         raise HTTPException(
